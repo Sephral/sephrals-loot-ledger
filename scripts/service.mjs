@@ -31,9 +31,11 @@ export function handleRequest(action, payload, user) {
     try {
       return await fn(payload ?? {}, user);
     } catch(err) {
-      console.error(`${MODULE_ID} | ${action} failed`, err);
+      // Expected refusals (the item is gone, not enough coins) carry a message key and need no stack trace
       const key = String(err?.message ?? "");
-      return fail(key.startsWith("SLL.") ? key : "SLL.Error.requestFailed");
+      if ( key.startsWith("SLL.") ) return fail(key);
+      console.error(`${MODULE_ID} | ${action} failed`, err);
+      return fail("SLL.Error.requestFailed");
     }
   });
   queue = run.catch(() => {});

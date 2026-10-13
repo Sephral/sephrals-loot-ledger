@@ -1,0 +1,312 @@
+{
+  "SLL": {
+    "Title": "Beutebuch",
+    "NotReady": "Das Beutebuch ist noch nicht eingerichtet. Es richtet sich ein, sobald eine Spielleitung online ist.",
+    "NoGM": "Keine Spielleitung online. Änderungen brauchen eine Spielleitung, umsehen kannst du dich trotzdem.",
+    "ActingAs": "Du handelst als",
+    "Search": "Suchen",
+    "Heavy": "Zu schwer für deinen Charakter",
+    "LANGUAGE": {
+      "default": "Wie Foundry",
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "Tab": {
+      "stash": "Gruppeninventar",
+      "pool": "Beute",
+      "log": "Protokoll",
+      "balance": "Bilanz"
+    },
+    "Storage": {
+      "actorName": "Gruppeninventar",
+      "journalName": "Beuteprotokoll"
+    },
+    "Place": {
+      "pool": "Beute",
+      "stash": "Gruppeninventar",
+      "fund": "Gruppenkasse",
+      "outside": "außerhalb"
+    },
+    "Claim": {
+      "need": "Brauche",
+      "want": "Hätte gern",
+      "pass": "Passe"
+    },
+    "Stash": {
+      "title": "Gruppeninventar",
+      "empty": "Das Gruppeninventar ist leer.",
+      "value": "Wert {value}",
+      "fund": "Gruppenkasse",
+      "depositCoins": "Einzahlen",
+      "withdrawCoins": "Entnehmen",
+      "addFund": "Münzen in die Gruppenkasse legen",
+      "spend": "Aus der Gruppenkasse bezahlen",
+      "take": "Nehmen",
+      "toPool": "Zurück in die Beute",
+      "deposit": "Hineinlegen",
+      "give": "Einem anderen Charakter geben",
+      "mine": "{name} trägt",
+      "mineEmpty": "Nichts zum Abgeben.",
+      "capacity": "trägt {value} von {max}",
+      "origin": "von {name}, {date}",
+      "contains": "enthält {list}",
+      "dropHint": "Zieh Gegenstände von deinem Charakterbogen hierher, um sie ins Gruppeninventar zu legen."
+    },
+    "Pool": {
+      "title": "Beute zum Verteilen",
+      "empty": "Gerade keine Beute.",
+      "coins": "Münzen in der Beute",
+      "split": "Teilen",
+      "addCoins": "Münzen in die Beute legen",
+      "collect": "Aus dem Kampf einsammeln",
+      "distribute": "Verteilen",
+      "unclaimed": "Rest ins Gruppeninventar",
+      "award": "Geben an",
+      "toStash": "Ins Gruppeninventar",
+      "remove": "Entfernen",
+      "removeConfirm": "{name} endgültig entfernen? Das Protokoll vermerkt es.",
+      "dropHint": "Zieh Gegenstände von Bögen, aus der Seitenleiste, aus Kompendien oder Beute-Links hierher.",
+      "distributeConfirm": {
+        "fair": "Alle beanspruchte Beute verteilen: Unter den stärksten Ansprüchen bekommt sie, wer bisher am wenigsten erhalten hat, bei Gleichstand entscheidet ein Wurf. Was niemand will, kommt ins Gruppeninventar.",
+        "roll": "Alle beanspruchte Beute verteilen: Unter den stärksten Ansprüchen gewinnt der höchste Wurf. Was niemand will, kommt ins Gruppeninventar.",
+        "gm": "Du verteilst die Beute selbst. Hier kommt nur die Beute, die niemand will, ins Gruppeninventar."
+      }
+    },
+    "Pending": {
+      "title": "Offene Anfragen",
+      "cancel": "Anfrage zurückziehen",
+      "withdraw": "{actor} möchte {what} nehmen",
+      "offer": "{from} bietet {to} {what} an",
+      "waitingOffer": "wartet auf Antwort",
+      "waitingGM": "wartet auf die Spielleitung"
+    },
+    "Card": {
+      "speaker": "Beutebuch",
+      "rolls": "Würfe",
+      "distribution": "Die Beute wurde verteilt:",
+      "approval": "{user} bittet um Freigabe:",
+      "approve": "Freigeben",
+      "deny": "Ablehnen",
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "accepted": "Angenommen von {name}.",
+      "declined": "Abgelehnt von {name}.",
+      "cancelled": "Zurückgezogen.",
+      "approved": "Freigegeben.",
+      "denied": "Abgelehnt."
+    },
+    "Log": {
+      "add": {
+        "new": {
+          "pool": "{what} kommt in die Beute",
+          "stash": "{what} kommt ins Gruppeninventar",
+          "fund": "{what} kommt in die Gruppenkasse"
+        },
+        "from": {
+          "pool": "{what} von {from} kommt in die Beute",
+          "stash": "{what} von {from} kommt ins Gruppeninventar",
+          "fund": "{what} von {from} kommt in die Gruppenkasse"
+        }
+      },
+      "award": "{to} erhält {what} aus der Beute",
+      "split": "{to} erhält {what} aus der Beute",
+      "move": "{what}: {from} → {to}",
+      "remove": {
+        "pool": "{what} wird aus der Beute entfernt",
+        "stash": "{what} wird aus dem Gruppeninventar entfernt"
+      },
+      "deposit": {
+        "stash": "{from} legt {what} ins Gruppeninventar",
+        "fund": "{from} zahlt {what} in die Gruppenkasse"
+      },
+      "withdraw": {
+        "stash": "{to} nimmt {what} aus dem Gruppeninventar",
+        "fund": "{to} nimmt {what} aus der Gruppenkasse"
+      },
+      "give": "{from} gibt {what} an {to}",
+      "spend": "Die Gruppenkasse zahlt {what}",
+      "edit": {
+        "create": {
+          "pool": "{what} außerhalb des Moduls in die Beute gelegt",
+          "stash": "{what} außerhalb des Moduls ins Gruppeninventar gelegt"
+        },
+        "delete": {
+          "pool": "{what} außerhalb des Moduls aus der Beute entfernt",
+          "stash": "{what} außerhalb des Moduls aus dem Gruppeninventar entfernt"
+        },
+        "update": "Menge von {name} außerhalb des Moduls geändert: {old} → {new}"
+      },
+      "undo": "Rückgängig: {entry}",
+      "pageIntro": "Geführt vom Beutebuch. Nur der Client der Spielleitung schreibt hier, und jede spätere Änderung zeigt die Prüfung des Moduls an.",
+      "time": "Zeit",
+      "by": "Von",
+      "what": "Was",
+      "value": "Wert",
+      "intact": "Protokoll unverändert: {count} Einträge, keiner nachträglich geändert.",
+      "broken": "Eintrag #{seq} wurde nachträglich geändert.",
+      "openJournal": "Als Journal öffnen",
+      "undoTitle": "Rückgängig",
+      "undoConfirm": "Diesen Eintrag rückgängig machen? Gegenstände und Münzen gehen dorthin zurück, wo sie herkamen, und das Protokoll vermerkt es.",
+      "empty": "Noch nichts aufgezeichnet."
+    },
+    "Reason": {
+      "single": "stärkster Anspruch",
+      "fair": "bisher am wenigsten erhalten",
+      "fairRoll": "bisher am wenigsten erhalten, gewürfelt",
+      "roll": "höchster Wurf",
+      "remainder": "Rest der Teilung",
+      "unclaimed": "niemand wollte es",
+      "approved": "freigegeben von {name}"
+    },
+    "Balance": {
+      "hint": "Was jeder Charakter aus Beute, Gruppeninventar und Gruppenkasse genommen hat, abzüglich dessen, was er hineingelegt hat. Geschenke zwischen Charakteren zählen beim Empfänger.",
+      "today": "Heute",
+      "total": "Insgesamt"
+    },
+    "Dialog": {
+      "quantity": "Wie viele",
+      "ok": "OK",
+      "recipient": "An",
+      "amount": "Betrag",
+      "amountHint": "zum Beispiel 12 oder 3 {coin} 5 …",
+      "note": "Notiz",
+      "splitTitle": "Münzen teilen",
+      "splitHint": "Die Münzen gehen zu gleichen Teilen an die gewählten Charaktere. Was sich nicht teilen lässt, kommt in die Gruppenkasse.",
+      "split": "Teilen"
+    },
+    "Collect": {
+      "title": "Aus dem Kampf einsammeln",
+      "hint": "Wähle, was die Besiegten zurücklassen. Es kommt in die Beute, und das Protokoll vermerkt, woher es stammt.",
+      "take": "In die Beute"
+    },
+    "Notice": {
+      "waitingApproval": "Deine Anfrage wartet auf die Spielleitung.",
+      "offerSent": "Angebot an {name} geschickt.",
+      "distributed": "{count} Gegenstände verteilt, {rest} ins Gruppeninventar gelegt.",
+      "collected": "{count} Dinge in die Beute gelegt.",
+      "nothingToCollect": "Die Besiegten hinterlassen nichts."
+    },
+    "Error": {
+      "noGM": "Keine Spielleitung online.",
+      "requestFailed": "Das hat nicht geklappt. Details stehen in der Konsole.",
+      "unknownSender": "Die Anfrage ließ sich nicht prüfen.",
+      "unknownAction": "Unbekannte Anfrage.",
+      "noStorage": "Das Gruppeninventar gibt es noch nicht. Eine Spielleitung richtet es beim Einloggen ein.",
+      "notYours": "Du kannst nur für deine eigenen Charaktere handeln.",
+      "gmOnly": "Das kann nur die Spielleitung.",
+      "noCharacter": "Wähle zuerst einen Charakter.",
+      "itemGone": "Dieser Gegenstand ist nicht mehr da.",
+      "notTransferable": "Das lässt sich nicht weitergeben.",
+      "notEnoughCoins": "Nicht genug Münzen.",
+      "noCoins": "Dieses System hat keine Münzen, die das Modul nutzen kann. Die Spielleitung kann sie in den Moduleinstellungen angeben.",
+      "noCoinsToSplit": "In der Beute liegen keine Münzen.",
+      "tooFewCoins": "Zu wenige Münzen, um jedem etwas zu geben.",
+      "noAmount": "Gib einen Betrag ein.",
+      "nothingToDistribute": "Nichts zu verteilen: Noch hat niemand Anspruch angemeldet.",
+      "nothingUnclaimed": "Auf jeden Gegenstand der Beute gibt es einen Anspruch.",
+      "requestGone": "Diese Anfrage wurde schon beantwortet.",
+      "nothingCollected": "Es wurde nichts eingesammelt.",
+      "cannotUndo": "Dieser Eintrag lässt sich nicht mehr rückgängig machen.",
+      "alreadyUndone": "Dieser Eintrag wurde schon rückgängig gemacht.",
+      "dropOwn": "Zieh hier Gegenstände deines eigenen Charakters hinein."
+    },
+    "Block": {
+      "cursed": "Verflucht und investiert: Nur die Spielleitung kann es abnehmen.",
+      "equippedInCombat": "Im Kampf angelegt: zuerst ablegen."
+    },
+    "SETTINGS": {
+      "uiLanguage": {
+        "name": "Modulsprache",
+        "hint": "Sprache des Beutebuchs für dich. „Wie Foundry“ nimmt die Sprache von Foundry."
+      },
+      "recipients": {
+        "name": "Wer die Beute teilt",
+        "hint": "Die Charaktere, die Anspruch anmelden und beim Teilen Münzen bekommen.",
+        "party": "Die Gruppe des Systems, sonst alle Spielercharaktere",
+        "players": "Alle Spielercharaktere"
+      },
+      "stashWithdraw": {
+        "name": "Nehmen aus dem Gruppeninventar",
+        "hint": "Ob Spieler einfach nehmen können oder die Freigabe der Spielleitung brauchen. Hineinlegen geht immer.",
+        "free": "Frei",
+        "approval": "Mit Freigabe der Spielleitung"
+      },
+      "fundLimit": {
+        "name": "Grenze der Gruppenkasse",
+        "hint": "Bis zu diesem Betrag (in der Hauptmünze des Systems) können Spieler ohne Nachfrage aus der Gruppenkasse nehmen. Mehr braucht die Freigabe der Spielleitung. 0 heißt: immer fragen."
+      },
+      "giveAcceptance": {
+        "name": "Geschenke müssen angenommen werden",
+        "hint": "Gibt ein Charakter etwas an den Charakter eines anderen Spielers, nimmt dieser es zuerst an oder lehnt ab."
+      },
+      "distribution": {
+        "name": "Wie die Beute verteilt wird",
+        "hint": "Was passiert, wenn die Spielleitung die beanspruchte Beute verteilt.",
+        "fair": "Fair: der stärkste Anspruch, dann wer bisher am wenigsten bekam",
+        "roll": "Würfeln: der stärkste Anspruch, dann der höchste Wurf",
+        "gm": "Die Spielleitung entscheidet jeden Gegenstand"
+      },
+      "remainder": {
+        "name": "Rest beim Teilen",
+        "hint": "Wohin die Münzen gehen, die sich nicht gleichmäßig teilen lassen.",
+        "fund": "In die Gruppenkasse",
+        "pool": "Bleiben in der Beute"
+      },
+      "collectPrompt": {
+        "name": "Nach dem Kampf einsammeln anbieten",
+        "hint": "Endet ein Kampf, fragt das Modul die Spielleitung, was die Besiegten zurücklassen."
+      },
+      "chatCards": {
+        "name": "Chatnachrichten",
+        "hint": "Eine Chatnachricht zu jeder Änderung. Das Protokoll im Journal gibt es in jedem Fall.",
+        "all": "Für alle",
+        "gm": "Nur für die Spielleitung",
+        "off": "Keine"
+      },
+      "genericCharacterType": {
+        "name": "Akteurtyp der Spielercharaktere",
+        "hint": "Für Systeme ohne eingebaute Unterstützung: der Akteurtyp der Spielercharaktere, mehrere durch Komma getrennt."
+      },
+      "genericQuantity": {
+        "name": "Wo Gegenstände ihre Menge speichern",
+        "hint": "Für Systeme ohne eingebaute Unterstützung, zum Beispiel system.quantity."
+      },
+      "genericPrice": {
+        "name": "Wo Gegenstände ihren Preis speichern",
+        "hint": "Für Systeme ohne eingebaute Unterstützung, eine Zahl in Münzen, zum Beispiel system.price. Leer lassen, wenn es keinen gibt."
+      },
+      "genericCurrency": {
+        "name": "Wo Charaktere ihre Münzen speichern",
+        "hint": "Für Systeme ohne eingebaute Unterstützung, eine einzelne Zahl, zum Beispiel system.currency. Leer lassen schaltet die Münzfunktionen ab."
+      },
+      "genericCoinName": {
+        "name": "Name der Münze",
+        "hint": "Für Systeme ohne eingebaute Unterstützung, das Kürzel hinter Beträgen."
+      }
+    },
+    "SELFTEST": {
+      "Title": "Beutebuch Selbsttest",
+      "Run": "Selbsttest starten",
+      "Hint": "Prüft Gruppeninventar, Protokoll und die Anbindung an dein Spielsystem. Nach jedem Update von Foundry oder dem System ausführen.",
+      "Passed": "Selbsttest bestanden: {checks} Prüfungen, Systemanbindung {system}.",
+      "Problems": "Selbsttest: {problems} von {checks} Prüfungen fehlgeschlagen. Details im Chat.",
+      "Version": "{id} {current} (geprüft {tested})",
+      "NewVersions": "Das Beutebuch wurde mit älteren Versionen als {versions} geprüft. Der Selbsttest in den Moduleinstellungen zeigt, ob noch alles funktioniert.",
+      "NoActor": "Der Akteur des Gruppeninventars fehlt.",
+      "ActorOwnership": "Spieler sehen den Akteur des Gruppeninventars nicht. Gib allen mindestens Beobachterrechte.",
+      "ActorOwner": "Spieler besitzen den Akteur des Gruppeninventars und könnten ihn am Protokoll vorbei ändern. Beobachterrechte genügen.",
+      "NoJournal": "Das Journal des Beuteprotokolls fehlt.",
+      "JournalOwnership": "Spieler können das Beuteprotokoll nicht lesen. Gib allen mindestens Beobachterrechte.",
+      "Chain": "Das Protokoll wurde nachträglich geändert ({count} Einträge geprüft).",
+      "Query": "Die Anfragen an die Spielleitung sind nicht angemeldet.",
+      "Generic": "{system} hat keine eingebaute Unterstützung. Das Modul nutzt die Pfade aus seinen Einstellungen.",
+      "NoCharacters": "Keine Spielercharaktere gefunden.",
+      "CruciblePhysical": "Crucibles Gegenstandsmodell wurde nicht gefunden.",
+      "Coins": "Die Münzen des Systems ließen sich nicht lesen.",
+      "StashType": "Das System hat keinen Gruppen-Akteurtyp für das Gruppeninventar.",
+      "Containers": "Behälter lassen sich nicht mit ihrem Inhalt weitergeben.",
+      "CharacterType": "Der Akteurtyp der Spielercharaktere aus den Einstellungen existiert nicht.",
+      "QuantityPath": "Gegenstände haben unter dem Pfad aus den Einstellungen keine Menge."
+    }
+  }
+}

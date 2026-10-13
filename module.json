@@ -1,0 +1,34 @@
+{
+  "id": "sephrals-loot-ledger",
+  "title": "Sephral’s Loot Ledger",
+  "description": "A comfortable party inventory with a fair loot table and an open log. Players claim loot, coins are split without losing a copper, unwanted loot lands in the party inventory, and every item that changes hands is written into a log everyone can read.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": 13,
+    "verified": "14.369"
+  },
+  "authors": [
+    {
+      "name": "Sephral"
+    }
+  ],
+  "url": "https://github.com/Sephral/sephrals-loot-ledger.git",
+  "esmodules": [
+    "scripts/sll.mjs"
+  ],
+  "styles": [
+    "styles/sll.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    }
+  ]
+}

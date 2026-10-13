@@ -1,0 +1,481 @@
+/* Sephral’s Loot Ledger */
+
+.sll-ledger .window-content {
+  padding: 0;
+}
+
+.sll-ledger .sll-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.sll-ledger .sll-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 6px 10px 10px;
+  overflow-y: auto;
+}
+
+.sll-ledger .sll-empty {
+  padding: 10px;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.sll-ledger .sll-spacer {
+  flex: 1;
+}
+
+.sll-ledger button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 0;
+  height: 26px;
+  margin: 0;
+  padding: 0 8px;
+  line-height: 24px;
+  white-space: nowrap;
+}
+
+.sll-ledger button.sll-icon {
+  width: 26px;
+  padding: 0;
+}
+
+/* Tabs */
+.sll-ledger .sll-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 10px 0;
+  border-bottom: 1px solid var(--color-border, rgb(255 255 255 / 0.15));
+}
+
+.sll-ledger .sll-tabs button {
+  flex: 1;
+  height: 30px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  background: none;
+  font-size: var(--font-size-14);
+}
+
+.sll-ledger .sll-tabs button.active {
+  border-bottom-color: var(--color-warm-2, #ee9b3a);
+  background: rgb(255 255 255 / 0.06);
+  font-weight: bold;
+}
+
+.sll-ledger .sll-badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--color-warm-2, #ee9b3a);
+  color: #111;
+  font-size: var(--font-size-11, 11px);
+  line-height: 16px;
+}
+
+.sll-ledger .sll-warning {
+  margin: 6px 10px 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgb(200 60 40 / 0.3);
+}
+
+/* Acting character and open requests */
+.sll-ledger .sll-acting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+
+.sll-ledger .sll-acting img {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sll-ledger .sll-acting select {
+  width: auto;
+  margin-left: 6px;
+}
+
+.sll-ledger .sll-pending {
+  margin: 0 10px 4px;
+  padding: 6px 8px;
+  border: 1px solid rgb(238 155 58 / 0.5);
+  border-radius: 6px;
+  background: rgb(238 155 58 / 0.1);
+}
+
+.sll-ledger .sll-pending h3 {
+  margin: 0 0 4px;
+  border: none;
+  font-size: var(--font-size-13);
+}
+
+.sll-ledger .sll-request {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.sll-ledger .sll-request span {
+  flex: 1;
+}
+
+/* Coin rows and toolbars */
+.sll-ledger .sll-coins,
+.sll-ledger .sll-toolbar,
+.sll-ledger .sll-check-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.2);
+}
+
+.sll-ledger .sll-coins i {
+  color: #e2b54c;
+}
+
+.sll-ledger .sll-check-line.ok i {
+  color: #7fd67f;
+}
+
+.sll-ledger .sll-check-line.broken {
+  background: rgb(200 60 40 / 0.3);
+}
+
+/* Lists */
+.sll-ledger .sll-list {
+  margin-bottom: 10px;
+  border: 1px dashed transparent;
+  border-radius: 6px;
+}
+
+.sll-ledger .sll-list.sll-drag-over {
+  border-color: var(--color-warm-2, #ee9b3a);
+  background: rgb(238 155 58 / 0.08);
+}
+
+.sll-ledger .sll-list > header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.sll-ledger .sll-list > header h3 {
+  margin: 0;
+  border: none;
+  font-size: var(--font-size-14);
+}
+
+.sll-ledger .sll-list > header small {
+  opacity: 0.75;
+}
+
+.sll-ledger .sll-list > header input[type="search"] {
+  width: 150px;
+  height: 24px;
+  margin-left: auto;
+}
+
+.sll-ledger .sll-items,
+.sll-ledger .sll-log {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+}
+
+.sll-ledger .sll-item,
+.sll-ledger .sll-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.15);
+}
+
+.sll-ledger .sll-item[hidden] {
+  display: none;
+}
+
+.sll-ledger .sll-item.blocked {
+  opacity: 0.6;
+}
+
+.sll-ledger .sll-item img,
+.sll-ledger .sll-entry img {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  object-fit: contain;
+}
+
+.sll-ledger .sll-entry > i {
+  flex: 0 0 32px;
+  text-align: center;
+  color: #e2b54c;
+}
+
+.sll-ledger .sll-item-info,
+.sll-ledger .sll-entry-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sll-ledger .sll-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sll-ledger .sll-item-info small,
+.sll-ledger .sll-entry-info small {
+  font-size: var(--font-size-11, 11px);
+  opacity: 0.75;
+}
+
+.sll-ledger .sll-item-info small.sll-contents {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: italic;
+}
+
+.sll-ledger .sll-heavy {
+  color: #ff9f6b;
+}
+
+.sll-ledger .sll-drop-hint {
+  margin: 4px 2px 0;
+  font-size: var(--font-size-11, 11px);
+  opacity: 0.6;
+}
+
+/* Claims */
+.sll-ledger .sll-claims {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.sll-ledger .sll-claim {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 5px 0 0;
+  border-radius: 9px;
+  background: rgb(255 255 255 / 0.08);
+  font-size: var(--font-size-11, 11px);
+}
+
+.sll-ledger .sll-claim img {
+  flex-basis: 16px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sll-ledger .sll-claim.need {
+  box-shadow: inset 0 0 0 1px #e2b54c;
+}
+
+.sll-ledger .sll-claim.pass {
+  opacity: 0.5;
+}
+
+.sll-ledger .sll-claim-buttons {
+  display: flex;
+  gap: 2px;
+}
+
+.sll-ledger .sll-claim-buttons button {
+  height: 22px;
+  padding: 0 6px;
+  font-size: var(--font-size-11, 11px);
+  line-height: 20px;
+  opacity: 0.7;
+}
+
+.sll-ledger .sll-claim-buttons button.active {
+  opacity: 1;
+  font-weight: bold;
+}
+
+.sll-ledger .sll-claim-buttons button.need.active {
+  background: rgb(226 181 76 / 0.45);
+}
+
+.sll-ledger .sll-claim-buttons button.want.active {
+  background: rgb(110 170 230 / 0.4);
+}
+
+.sll-ledger .sll-gm {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sll-ledger .sll-gm select {
+  width: 110px;
+  height: 26px;
+}
+
+/* Log and balance */
+.sll-ledger .sll-entry.undone .sll-entry-info span {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.sll-ledger .sll-entry.edit {
+  box-shadow: inset 3px 0 0 #ff9f6b;
+}
+
+.sll-ledger .sll-entry.undo {
+  box-shadow: inset 3px 0 0 #6eaae6;
+}
+
+.sll-ledger .sll-hint {
+  opacity: 0.8;
+}
+
+.sll-ledger .sll-balance {
+  width: 100%;
+}
+
+.sll-ledger .sll-balance td img {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 50%;
+  vertical-align: middle;
+  object-fit: cover;
+}
+
+.sll-ledger .sll-balance td.negative {
+  color: #ff9f6b;
+}
+
+/* Dialogs */
+.sll-check-list,
+.sll-collect-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sll-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sll-check img {
+  width: 24px;
+  height: 24px;
+  border: none;
+  object-fit: contain;
+}
+
+.sll-collect {
+  margin: 0 0 6px;
+  padding: 4px 8px;
+}
+
+.sll-coin-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sll-coin-fields label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sll-coin-fields input {
+  width: 70px;
+}
+
+/* Chat cards */
+.sll-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sll-card li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.sll-card li img {
+  width: 24px;
+  height: 24px;
+  border: none;
+  object-fit: contain;
+}
+
+.sll-card li span {
+  flex: 1;
+}
+
+.sll-card-entries li small {
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.sll-card-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.sll-card-resolved {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* Light interface theme */
+.theme-light .sll-ledger .sll-item,
+.theme-light .sll-ledger .sll-entry,
+.sll-ledger.theme-light .sll-item,
+.sll-ledger.theme-light .sll-entry {
+  background: rgb(0 0 0 / 0.05);
+}
+
+.theme-light .sll-ledger .sll-coins,
+.theme-light .sll-ledger .sll-toolbar,
+.theme-light .sll-ledger .sll-check-line,
+.sll-ledger.theme-light .sll-coins,
+.sll-ledger.theme-light .sll-toolbar,
+.sll-ledger.theme-light .sll-check-line {
+  background: rgb(0 0 0 / 0.06);
+}

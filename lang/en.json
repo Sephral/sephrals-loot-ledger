@@ -1,0 +1,312 @@
+{
+  "SLL": {
+    "Title": "Loot Ledger",
+    "NotReady": "The Loot Ledger is not set up yet. It sets itself up as soon as a GM is online.",
+    "NoGM": "No GM is online. Changes need a GM, you can still look around.",
+    "ActingAs": "Acting as",
+    "Search": "Search",
+    "Heavy": "Too heavy for your character to carry",
+    "LANGUAGE": {
+      "default": "Follow Foundry",
+      "de": "Deutsch",
+      "en": "English"
+    },
+    "Tab": {
+      "stash": "Party inventory",
+      "pool": "Loot",
+      "log": "Log",
+      "balance": "Balance"
+    },
+    "Storage": {
+      "actorName": "Party inventory",
+      "journalName": "Loot log"
+    },
+    "Place": {
+      "pool": "Loot",
+      "stash": "Party inventory",
+      "fund": "Party fund",
+      "outside": "outside"
+    },
+    "Claim": {
+      "need": "Need",
+      "want": "Want",
+      "pass": "Pass"
+    },
+    "Stash": {
+      "title": "Party inventory",
+      "empty": "The party inventory is empty.",
+      "value": "worth {value}",
+      "fund": "Party fund",
+      "depositCoins": "Pay in",
+      "withdrawCoins": "Take out",
+      "addFund": "Add coins to the party fund",
+      "spend": "Pay from the party fund",
+      "take": "Take",
+      "toPool": "Back to the loot",
+      "deposit": "Put in",
+      "give": "Give to another character",
+      "mine": "{name} carries",
+      "mineEmpty": "Nothing to hand over.",
+      "capacity": "carries {value} of {max}",
+      "origin": "from {name}, {date}",
+      "contains": "contains {list}",
+      "dropHint": "Drop items from your character sheet here to put them into the party inventory."
+    },
+    "Pool": {
+      "title": "Loot to share",
+      "empty": "No loot right now.",
+      "coins": "Coins in the loot",
+      "split": "Split",
+      "addCoins": "Add coins to the loot",
+      "collect": "Collect from the fight",
+      "distribute": "Hand out",
+      "unclaimed": "Rest to the party inventory",
+      "award": "Give to",
+      "toStash": "To the party inventory",
+      "remove": "Remove",
+      "removeConfirm": "Remove {name} for good? The log keeps a note of it.",
+      "dropHint": "Drop items from sheets, the sidebar, compendiums or loot links here.",
+      "distributeConfirm": {
+        "fair": "Hand out all claimed loot: among the strongest claims the character who received the least so far gets it, a roll breaks ties. Loot nobody wants goes into the party inventory.",
+        "roll": "Hand out all claimed loot: among the strongest claims the highest roll wins. Loot nobody wants goes into the party inventory.",
+        "gm": "You hand out the loot yourself. This only moves the loot nobody wants into the party inventory."
+      }
+    },
+    "Pending": {
+      "title": "Open requests",
+      "cancel": "Withdraw the request",
+      "withdraw": "{actor} would like to take {what}",
+      "offer": "{from} offers {what} to {to}",
+      "waitingOffer": "waiting for an answer",
+      "waitingGM": "waiting for the GM"
+    },
+    "Card": {
+      "speaker": "Loot Ledger",
+      "rolls": "Rolls",
+      "distribution": "The loot was handed out:",
+      "approval": "{user} asks for approval:",
+      "approve": "Approve",
+      "deny": "Deny",
+      "accept": "Accept",
+      "decline": "Decline",
+      "accepted": "Accepted by {name}.",
+      "declined": "Declined by {name}.",
+      "cancelled": "Withdrawn.",
+      "approved": "Approved.",
+      "denied": "Denied."
+    },
+    "Log": {
+      "add": {
+        "new": {
+          "pool": "{what} added to the loot",
+          "stash": "{what} added to the party inventory",
+          "fund": "{what} added to the party fund"
+        },
+        "from": {
+          "pool": "{what} from {from} added to the loot",
+          "stash": "{what} from {from} added to the party inventory",
+          "fund": "{what} from {from} added to the party fund"
+        }
+      },
+      "award": "{to} receives {what} from the loot",
+      "split": "{to} receives {what} from the loot",
+      "move": "{what}: {from} → {to}",
+      "remove": {
+        "pool": "{what} removed from the loot",
+        "stash": "{what} removed from the party inventory"
+      },
+      "deposit": {
+        "stash": "{from} puts {what} into the party inventory",
+        "fund": "{from} pays {what} into the party fund"
+      },
+      "withdraw": {
+        "stash": "{to} takes {what} from the party inventory",
+        "fund": "{to} takes {what} from the party fund"
+      },
+      "give": "{from} gives {what} to {to}",
+      "spend": "The party fund pays {what}",
+      "edit": {
+        "create": {
+          "pool": "{what} put into the loot outside the module",
+          "stash": "{what} put into the party inventory outside the module"
+        },
+        "delete": {
+          "pool": "{what} removed from the loot outside the module",
+          "stash": "{what} removed from the party inventory outside the module"
+        },
+        "update": "Quantity of {name} changed outside the module: {old} → {new}"
+      },
+      "undo": "Undone: {entry}",
+      "pageIntro": "Kept by the Loot Ledger. Only the GM's client writes here, and any later change shows up in the module's check.",
+      "time": "Time",
+      "by": "By",
+      "what": "What",
+      "value": "Value",
+      "intact": "Log intact: {count} entries, none changed afterwards.",
+      "broken": "Entry #{seq} was changed afterwards.",
+      "openJournal": "Open as journal",
+      "undoTitle": "Undo",
+      "undoConfirm": "Reverse this entry? Items and coins go back where they came from, and the log records the undo.",
+      "empty": "Nothing recorded yet."
+    },
+    "Reason": {
+      "single": "strongest claim",
+      "fair": "received the least so far",
+      "fairRoll": "received the least so far, rolled",
+      "roll": "highest roll",
+      "remainder": "rest of the split",
+      "unclaimed": "nobody claimed it",
+      "approved": "approved by {name}"
+    },
+    "Balance": {
+      "hint": "What each character took from the loot, the party inventory and the party fund, minus what they put in. Gifts between characters count for the one who receives them.",
+      "today": "Today",
+      "total": "In total"
+    },
+    "Dialog": {
+      "quantity": "How many",
+      "ok": "OK",
+      "recipient": "To",
+      "amount": "Amount",
+      "amountHint": "for example 12 or 3 {coin} 5 …",
+      "note": "Note",
+      "splitTitle": "Split the coins",
+      "splitHint": "The coins go in equal shares to the characters you pick. What cannot be shared goes into the party fund.",
+      "split": "Split"
+    },
+    "Collect": {
+      "title": "Collect from the fight",
+      "hint": "Pick what the defeated leave behind. It moves into the loot, and the log notes where it came from.",
+      "take": "Into the loot"
+    },
+    "Notice": {
+      "waitingApproval": "Your request waits for the GM.",
+      "offerSent": "Offer sent to {name}.",
+      "distributed": "{count} items handed out, {rest} moved to the party inventory.",
+      "collected": "{count} things moved into the loot.",
+      "nothingToCollect": "The defeated have nothing to leave behind."
+    },
+    "Error": {
+      "noGM": "No GM is online.",
+      "requestFailed": "That did not work. See the console for details.",
+      "unknownSender": "The request could not be checked.",
+      "unknownAction": "Unknown request.",
+      "noStorage": "The party inventory does not exist yet. A GM sets it up on login.",
+      "notYours": "You can only act for your own characters.",
+      "gmOnly": "Only the GM can do that.",
+      "noCharacter": "Pick a character first.",
+      "itemGone": "That item is no longer there.",
+      "notTransferable": "That cannot be handed over.",
+      "notEnoughCoins": "Not enough coins.",
+      "noCoins": "This system has no coins the module can use. The GM can name them in the module settings.",
+      "noCoinsToSplit": "There are no coins in the loot.",
+      "tooFewCoins": "Too few coins to give everyone something.",
+      "noAmount": "Enter an amount.",
+      "nothingToDistribute": "Nothing to hand out: no item has a claim yet.",
+      "nothingUnclaimed": "Every item of the loot has a claim.",
+      "requestGone": "That request was already answered.",
+      "nothingCollected": "Nothing was collected.",
+      "cannotUndo": "This entry cannot be undone anymore.",
+      "alreadyUndone": "This entry was already undone.",
+      "dropOwn": "Drop items from your own character here."
+    },
+    "Block": {
+      "cursed": "Cursed and invested: only the GM can take it off.",
+      "equippedInCombat": "Equipped during a fight: unequip it first."
+    },
+    "SETTINGS": {
+      "uiLanguage": {
+        "name": "Module language",
+        "hint": "Language of the Loot Ledger for you. Follow Foundry uses Foundry's language."
+      },
+      "recipients": {
+        "name": "Who shares the loot",
+        "hint": "The characters who can claim loot and get coins from a split.",
+        "party": "The system's party, otherwise all player characters",
+        "players": "All player characters"
+      },
+      "stashWithdraw": {
+        "name": "Taking from the party inventory",
+        "hint": "Whether players can simply take items or need the GM's approval. Putting things in is always free.",
+        "free": "Free",
+        "approval": "With the GM's approval"
+      },
+      "fundLimit": {
+        "name": "Party fund limit",
+        "hint": "Players can take up to this amount (in the system's main coin) from the party fund without asking. More needs the GM's approval. 0 means always ask."
+      },
+      "giveAcceptance": {
+        "name": "Gifts must be accepted",
+        "hint": "When a character gives something to another player's character, that player accepts or declines first."
+      },
+      "distribution": {
+        "name": "How loot is handed out",
+        "hint": "What happens when the GM hands out the claimed loot.",
+        "fair": "Fair: the strongest claim, then who received the least so far",
+        "roll": "Roll: the strongest claim, then the highest roll",
+        "gm": "The GM decides each item"
+      },
+      "remainder": {
+        "name": "Rest of a coin split",
+        "hint": "Where the coins go that cannot be shared evenly.",
+        "fund": "Into the party fund",
+        "pool": "Stay in the loot"
+      },
+      "collectPrompt": {
+        "name": "Offer to collect after a fight",
+        "hint": "When a combat ends, the GM is asked what the defeated leave behind."
+      },
+      "chatCards": {
+        "name": "Chat messages",
+        "hint": "A chat message for every change. The log in the journal is there either way.",
+        "all": "For everyone",
+        "gm": "Only for the GM",
+        "off": "None"
+      },
+      "genericCharacterType": {
+        "name": "Actor type of player characters",
+        "hint": "For systems without built in support: the actor type of player characters, several separated by commas."
+      },
+      "genericQuantity": {
+        "name": "Where items keep their quantity",
+        "hint": "For systems without built in support, for example system.quantity."
+      },
+      "genericPrice": {
+        "name": "Where items keep their price",
+        "hint": "For systems without built in support, a number in coins, for example system.price. Leave empty if there is none."
+      },
+      "genericCurrency": {
+        "name": "Where characters keep their coins",
+        "hint": "For systems without built in support, a single number, for example system.currency. Leave empty to switch the coin features off."
+      },
+      "genericCoinName": {
+        "name": "Name of the coin",
+        "hint": "For systems without built in support, the short name shown after amounts."
+      }
+    },
+    "SELFTEST": {
+      "Title": "Loot Ledger self test",
+      "Run": "Run self test",
+      "Hint": "Checks the party inventory, the log and the connection to your game system. Run it after an update of Foundry or the system.",
+      "Passed": "Self test passed: {checks} checks, system support {system}.",
+      "Problems": "Self test: {problems} of {checks} checks failed. See the chat message.",
+      "Version": "{id} {current} (verified {tested})",
+      "NewVersions": "The Loot Ledger was verified with older versions than {versions}. Run the self test in the module settings to check that everything still works.",
+      "NoActor": "The party inventory actor is missing.",
+      "ActorOwnership": "Players cannot see the party inventory actor. Give everyone at least observer rights.",
+      "ActorOwner": "Players own the party inventory actor and could change it past the log. Observer rights are enough.",
+      "NoJournal": "The loot log journal is missing.",
+      "JournalOwnership": "Players cannot read the loot log. Give everyone at least observer rights.",
+      "Chain": "The log was changed afterwards ({count} entries checked).",
+      "Query": "Requests to the GM are not registered.",
+      "Generic": "{system} has no built in support. The module uses the paths from its settings.",
+      "NoCharacters": "No player characters were found.",
+      "CruciblePhysical": "Crucible's item model was not found.",
+      "Coins": "The system's coins could not be read.",
+      "StashType": "The system has no group actor type for the party inventory.",
+      "Containers": "Containers cannot be handed over with their contents.",
+      "CharacterType": "The actor type of player characters from the settings does not exist.",
+      "QuantityPath": "Items have no quantity at the path from the settings."
+    }
+  }
+}

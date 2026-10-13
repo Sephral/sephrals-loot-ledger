@@ -1,0 +1,232 @@
+<div class="sll-body">
+  {{#unless ready}}
+  <p class="sll-empty">{{localize "SLL.NotReady"}}</p>
+  {{else}}
+
+  <nav class="sll-tabs">
+    {{#each tabs}}
+    <button type="button" class="{{#if active}}active{{/if}}" data-action="showTab" data-tab="{{id}}">
+      {{label}}{{#if badge}} <span class="sll-badge">{{badge}}</span>{{/if}}
+    </button>
+    {{/each}}
+  </nav>
+
+  {{#if noGM}}<p class="sll-warning"><i class="fa-solid fa-triangle-exclamation" inert></i> {{localize "SLL.NoGM"}}</p>{{/if}}
+
+  {{#if showActing}}
+  <div class="sll-acting">
+    <img src="{{acting.img}}" alt="">
+    {{#if (gt ownCharacters.length 1)}}
+    <label>{{localize "SLL.ActingAs"}}
+      <select name="acting">
+        {{#each ownCharacters}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+      </select>
+    </label>
+    {{else}}
+    <span>{{localize "SLL.ActingAs"}} <strong>{{acting.name}}</strong></span>
+    {{/if}}
+  </div>
+  {{/if}}
+
+  {{#if pending.length}}
+  <section class="sll-pending">
+    <h3>{{localize "SLL.Pending.title"}}</h3>
+    {{#each pending}}
+    <div class="sll-request" data-request-id="{{id}}" data-type="{{#if canApprove}}approval{{else}}offer{{/if}}">
+      <span>{{label}}</span>
+      {{#if canApprove}}
+      <button type="button" data-action="answer" data-answer="yes">{{localize "SLL.Card.approve"}}</button>
+      <button type="button" data-action="answer" data-answer="no">{{localize "SLL.Card.deny"}}</button>
+      {{else if canAccept}}
+      <button type="button" data-action="answer" data-answer="yes">{{localize "SLL.Card.accept"}}</button>
+      <button type="button" data-action="answer" data-answer="no">{{localize "SLL.Card.decline"}}</button>
+      {{else}}
+      <small>{{waiting}}</small>
+      {{/if}}
+      {{#if mine}}<button type="button" class="sll-icon" data-action="cancel" data-tooltip="{{localize "SLL.Pending.cancel"}}"><i class="fa-solid fa-xmark" inert></i></button>{{/if}}
+    </div>
+    {{/each}}
+  </section>
+  {{/if}}
+
+  <div class="sll-scroll">
+
+    {{!-- Party inventory --}}
+    {{#if (eq tab "stash")}}
+    {{#if coinsAvailable}}
+    <section class="sll-coins">
+      <i class="fa-solid fa-coins" inert></i>
+      <span>{{localize "SLL.Stash.fund"}}: <strong>{{fund}}</strong></span>
+      <span class="sll-spacer"></span>
+      {{#if acting}}
+      <button type="button" data-action="depositCoins">{{localize "SLL.Stash.depositCoins"}}</button>
+      <button type="button" data-action="withdrawCoins">{{localize "SLL.Stash.withdrawCoins"}}</button>
+      {{/if}}
+      {{#if isGM}}
+      <button type="button" class="sll-icon" data-action="addCoins" data-area="fund" data-tooltip="{{localize "SLL.Stash.addFund"}}"><i class="fa-solid fa-plus" inert></i></button>
+      <button type="button" class="sll-icon" data-action="spend" data-tooltip="{{localize "SLL.Stash.spend"}}"><i class="fa-solid fa-hand-holding-dollar" inert></i></button>
+      {{/if}}
+    </section>
+    {{/if}}
+
+    <section class="sll-list" data-drop="stash">
+      <header>
+        <h3>{{localize "SLL.Stash.title"}}</h3>
+        {{#if stashValue}}<small>{{localize "SLL.Stash.value" value=stashValue}}</small>{{/if}}
+        <input type="search" data-filter="stash" placeholder="{{localize "SLL.Search"}}">
+      </header>
+      <ol class="sll-items plain" data-list="stash">
+        {{#each stash}}
+        <li class="sll-item" data-item-id="{{id}}" data-area="stash" data-name="{{name}}">
+          <img src="{{img}}" alt="">
+          <div class="sll-item-info">
+            <span class="sll-item-name">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <small>{{#if value}}{{value}}{{/if}}{{#if origin}}{{#if value}} · {{/if}}{{origin}}{{/if}}</small>
+            {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
+          </div>
+          {{#if heavy}}<i class="fa-solid fa-weight-hanging sll-heavy" data-tooltip="{{localize "SLL.Heavy"}}" inert></i>{{/if}}
+          {{#if ../acting}}<button type="button" data-action="take">{{localize "SLL.Stash.take"}}</button>{{/if}}
+          {{#if ../isGM}}
+          <button type="button" class="sll-icon" data-action="toPool" data-tooltip="{{localize "SLL.Stash.toPool"}}"><i class="fa-solid fa-sack" inert></i></button>
+          <button type="button" class="sll-icon" data-action="remove" data-tooltip="{{localize "SLL.Pool.remove"}}"><i class="fa-solid fa-trash" inert></i></button>
+          {{/if}}
+        </li>
+        {{else}}
+        <li class="sll-empty">{{localize "SLL.Stash.empty"}}</li>
+        {{/each}}
+      </ol>
+      <p class="sll-drop-hint"><i class="fa-solid fa-hand-pointer" inert></i> {{localize "SLL.Stash.dropHint"}}</p>
+    </section>
+
+    {{#if acting}}
+    <section class="sll-list">
+      <header>
+        <h3>{{localize "SLL.Stash.mine" name=acting.name}}</h3>
+        <small>{{#if coinsAvailable}}{{purse}}{{/if}}{{#if capacity}} · {{capacity}}{{/if}}</small>
+        <input type="search" data-filter="mine" placeholder="{{localize "SLL.Search"}}">
+      </header>
+      <ol class="sll-items plain" data-list="mine">
+        {{#each mine}}
+        <li class="sll-item {{#if blocked}}blocked{{/if}}" data-item-id="{{id}}" data-area="mine" data-name="{{name}}">
+          <img src="{{img}}" alt="">
+          <div class="sll-item-info">
+            <span class="sll-item-name">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <small>{{#if blocked}}{{blocked}}{{else}}{{value}}{{/if}}</small>
+            {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
+          </div>
+          {{#unless blocked}}
+          <button type="button" data-action="deposit">{{localize "SLL.Stash.deposit"}}</button>
+          <button type="button" class="sll-icon" data-action="give" data-tooltip="{{localize "SLL.Stash.give"}}"><i class="fa-solid fa-hand-holding-hand" inert></i></button>
+          {{/unless}}
+        </li>
+        {{else}}
+        <li class="sll-empty">{{localize "SLL.Stash.mineEmpty"}}</li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/if}}
+    {{/if}}
+
+    {{!-- Loot --}}
+    {{#if (eq tab "pool")}}
+    <section class="sll-coins">
+      <i class="fa-solid fa-coins" inert></i>
+      <span>{{localize "SLL.Pool.coins"}}: <strong>{{#if poolCoins}}{{poolCoins}}{{else}}–{{/if}}</strong></span>
+      <span class="sll-spacer"></span>
+      {{#if isGM}}
+      {{#if hasPoolCoins}}<button type="button" data-action="split">{{localize "SLL.Pool.split"}}</button>{{/if}}
+      <button type="button" class="sll-icon" data-action="addCoins" data-area="pool" data-tooltip="{{localize "SLL.Pool.addCoins"}}"><i class="fa-solid fa-plus" inert></i></button>
+      {{/if}}
+    </section>
+
+    {{#if isGM}}
+    <section class="sll-toolbar">
+      <button type="button" data-action="collect"><i class="fa-solid fa-skull" inert></i> {{localize "SLL.Pool.collect"}}</button>
+      <button type="button" data-action="distribute"><i class="fa-solid fa-scale-balanced" inert></i> {{localize "SLL.Pool.distribute"}}</button>
+      {{#if hasUnclaimed}}<button type="button" data-action="unclaimed"><i class="fa-solid fa-box-archive" inert></i> {{localize "SLL.Pool.unclaimed"}}</button>{{/if}}
+    </section>
+    {{/if}}
+
+    <section class="sll-list" data-drop="pool">
+      <header><h3>{{localize "SLL.Pool.title"}}</h3></header>
+      <ol class="sll-items plain">
+        {{#each pool}}
+        <li class="sll-item sll-loot" data-item-id="{{id}}" data-area="pool" data-name="{{name}}">
+          <img src="{{img}}" alt="">
+          <div class="sll-item-info">
+            <span class="sll-item-name">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <small>{{value}}</small>
+            {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
+            {{#if claims.length}}
+            <div class="sll-claims">
+              {{#each claims}}<span class="sll-claim {{claim}}" data-tooltip="{{label}}"><img src="{{img}}" alt="">{{name}}</span>{{/each}}
+            </div>
+            {{/if}}
+          </div>
+          {{#if heavy}}<i class="fa-solid fa-weight-hanging sll-heavy" data-tooltip="{{localize "SLL.Heavy"}}" inert></i>{{/if}}
+          {{#if ../acting}}
+          <div class="sll-claim-buttons">
+            {{#each claimButtons}}<button type="button" class="{{claim}} {{#if active}}active{{/if}}" data-action="claim" data-claim="{{claim}}">{{label}}</button>{{/each}}
+          </div>
+          {{/if}}
+          {{#if ../isGM}}
+          <div class="sll-gm">
+            <select name="winner">{{#each options}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select>
+            <button type="button" class="sll-icon" data-action="award" data-tooltip="{{localize "SLL.Pool.award"}}"><i class="fa-solid fa-gift" inert></i></button>
+            <button type="button" class="sll-icon" data-action="toStash" data-tooltip="{{localize "SLL.Pool.toStash"}}"><i class="fa-solid fa-box-archive" inert></i></button>
+            <button type="button" class="sll-icon" data-action="remove" data-tooltip="{{localize "SLL.Pool.remove"}}"><i class="fa-solid fa-trash" inert></i></button>
+          </div>
+          {{/if}}
+        </li>
+        {{else}}
+        <li class="sll-empty">{{localize "SLL.Pool.empty"}}</li>
+        {{/each}}
+      </ol>
+      {{#if isGM}}<p class="sll-drop-hint"><i class="fa-solid fa-hand-pointer" inert></i> {{localize "SLL.Pool.dropHint"}}</p>{{/if}}
+    </section>
+    {{/if}}
+
+    {{!-- Log --}}
+    {{#if (eq tab "log")}}
+    <section class="sll-check-line {{#if check.ok}}ok{{else}}broken{{/if}}">
+      <i class="fa-solid {{#if check.ok}}fa-shield-halved{{else}}fa-triangle-exclamation{{/if}}" inert></i>
+      <span>{{check.text}}</span>
+      <span class="sll-spacer"></span>
+      <button type="button" data-action="openJournal">{{localize "SLL.Log.openJournal"}}</button>
+    </section>
+    <ol class="sll-log plain">
+      {{#each log}}
+      <li class="sll-entry {{kind}} {{#if undone}}undone{{/if}}" data-entry-id="{{id}}">
+        {{#if img}}<img src="{{img}}" alt="">{{else}}<i class="fa-solid fa-coins" inert></i>{{/if}}
+        <div class="sll-entry-info">
+          <span>{{text}}</span>
+          <small>#{{seq}} · {{time}} · {{user}}{{#if value}} · {{value}}{{/if}}</small>
+        </div>
+        {{#if canUndo}}<button type="button" class="sll-icon" data-action="undo" data-tooltip="{{localize "SLL.Log.undoTitle"}}"><i class="fa-solid fa-rotate-left" inert></i></button>{{/if}}
+      </li>
+      {{else}}
+      <li class="sll-empty">{{localize "SLL.Log.empty"}}</li>
+      {{/each}}
+    </ol>
+    {{/if}}
+
+    {{!-- Balance --}}
+    {{#if (eq tab "balance")}}
+    <p class="sll-hint">{{localize "SLL.Balance.hint"}}</p>
+    <table class="sll-balance">
+      <thead><tr><th></th><th>{{localize "SLL.Balance.today"}}</th><th>{{localize "SLL.Balance.total"}}</th></tr></thead>
+      <tbody>
+        {{#each balance}}
+        <tr>
+          <td><img src="{{img}}" alt=""> {{name}}</td>
+          <td class="{{#if todayNegative}}negative{{/if}}">{{#if todayNegative}}−{{/if}}{{today}}</td>
+          <td class="{{#if totalNegative}}negative{{/if}}">{{#if totalNegative}}−{{/if}}{{total}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{/if}}
+
+  </div>
+  {{/unless}}
+</div>

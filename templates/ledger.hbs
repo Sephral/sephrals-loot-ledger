@@ -53,21 +53,27 @@
 
     {{!-- Party inventory --}}
     {{#if (eq tab "stash")}}
-    {{#if coinsAvailable}}
+    {{#if showFund}}
     <section class="sll-coins">
       <i class="fa-solid fa-coins" inert></i>
       <span>{{localize "SLL.Stash.fund"}}: <strong>{{fund}}</strong></span>
       <span class="sll-spacer"></span>
       {{#if acting}}
-      <button type="button" data-action="depositCoins">{{localize "SLL.Stash.depositCoins"}}</button>
+      {{#if fundOn}}<button type="button" data-action="depositCoins">{{localize "SLL.Stash.depositCoins"}}</button>{{/if}}
       <button type="button" data-action="withdrawCoins">{{localize "SLL.Stash.withdrawCoins"}}</button>
       {{/if}}
       {{#if isGM}}
-      <button type="button" class="sll-icon" data-action="addCoins" data-area="fund" data-tooltip="{{localize "SLL.Stash.addFund"}}"><i class="fa-solid fa-plus" inert></i></button>
+      {{#if fundOn}}<button type="button" class="sll-icon" data-action="addCoins" data-area="fund" data-tooltip="{{localize "SLL.Stash.addFund"}}"><i class="fa-solid fa-plus" inert></i></button>{{/if}}
       <button type="button" class="sll-icon" data-action="spend" data-tooltip="{{localize "SLL.Stash.spend"}}"><i class="fa-solid fa-hand-holding-dollar" inert></i></button>
       {{/if}}
     </section>
     {{/if}}
+
+    {{#if isGM}}{{#unless lootOn}}
+    <section class="sll-toolbar">
+      <button type="button" data-action="collect"><i class="fa-solid fa-skull" inert></i> {{localize "SLL.Pool.collect"}}</button>
+    </section>
+    {{/unless}}{{/if}}
 
     <section class="sll-list" data-drop="stash">
       <header>
@@ -87,7 +93,8 @@
           {{#if heavy}}<i class="fa-solid fa-weight-hanging sll-heavy" data-tooltip="{{localize "SLL.Heavy"}}" inert></i>{{/if}}
           {{#if ../acting}}<button type="button" data-action="take">{{localize "SLL.Stash.take"}}</button>{{/if}}
           {{#if ../isGM}}
-          <button type="button" class="sll-icon" data-action="toPool" data-tooltip="{{localize "SLL.Stash.toPool"}}"><i class="fa-solid fa-sack" inert></i></button>
+          <button type="button" class="sll-icon" data-action="handOut" data-tooltip="{{localize "SLL.Stash.handOut"}}"><i class="fa-solid fa-gift" inert></i></button>
+          {{#if @root.lootOn}}<button type="button" class="sll-icon" data-action="toPool" data-tooltip="{{localize "SLL.Stash.toPool"}}"><i class="fa-solid fa-sack" inert></i></button>{{/if}}
           <button type="button" class="sll-icon" data-action="remove" data-tooltip="{{localize "SLL.Pool.remove"}}"><i class="fa-solid fa-trash" inert></i></button>
           {{/if}}
         </li>
@@ -129,21 +136,29 @@
 
     {{!-- Loot --}}
     {{#if (eq tab "pool")}}
+    {{#if coinsAvailable}}
     <section class="sll-coins">
       <i class="fa-solid fa-coins" inert></i>
       <span>{{localize "SLL.Pool.coins"}}: <strong>{{#if poolCoins}}{{poolCoins}}{{else}}–{{/if}}</strong></span>
       <span class="sll-spacer"></span>
       {{#if isGM}}
       {{#if hasPoolCoins}}<button type="button" data-action="split">{{localize "SLL.Pool.split"}}</button>{{/if}}
-      <button type="button" class="sll-icon" data-action="addCoins" data-area="pool" data-tooltip="{{localize "SLL.Pool.addCoins"}}"><i class="fa-solid fa-plus" inert></i></button>
+      {{#if lootOn}}<button type="button" class="sll-icon" data-action="addCoins" data-area="pool" data-tooltip="{{localize "SLL.Pool.addCoins"}}"><i class="fa-solid fa-plus" inert></i></button>{{/if}}
       {{/if}}
     </section>
+    {{/if}}
+
+    {{#unless lootOn}}<p class="sll-hint"><i class="fa-solid fa-circle-info" inert></i> {{localize "SLL.Pool.off"}}</p>{{/unless}}
 
     {{#if isGM}}
     <section class="sll-toolbar">
+      {{#if lootOn}}
       <button type="button" data-action="collect"><i class="fa-solid fa-skull" inert></i> {{localize "SLL.Pool.collect"}}</button>
       <button type="button" data-action="distribute"><i class="fa-solid fa-scale-balanced" inert></i> {{localize "SLL.Pool.distribute"}}</button>
       {{#if hasUnclaimed}}<button type="button" data-action="unclaimed"><i class="fa-solid fa-box-archive" inert></i> {{localize "SLL.Pool.unclaimed"}}</button>{{/if}}
+      {{else if hasUnclaimed}}
+      <button type="button" data-action="unclaimed"><i class="fa-solid fa-box-archive" inert></i> {{localize "SLL.Pool.allToStash"}}</button>
+      {{/if}}
     </section>
     {{/if}}
 
@@ -164,7 +179,7 @@
             {{/if}}
           </div>
           {{#if heavy}}<i class="fa-solid fa-weight-hanging sll-heavy" data-tooltip="{{localize "SLL.Heavy"}}" inert></i>{{/if}}
-          {{#if ../acting}}
+          {{#if (and ../acting @root.lootOn)}}
           <div class="sll-claim-buttons">
             {{#each claimButtons}}<button type="button" class="{{claim}} {{#if active}}active{{/if}}" data-action="claim" data-claim="{{claim}}">{{label}}</button>{{/each}}
           </div>
@@ -182,7 +197,7 @@
         <li class="sll-empty">{{localize "SLL.Pool.empty"}}</li>
         {{/each}}
       </ol>
-      {{#if isGM}}<p class="sll-drop-hint"><i class="fa-solid fa-hand-pointer" inert></i> {{localize "SLL.Pool.dropHint"}}</p>{{/if}}
+      {{#if (and isGM lootOn)}}<p class="sll-drop-hint"><i class="fa-solid fa-hand-pointer" inert></i> {{localize "SLL.Pool.dropHint"}}</p>{{/if}}
     </section>
     {{/if}}
 

@@ -18,6 +18,7 @@ import {runSelfTest} from "./selftest.mjs";
  * @property {{min: number, max: number, step: number}} [range]
  * @property {"world"|"client"} [scope="world"]
  * @property {boolean} [generic]              Only for systems without an own adapter
+ * @property {string[]} [requires]            Switches this setting depends on; it hides while one of them is off
  * @property {Function} [onChange]
  */
 
@@ -31,17 +32,20 @@ const redraw = () => refreshLedger();
 export const SETTINGS = {
   uiLanguage: {type: String, default: FOLLOW_FOUNDRY, scope: "client", onChange: onLanguageChange, choices: {
     [FOLLOW_FOUNDRY]: "SLL.LANGUAGE.default", de: "SLL.LANGUAGE.de", en: "SLL.LANGUAGE.en"}},
+  lootTable: {type: Boolean, default: true, onChange: redraw},
+  partyFund: {type: Boolean, default: true, onChange: redraw},
+  balanceTab: {type: Boolean, default: true, onChange: redraw},
   recipients: {type: String, default: "party", onChange: redraw, choices: {
     party: "SLL.SETTINGS.recipients.party", players: "SLL.SETTINGS.recipients.players"}},
   stashWithdraw: {type: String, default: "free", choices: {
     free: "SLL.SETTINGS.stashWithdraw.free", approval: "SLL.SETTINGS.stashWithdraw.approval"}},
-  fundLimit: {type: Number, default: 10, range: {min: 0, max: 10000, step: 1}},
+  fundLimit: {type: Number, default: 10, range: {min: 0, max: 10000, step: 1}, requires: ["partyFund"]},
   giveAcceptance: {type: Boolean, default: true},
-  distribution: {type: String, default: "fair", onChange: redraw, choices: {
+  distribution: {type: String, default: "fair", onChange: redraw, requires: ["lootTable"], choices: {
     fair: "SLL.SETTINGS.distribution.fair", roll: "SLL.SETTINGS.distribution.roll", gm: "SLL.SETTINGS.distribution.gm"}},
-  remainder: {type: String, default: "fund", choices: {
+  remainder: {type: String, default: "fund", requires: ["lootTable", "partyFund"], choices: {
     fund: "SLL.SETTINGS.remainder.fund", pool: "SLL.SETTINGS.remainder.pool"}},
-  collectPrompt: {type: Boolean, default: true},
+  collectPrompt: {type: Boolean, default: true, requires: ["lootTable"]},
   chatCards: {type: String, default: "all", choices: {
     all: "SLL.SETTINGS.chatCards.all", gm: "SLL.SETTINGS.chatCards.gm", off: "SLL.SETTINGS.chatCards.off"}},
   genericCharacterType: {type: String, default: "character", generic: true, onChange: redraw},
@@ -63,6 +67,39 @@ function onLanguageChange(value) {
     ui.controls?.render();
     if ( game.settings.sheet?.rendered ) game.settings.sheet.render();
   });
+}
+
+/* -------------------------------------------- */
+
+/**
+ * The settings to hide in the settings dialog, because a switch they depend on is off.
+ * @param {Record<string, boolean>} switches   The current state of the switches
+ * @returns {string[]}
+ */
+export function hiddenSettings(switches) {
+  return Object.keys(SETTINGS).filter(key => SETTINGS[key].requires?.some(s => !switches[s]));
+}
+
+/**
+ * Hook "renderSettingsConfig": hide the settings of parts that are switched off, and follow the switches while the GM
+ * changes them.
+ * @param {Application} app
+ * @param {HTMLElement} html
+ */
+export function onRenderSettingsConfig(app, html) {
+  const element = (html instanceof HTMLElement) ? html : html?.[0];
+  const input = key => element?.querySelector(`[name="${MODULE_ID}.${key}"]`);
+  const switches = [...new Set(Object.values(SETTINGS).flatMap(def => def.requires ?? []))].filter(key => input(key));
+  if ( !switches.length ) return;
+  const update = () => {
+    const hidden = new Set(hiddenSettings(Object.fromEntries(switches.map(key => [key, input(key).checked]))));
+    for ( const key of Object.keys(SETTINGS) ) {
+      const group = input(key)?.closest(".form-group");
+      if ( group ) group.style.display = hidden.has(key) ? "none" : "";
+    }
+  };
+  for ( const key of switches ) input(key).addEventListener("change", update);
+  update();
 }
 
 /* -------------------------------------------- */

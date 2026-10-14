@@ -3,7 +3,7 @@
  * 14 both offer.
  */
 
-import {esc, t} from "./config.mjs";
+import {esc, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {parseCoins} from "./coins.mjs";
 
@@ -118,7 +118,7 @@ export async function askSplit(actors) {
     + `<img src="${esc(a.img)}" alt=""> ${esc(a.name)}</label>`).join("");
   const result = await DialogV2.prompt({
     window: {title: t("SLL.Dialog.splitTitle")},
-    content: `<p>${esc(t("SLL.Dialog.splitHint"))}</p><div class="sll-check-list">${rows}</div>`,
+    content: `<p>${esc(t(((setting("remainder") === "fund") && parts().fund) ? "SLL.Dialog.splitHint" : "SLL.Dialog.splitHintPool"))}</p><div class="sll-check-list">${rows}</div>`,
     rejectClose: false,
     ok: {label: t("SLL.Dialog.split"), callback: (event, button) => formData(button)}
   });

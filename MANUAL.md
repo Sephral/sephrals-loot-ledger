@@ -9,14 +9,17 @@ Open the Loot Ledger from the token controls on the left (scroll icon) or with t
 * **Log:** every change, newest first, with who asked for it. The line on top shows whether the log is unchanged.
 * **Balance:** what each character took from the loot, the party inventory and the party fund, minus what they put in, today and in total.
 
-If you play more than one character, pick the one you act for at the top.
+If you play more than one character, pick the one you act for at the top. The gear in the title bar opens the module's settings.
+
+The loot table, the party fund and the balance can be switched off in the settings. With all three off the Loot Ledger is a plain party inventory with a log. A part that is switched off stays visible while it still holds something: leftover loot can be handed out or moved into the party inventory, and coins left in the party fund can still be taken out.
 
 ## For the GM
 
-* **Collect from the fight:** when a combat ends, the module asks what the defeated leave behind (items and coins). The button on the Loot tab does the same for the running or the last fight.
+* **Collect from the fight:** when a combat ends, the module asks what the defeated leave behind (items and coins). The button on the Loot tab does the same for the running or the last fight. With the loot table switched off nothing is offered after a fight. The button then sits on the Party inventory tab and collects straight into the party inventory, coins into the party fund.
 * **Add loot:** drag items from any sheet, the sidebar, a compendium or a loot link onto the Loot tab. Items from a sheet move, everything else is copied.
 * **Hand out:** *Hand out* gives every claimed item to a character, following the rule in the settings, and moves the loot nobody wants into the party inventory. *Rest to the party inventory* does only the second part. You can also pick a character per item and give it directly.
 * **Coins:** *Split* shares the coins of the loot among the characters you pick. Coins can be added to the loot or the party fund, and the party fund can pay for things (an inn, a ferry, a bribe).
+* **Hand out from the party inventory:** the gift icon next to an item of the party inventory gives it to a character of your choice.
 * **Approvals:** requests that need your approval appear on top of the window and as a chat message only you see.
 * **Undo:** most log entries can be reversed with the arrow button. Items and coins go back where they came from, and the log records the undo.
 
@@ -27,15 +30,20 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 | Setting | What it does |
 | --- | --- |
 | Module language | Follow Foundry, German or English, for you |
+| Loot table | Claims and handing out of loot. Off: no Loot tab, nothing is collected after a fight, the GM collects by hand into the party inventory |
+| Party fund | Shared coins of the group. Off: coins stay with the characters |
+| Balance tab | Shows the Balance tab |
 | Who shares the loot | The system's party (Crucible and D&D 5e), otherwise all player characters, or always all player characters |
 | Taking from the party inventory | Free, or with the GM's approval. Putting things in is always free |
-| Party fund limit | Up to this amount players take coins without asking, more needs approval. 0 means always ask |
+| Party fund limit | Up to this amount players take coins without asking, more needs approval. 0 means always ask (only with the party fund) |
 | Gifts must be accepted | The receiving player accepts or declines a gift first |
-| How loot is handed out | Fair (strongest claim, then who received the least), roll (strongest claim, then the highest roll), or the GM decides |
-| Rest of a coin split | Into the party fund, or it stays in the loot |
-| Offer to collect after a fight | Ask the GM when a combat ends |
+| How loot is handed out | Fair (strongest claim, then who received the least), roll (strongest claim, then the highest roll), or the GM decides (only with the loot table) |
+| Rest of a coin split | Into the party fund, or it stays in the loot (only with the loot table and the party fund) |
+| Offer to collect after a fight | Ask the GM when a combat ends (only with the loot table) |
 | Chat messages | For everyone, only for the GM, or none |
 | Self test | Checks the party inventory, the log and the system support (GM) |
+
+Settings that belong to a switched off part are hidden in the settings dialog.
 
 ## Who can do what
 

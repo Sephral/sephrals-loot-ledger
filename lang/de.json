@@ -6,6 +6,7 @@
     "ActingAs": "Du handelst als",
     "Search": "Suchen",
     "Heavy": "Zu schwer für deinen Charakter",
+    "OpenSettings": "Einstellungen",
     "LANGUAGE": {
       "default": "Wie Foundry",
       "de": "Deutsch",
@@ -50,7 +51,8 @@
       "capacity": "trägt {value} von {max}",
       "origin": "von {name}, {date}",
       "contains": "enthält {list}",
-      "dropHint": "Zieh Gegenstände von deinem Charakterbogen hierher, um sie ins Gruppeninventar zu legen."
+      "dropHint": "Zieh Gegenstände von deinem Charakterbogen hierher, um sie ins Gruppeninventar zu legen.",
+      "handOut": "An einen Charakter geben"
     },
     "Pool": {
       "title": "Beute zum Verteilen",
@@ -70,7 +72,9 @@
         "fair": "Alle beanspruchte Beute verteilen: Unter den stärksten Ansprüchen bekommt sie, wer bisher am wenigsten erhalten hat, bei Gleichstand entscheidet ein Wurf. Was niemand will, kommt ins Gruppeninventar.",
         "roll": "Alle beanspruchte Beute verteilen: Unter den stärksten Ansprüchen gewinnt der höchste Wurf. Was niemand will, kommt ins Gruppeninventar.",
         "gm": "Du verteilst die Beute selbst. Hier kommt nur die Beute, die niemand will, ins Gruppeninventar."
-      }
+      },
+      "off": "Die Beuteverteilung ist abgeschaltet. Gib den Rest an Charaktere oder leg ihn ins Gruppeninventar.",
+      "allToStash": "Alles ins Gruppeninventar"
     },
     "Pending": {
       "title": "Offene Anfragen",
@@ -172,19 +176,23 @@
       "note": "Notiz",
       "splitTitle": "Münzen teilen",
       "splitHint": "Die Münzen gehen zu gleichen Teilen an die gewählten Charaktere. Was sich nicht teilen lässt, kommt in die Gruppenkasse.",
-      "split": "Teilen"
+      "split": "Teilen",
+      "splitHintPool": "Die Münzen gehen zu gleichen Teilen an die gewählten Charaktere. Was sich nicht teilen lässt, bleibt in der Beute."
     },
     "Collect": {
       "title": "Aus dem Kampf einsammeln",
       "hint": "Wähle, was die Besiegten zurücklassen. Es kommt in die Beute, und das Protokoll vermerkt, woher es stammt.",
-      "take": "In die Beute"
+      "take": "In die Beute",
+      "hintStash": "Wähle, was die Besiegten zurücklassen. Es kommt ins Gruppeninventar, und das Protokoll vermerkt, woher es stammt.",
+      "takeStash": "Ins Gruppeninventar"
     },
     "Notice": {
       "waitingApproval": "Deine Anfrage wartet auf die Spielleitung.",
       "offerSent": "Angebot an {name} geschickt.",
       "distributed": "{count} Gegenstände verteilt, {rest} ins Gruppeninventar gelegt.",
       "collected": "{count} Dinge in die Beute gelegt.",
-      "nothingToCollect": "Die Besiegten hinterlassen nichts."
+      "nothingToCollect": "Die Besiegten hinterlassen nichts.",
+      "collectedStash": "{count} Dinge ins Gruppeninventar gelegt."
     },
     "Error": {
       "noGM": "Keine Spielleitung online.",
@@ -208,7 +216,9 @@
       "nothingCollected": "Es wurde nichts eingesammelt.",
       "cannotUndo": "Dieser Eintrag lässt sich nicht mehr rückgängig machen.",
       "alreadyUndone": "Dieser Eintrag wurde schon rückgängig gemacht.",
-      "dropOwn": "Zieh hier Gegenstände deines eigenen Charakters hinein."
+      "dropOwn": "Zieh hier Gegenstände deines eigenen Charakters hinein.",
+      "lootOff": "Die Beuteverteilung ist abgeschaltet.",
+      "fundOff": "Die Gruppenkasse ist abgeschaltet."
     },
     "Block": {
       "cursed": "Verflucht und investiert: Nur die Spielleitung kann es abnehmen.",
@@ -218,6 +228,18 @@
       "uiLanguage": {
         "name": "Modulsprache",
         "hint": "Sprache des Beutebuchs für dich. „Wie Foundry“ nimmt die Sprache von Foundry."
+      },
+      "lootTable": {
+        "name": "Beuteverteilung",
+        "hint": "Spieler melden Anspruch auf Beute an (Brauche, Hätte gern, Passe) und die Spielleitung verteilt sie. Aus: das Beutebuch ist nur ein Gruppeninventar. Nach dem Kampf wird nichts eingesammelt, die Spielleitung sammelt von Hand ein und gibt Dinge aus dem Gruppeninventar an Charaktere."
+      },
+      "partyFund": {
+        "name": "Gruppenkasse",
+        "hint": "Gemeinsame Münzen der Gruppe. Aus: Münzen bleiben bei den Charakteren. Was schon in der Kasse liegt, lässt sich weiter entnehmen."
+      },
+      "balanceTab": {
+        "name": "Reiter Bilanz",
+        "hint": "Zeigt, was jeder Charakter von der Gruppe genommen und ihr gegeben hat."
       },
       "recipients": {
         "name": "Wer die Beute teilt",

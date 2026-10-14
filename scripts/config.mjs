@@ -22,6 +22,15 @@ export function setting(key) {
 }
 
 /**
+ * The parts of the ledger the world uses (world settings). A part that is switched off stays visible while it still
+ * holds something, so nothing gets lost.
+ * @returns {{loot: boolean, fund: boolean, balance: boolean}}
+ */
+export function parts() {
+  return {loot: !!setting("lootTable"), fund: !!setting("partyFund"), balance: !!setting("balanceTab")};
+}
+
+/**
  * Localize a key, with optional data.
  * @param {string} key
  * @param {object} [data]

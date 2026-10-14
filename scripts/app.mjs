@@ -1,10 +1,11 @@
 /**
  * The Loot Ledger window. Four tabs: the loot (claims and distribution), the stash with the party fund and the acting
  * character's own things, the log and the balance. Players and the GM see the same window; buttons a user may not use
- * are left out. Every button sends a request, nothing changes directly in this window.
+ * are left out. Every button sends a request, nothing changes directly in this window. The loot, the party fund and the
+ * balance can be switched off in the settings; the loot and the fund stay visible until they are empty.
  */
 
-import {TEMPLATES, flag, setting, t} from "./config.mjs";
+import {MODULE_ID, TEMPLATES, flag, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {openCollect} from "./collect.mjs";
 import {askCoins, askQuantity, askRecipient, askSplit, confirm} from "./dialogs.mjs";
@@ -75,6 +76,8 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       take: LootLedger.#onTake,
       deposit: LootLedger.#onDeposit,
       give: LootLedger.#onGive,
+      handOut: LootLedger.#onHandOut,
+      openSettings: LootLedger.#onOpenSettings,
       depositCoins: LootLedger.#onDepositCoins,
       withdrawCoins: LootLedger.#onWithdrawCoins,
       undo: LootLedger.#onUndo,
@@ -124,18 +127,42 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
   /* -------------------------------------------- */
 
   /** @override */
+  async _renderFrame(options) {
+    const frame = await super._renderFrame(options);
+    // A gear in the title bar opens the module's settings
+    const close = frame.querySelector(".window-header [data-action=close]");
+    if ( close ) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "header-control icon fa-solid fa-gear";
+      button.dataset.action = "openSettings";
+      button.dataset.tooltip = t("SLL.OpenSettings");
+      button.setAttribute("aria-label", t("SLL.OpenSettings"));
+      close.before(button);
+    }
+    return frame;
+  }
+
+  /* -------------------------------------------- */
+
+  /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const a = adapter();
     const isGM = game.user.isGM;
     const ledger = ledgerActor();
+    const on = parts();
     context.ready = !!ledger;
     context.isGM = isGM;
-    const hasLoot = areaItems("pool").length || storedCoins().pool;
+    const stored = storedCoins();
+    const hasLoot = areaItems("pool").length || stored.pool;
+    const visible = ["stash", (on.loot || hasLoot) && "pool", "log", on.balance && "balance"].filter(Boolean);
+    if ( !visible.includes(this.tab) ) this.tab = null;
     this.tab ??= hasLoot ? "pool" : "stash";
     context.tab = this.tab;
-    context.tabs = ["stash", "pool", "log", "balance"].map(id => ({id, label: t(`SLL.Tab.${id}`),
+    context.tabs = visible.map(id => ({id, label: t(`SLL.Tab.${id}`),
       active: id === this.tab, badge: (id === "pool") && hasLoot ? (areaItems("pool").length || "") : ""}));
+    context.lootOn = on.loot;
     context.noGM = !game.users.activeGM;
     if ( !ledger ) return context;
 
@@ -149,7 +176,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     const all = entries();
     const received = balance(all);
     const rule = setting("distribution");
-    const coins = storedCoins();
+    const coins = stored;
     const capacity = acting ? a.capacity(acting) : null;
 
     const itemRow = (item, area) => {
@@ -210,9 +237,13 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       return row;
     });
     context.stashValue = stashValue ? a.formatCoins(stashValue) : "";
-    context.hasUnclaimed = context.pool.some(r => !r.wanted);
+    // Without the loot table the GM moves everything that is left, coins into the fund
+    context.hasUnclaimed = on.loot ? context.pool.some(r => !r.wanted)
+      : (context.pool.length > 0) || (on.fund && (coins.pool > 0));
     context.fund = a.formatCoins(coins.fund);
     context.coinsAvailable = (a.id !== "generic") || !!a.hasCoins;
+    context.fundOn = on.fund;
+    context.showFund = context.coinsAvailable && (on.fund || (coins.fund > 0));
     if ( acting ) {
       context.mine = acting.items.filter(i => a.isTransferable(i) && !isContained(i))
         .sort((x, y) => x.name.localeCompare(y.name, game.i18n.lang))
@@ -477,6 +508,29 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     const choice = await askRecipient(t("SLL.Stash.give"), others, LootLedger.#quantity(itemId, acting));
     if ( !choice ) return;
     report(await request("give", {fromActorId: acting.id, itemId, quantity: choice.quantity, toActorId: choice.actorId}));
+  }
+
+  /** GM: hand an item of the party inventory to a character. @this {LootLedger} */
+  static async #onHandOut(event, target) {
+    const itemId = LootLedger.#itemId(target);
+    const a = adapter();
+    const members = [...new Set([...a.partyMembers(setting("recipients")),
+      ...game.actors.filter(x => a.isCharacter(x) && x.hasPlayerOwner)])];
+    const choice = await askRecipient(t("SLL.Stash.handOut"), members, LootLedger.#quantity(itemId));
+    if ( !choice ) return;
+    report(await request("withdraw", {actorId: choice.actorId, itemId, quantity: choice.quantity}));
+  }
+
+  /** Open Foundry's settings on the tab of this module. @this {LootLedger} */
+  static async #onOpenSettings() {
+    const sheet = game.settings.sheet;
+    await sheet.render({force: true});
+    try {
+      sheet.changeTab(MODULE_ID, "categories");
+    } catch(err) {
+      console.warn(`${MODULE_ID} | The settings have no tab for this module`, err);
+    }
+    sheet.bringToFront?.();
   }
 
   /** @this {LootLedger} */

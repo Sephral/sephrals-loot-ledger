@@ -6,6 +6,7 @@
     "ActingAs": "Acting as",
     "Search": "Search",
     "Heavy": "Too heavy for your character to carry",
+    "OpenSettings": "Settings",
     "LANGUAGE": {
       "default": "Follow Foundry",
       "de": "Deutsch",
@@ -50,7 +51,8 @@
       "capacity": "carries {value} of {max}",
       "origin": "from {name}, {date}",
       "contains": "contains {list}",
-      "dropHint": "Drop items from your character sheet here to put them into the party inventory."
+      "dropHint": "Drop items from your character sheet here to put them into the party inventory.",
+      "handOut": "Hand out to a character"
     },
     "Pool": {
       "title": "Loot to share",
@@ -70,7 +72,9 @@
         "fair": "Hand out all claimed loot: among the strongest claims the character who received the least so far gets it, a roll breaks ties. Loot nobody wants goes into the party inventory.",
         "roll": "Hand out all claimed loot: among the strongest claims the highest roll wins. Loot nobody wants goes into the party inventory.",
         "gm": "You hand out the loot yourself. This only moves the loot nobody wants into the party inventory."
-      }
+      },
+      "off": "The loot table is switched off. Hand out what is left or move it into the party inventory.",
+      "allToStash": "All into the party inventory"
     },
     "Pending": {
       "title": "Open requests",
@@ -172,19 +176,23 @@
       "note": "Note",
       "splitTitle": "Split the coins",
       "splitHint": "The coins go in equal shares to the characters you pick. What cannot be shared goes into the party fund.",
-      "split": "Split"
+      "split": "Split",
+      "splitHintPool": "The coins go in equal shares to the characters you pick. What cannot be split stays in the loot."
     },
     "Collect": {
       "title": "Collect from the fight",
       "hint": "Pick what the defeated leave behind. It moves into the loot, and the log notes where it came from.",
-      "take": "Into the loot"
+      "take": "Into the loot",
+      "hintStash": "Pick what the defeated leave behind. It goes into the party inventory, and the log notes where it came from.",
+      "takeStash": "Into the party inventory"
     },
     "Notice": {
       "waitingApproval": "Your request waits for the GM.",
       "offerSent": "Offer sent to {name}.",
       "distributed": "{count} items handed out, {rest} moved to the party inventory.",
       "collected": "{count} things moved into the loot.",
-      "nothingToCollect": "The defeated have nothing to leave behind."
+      "nothingToCollect": "The defeated have nothing to leave behind.",
+      "collectedStash": "{count} things put into the party inventory."
     },
     "Error": {
       "noGM": "No GM is online.",
@@ -208,7 +216,9 @@
       "nothingCollected": "Nothing was collected.",
       "cannotUndo": "This entry cannot be undone anymore.",
       "alreadyUndone": "This entry was already undone.",
-      "dropOwn": "Drop items from your own character here."
+      "dropOwn": "Drop items from your own character here.",
+      "lootOff": "The loot table is switched off.",
+      "fundOff": "The party fund is switched off."
     },
     "Block": {
       "cursed": "Cursed and invested: only the GM can take it off.",
@@ -218,6 +228,18 @@
       "uiLanguage": {
         "name": "Module language",
         "hint": "Language of the Loot Ledger for you. Follow Foundry uses Foundry's language."
+      },
+      "lootTable": {
+        "name": "Loot table",
+        "hint": "Players claim loot (need, want, pass) and the GM hands it out. Off: the Loot Ledger is just a party inventory. Nothing is collected after a fight, the GM collects by hand and hands things out from the party inventory."
+      },
+      "partyFund": {
+        "name": "Party fund",
+        "hint": "Shared coins of the group. Off: coins stay with the characters. Coins already in the fund can still be taken out."
+      },
+      "balanceTab": {
+        "name": "Balance tab",
+        "hint": "Shows what each character took from the group and put in."
       },
       "recipients": {
         "name": "Who shares the loot",

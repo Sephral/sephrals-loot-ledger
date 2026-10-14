@@ -1,10 +1,11 @@
 /**
  * Everything that changes the loot, the stash, the party fund or a character runs here, on the client of the active
  * GM, one request at a time. Each action checks who asked: players may only act for characters they own, and only the
- * GM manages the loot. Every change ends up in the log.
+ * GM manages the loot. Every change ends up in the log. Parts the world switched off take nothing new in, but what they
+ * still hold can be moved out.
  */
 
-import {MODULE_ID, flag, setting, t} from "./config.mjs";
+import {MODULE_ID, flag, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {splitCoins} from "./coins.mjs";
 import {append, entries} from "./ledger.mjs";
@@ -260,6 +261,7 @@ const ACTIONS = {
 
   /** A character claims an item of the loot: need, want, pass or nothing. */
   async claim({itemId, actorId, claim}, user) {
+    if ( !parts().loot ) return fail("SLL.Error.lootOff");
     const item = ledgerItem(itemId, "pool");
     const actor = actorById(actorId);
     if ( !isCharacter(actor) || !owns(user, actor) ) return fail("SLL.Error.notYours");
@@ -285,6 +287,7 @@ const ACTIONS = {
   /** GM: hand out every claimed item of the loot by the distribution rule. */
   async distribute({rule}, user) {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    if ( !parts().loot ) return fail("SLL.Error.lootOff");
     rule ??= setting("distribution");
     const received = balance(entries());
     const lines = [];
@@ -322,10 +325,17 @@ const ACTIONS = {
     return ok({notice: "SLL.Notice.distributed", data: {count: log.length, rest: rest.length}});
   },
 
-  /** GM: move the loot nobody claimed into the party inventory. */
+  /** GM: move the loot nobody claimed into the party inventory. Without the loot table: all of it, coins into the fund. */
   async unclaimedToStash(payload, user) {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
-    const rest = await moveUnclaimed(user);
+    const {loot, fund} = parts();
+    const rest = await moveUnclaimed(user, {all: !loot});
+    const coins = storedCoins();
+    if ( !loot && fund && coins.pool ) {
+      await applyOperations([{action: "update", documentName: "Actor",
+        updates: [coinsUpdate({pool: 0, fund: coins.fund + coins.pool})]}]);
+      rest.push({...by(user), kind: "move", from: place("pool"), to: place("fund"), coins: coins.pool});
+    }
     if ( !rest.length ) return fail("SLL.Error.nothingUnclaimed");
     await record(rest);
     return ok();
@@ -341,7 +351,7 @@ const ACTIONS = {
     const {share, remainder} = splitCoins(coins.pool, actors.length);
     if ( !share ) return fail("SLL.Error.tooFewCoins");
     const a = adapter();
-    const toFund = (setting("remainder") === "fund") ? remainder : 0;
+    const toFund = ((setting("remainder") === "fund") && parts().fund) ? remainder : 0;
     const updates = actors.map(actor => ({_id: actor.id, ...a.receiveUpdate(actor, share)}));
     updates.push(coinsUpdate({pool: coins.pool - (share * actors.length) - toFund, fund: coins.fund + toFund}));
     await applyOperations([{action: "update", documentName: "Actor", updates}]);
@@ -358,6 +368,9 @@ const ACTIONS = {
     const base = Math.max(Math.floor(Number(amount) || 0), 0);
     if ( !base ) return fail("SLL.Error.noAmount");
     const key = (area === "fund") ? "fund" : "pool";
+    if ( (key === "fund") && !parts().fund ) return fail("SLL.Error.fundOff");
+    if ( (key === "pool") && !parts().loot ) return fail("SLL.Error.lootOff");
+    if ( (adapter().id === "generic") && !adapter().hasCoins ) return fail("SLL.Error.noCoins");
     const coins = storedCoins();
     await applyOperations([{action: "update", documentName: "Actor", updates: [coinsUpdate({[key]: coins[key] + base})]}]);
     await record([{...by(user), kind: "add", from: place("outside"), to: place(key), coins: base, note: note ?? ""}]);
@@ -376,10 +389,13 @@ const ACTIONS = {
     return ok();
   },
 
-  /** GM: add items to the loot or the stash, from a sheet (moved) or from the sidebar, a compendium or a link (copied). */
+  /**
+   * GM: add items to the loot or the stash, from a sheet (moved) or from the sidebar, a compendium or a link (copied).
+   * Without the loot table everything goes into the stash.
+   */
   async addItems({area, uuids, data}, user) {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
-    const key = (area === "stash") ? "stash" : "pool";
+    const key = ((area === "stash") || !parts().loot) ? "stash" : "pool";
     const target = ledgerActor();
     const log = [];
     for ( const uuid of (uuids ?? []) ) {
@@ -405,6 +421,7 @@ const ACTIONS = {
   /** GM: move an item between the loot and the stash. */
   async moveArea({itemId, to, quantity}, user) {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    if ( (to === "pool") && !parts().loot ) return fail("SLL.Error.lootOff");
     const from = (to === "pool") ? "stash" : "pool";
     const item = ledgerItem(itemId, from);
     const amount = amountOf(item, quantity);
@@ -454,6 +471,7 @@ const ACTIONS = {
 
   /** A character pays coins into the party fund. */
   async depositCoins({actorId, coins}, user) {
+    if ( !parts().fund ) return fail("SLL.Error.fundOff");
     const actor = actorById(actorId);
     if ( !isCharacter(actor) || !owns(user, actor) ) return fail("SLL.Error.notYours");
     const a = adapter();
@@ -556,9 +574,15 @@ const ACTIONS = {
     return result;
   },
 
-  /** GM: take the belongings of defeated combatants into the loot. */
+  /**
+   * GM: take the belongings of defeated combatants into the loot. Without the loot table the items go into the stash and
+   * the coins into the party fund, or stay where they are if that is switched off too.
+   */
   async collect({sources}, user) {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const {loot, fund} = parts();
+    const area = loot ? "pool" : "stash";
+    const coinArea = loot ? "pool" : (fund ? "fund" : null);
     const a = adapter();
     const target = ledgerActor();
     const log = [];
@@ -571,24 +595,25 @@ const ACTIONS = {
         if ( !item || !a.isTransferable(item) ) continue;
         const amount = amountOf(item, quantity);
         const info = itemInfo(item, amount);
-        const {itemId} = await moveItem(item, amount, target, "pool");
-        log.push({...by(user), kind: "add", from: place(actor), to: place("pool"), item: info, ref: {itemId}});
+        const {itemId} = await moveItem(item, amount, target, area);
+        log.push({...by(user), kind: "add", from: place(actor), to: place(area), item: info, ref: {itemId}});
       }
       // Coins: all of them, coin by coin where the system keeps them separately
-      const base = source.coins ? a.coinsBase(actor) : 0;
+      const base = (source.coins && coinArea) ? a.coinsBase(actor) : 0;
       if ( base ) {
         await actor.update(a.payUpdate(actor, a.separateCoins ? a.purse(actor) : base));
         coinsIn += base;
-        log.push({...by(user), kind: "add", from: place(actor), to: place("pool"), coins: base});
+        log.push({...by(user), kind: "add", from: place(actor), to: place(coinArea), coins: base});
       }
     }
     if ( coinsIn ) {
       const coins = storedCoins();
-      await applyOperations([{action: "update", documentName: "Actor", updates: [coinsUpdate({pool: coins.pool + coinsIn})]}]);
+      await applyOperations([{action: "update", documentName: "Actor",
+        updates: [coinsUpdate({[coinArea]: coins[coinArea] + coinsIn})]}]);
     }
     if ( !log.length ) return fail("SLL.Error.nothingCollected");
     await record(log);
-    return ok({notice: "SLL.Notice.collected", data: {count: log.length}});
+    return ok({notice: loot ? "SLL.Notice.collected" : "SLL.Notice.collectedStash", data: {count: log.length}});
   },
 
   /** GM: reverse a log entry. */
@@ -610,18 +635,20 @@ const ACTIONS = {
 /**
  * Move every item of the loot that nobody claimed (no claims, or everybody passed) into the party inventory.
  * @param {User} user
+ * @param {object} [options]
+ * @param {boolean} [options.all]   Move the claimed items as well
  * @returns {Promise<object[]>}   Log entries
  */
-async function moveUnclaimed(user) {
+async function moveUnclaimed(user, {all=false}={}) {
   const log = [];
   for ( const item of ledgerActor().items.filter(i => (areaOf(i) === "pool") && !isContained(i)) ) {
     const claims = flag(item, "claims") ?? {};
-    if ( Object.values(claims).some(c => (c === "need") || (c === "want")) ) continue;
+    if ( !all && Object.values(claims).some(c => (c === "need") || (c === "want")) ) continue;
     const amount = adapter().quantity(item) || 1;
     const info = itemInfo(item, amount);
     const {itemId} = await moveItem(item, amount, ledgerActor(), "stash");
     log.push({...by(user), kind: "move", from: place("pool"), to: place("stash"), item: info, ref: {itemId},
-      note: t("SLL.Reason.unclaimed")});
+      note: all ? "" : t("SLL.Reason.unclaimed")});
   }
   return log;
 }

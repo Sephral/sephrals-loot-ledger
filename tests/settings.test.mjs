@@ -15,7 +15,7 @@ globalThis.game = {system: {id: "crucible"}};
 
 const {MODULE_ID} = await import("../scripts/config.mjs");
 const {FOLLOW_FOUNDRY} = await import("../scripts/language.mjs");
-const {SETTINGS, registerSettings} = await import("../scripts/settings.mjs");
+const {SETTINGS, hiddenSettings, registerSettings} = await import("../scripts/settings.mjs");
 
 /**
  * Register the settings with a stub of game.settings which records every call.
@@ -65,6 +65,26 @@ test("the path settings only show in systems without an own adapter", () => {
   for ( const key of generic ) {
     assert.equal(supported.get(key).config, false, key);
     assert.equal(other.get(key).config, true, key);
+  }
+});
+
+test("loot table, party fund and balance are on by default and come right after the language", () => {
+  const {settings} = register("dnd5e");
+  assert.deepEqual([...settings.keys()].slice(1, 4), ["lootTable", "partyFund", "balanceTab"]);
+  for ( const key of ["lootTable", "partyFund", "balanceTab"] ) {
+    assert.equal(settings.get(key).type, Boolean, key);
+    assert.equal(settings.get(key).default, true, key);
+    assert.equal(settings.get(key).scope, "world", key);
+  }
+});
+
+test("settings of a switched off part hide in the settings dialog", () => {
+  assert.deepEqual(hiddenSettings({lootTable: true, partyFund: true}), []);
+  assert.deepEqual(hiddenSettings({lootTable: false, partyFund: true}).sort(),
+    ["collectPrompt", "distribution", "remainder"]);
+  assert.deepEqual(hiddenSettings({lootTable: true, partyFund: false}).sort(), ["fundLimit", "remainder"]);
+  for ( const key of Object.values(SETTINGS).flatMap(def => def.requires ?? []) ) {
+    assert.equal(SETTINGS[key]?.type, Boolean, key);
   }
 });
 

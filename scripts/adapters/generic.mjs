@@ -11,11 +11,14 @@ import {BaseAdapter} from "./base.mjs";
  * Read a generic setting, safely before the settings exist.
  * @param {string} key
  * @param {*} fallback
+ * @param {object} [options]
+ * @param {boolean} [options.allowEmpty]   An empty value means "none" instead of the fallback
  * @returns {*}
  */
-function option(key, fallback) {
+function option(key, fallback, {allowEmpty=false}={}) {
   try {
     const value = game.settings.get(MODULE_ID, key);
+    if ( (value === "") && allowEmpty ) return "";
     return ((value === undefined) || (value === null) || (value === "")) ? fallback : value;
   } catch {
     return fallback;
@@ -38,12 +41,12 @@ export class GenericAdapter extends BaseAdapter {
 
   /** Where an item's price is stored (a number in coins), or "" for none. */
   get pricePath() {
-    return option("genericPrice", "system.price");
+    return option("genericPrice", "system.price", {allowEmpty: true});
   }
 
   /** Where an actor's coins are stored (a number), or "" for none. */
   get currencyPath() {
-    return option("genericCurrency", "");
+    return option("genericCurrency", "", {allowEmpty: true});
   }
 
   /** Are coin features available? */

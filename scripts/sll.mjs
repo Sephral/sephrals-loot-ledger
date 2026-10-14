@@ -7,7 +7,7 @@ import {applyModuleLanguage} from "./language.mjs";
 import {entries, verify} from "./ledger.mjs";
 import {noticeNewVersions, runSelfTest} from "./selftest.mjs";
 import {handleRequest, rememberLedgerItems, watchLedgerItems} from "./service.mjs";
-import {registerSettings} from "./settings.mjs";
+import {onRenderSettingsConfig, registerSettings} from "./settings.mjs";
 import {ensureStorage, isLedgerActor, ledgerActor} from "./storage.mjs";
 import {registerTransport, report, request} from "./transport.mjs";
 
@@ -23,6 +23,7 @@ Hooks.once("init", () => {
   Hooks.on("renderChatMessageHTML", onRenderChatMessage);
   Hooks.on("deleteCombat", onDeleteCombat);
   Hooks.on("dropActorSheetData", onDropActorSheetData);
+  Hooks.on("renderSettingsConfig", onRenderSettingsConfig);
 
   // Changes made past the module and redraws of the window
   for ( const kind of ["create", "update", "delete"] ) {

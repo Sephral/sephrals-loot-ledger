@@ -1,9 +1,10 @@
 /**
  * Collecting loot from a fight: the GM picks what the defeated combatants leave behind, and it moves into the loot.
- * When a combat ends, the GM's client offers this right away (world setting).
+ * When a combat ends, the GM's client offers this right away (world setting). Without the loot table nothing is offered
+ * after a fight; the GM collects by hand, straight into the party inventory.
  */
 
-import {esc, setting, t} from "./config.mjs";
+import {esc, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {report, request} from "./transport.mjs";
 import {isLedgerActor} from "./storage.mjs";
@@ -41,7 +42,7 @@ export function onDeleteCombat(combat) {
   if ( !game.user.isActiveGM ) return;
   const uuids = defeatedOf(combat);
   if ( uuids.length ) lastDefeated = uuids;
-  if ( !uuids.length || !setting("collectPrompt") ) return;
+  if ( !uuids.length || !parts().loot || !setting("collectPrompt") ) return;
   const any = uuids.some(uuid => {
     const actor = fromUuidSync(uuid);
     if ( !actor ) return false;
@@ -61,9 +62,12 @@ export async function openCollect(uuids) {
   uuids ??= defeatedOf(game.combat);
   if ( !uuids.length ) uuids = lastDefeated;
   const a = adapter();
+  const {loot, fund} = parts();
+  const withCoins = loot || fund;
   const actors = uuids.map(uuid => fromUuidSync(uuid)).filter(actor => actor instanceof Actor);
   const sections = actors.map((actor, index) => {
-    const {items, coins} = belongings(actor);
+    const {items, coins: purse} = belongings(actor);
+    const coins = withCoins ? purse : 0;
     if ( !items.length && !coins ) return "";
     const rows = items.map(item => {
       const qty = a.quantity(item);
@@ -81,9 +85,9 @@ export async function openCollect(uuids) {
   const result = await foundry.applications.api.DialogV2.prompt({
     window: {title: t("SLL.Collect.title"), icon: "fa-solid fa-sack"},
     position: {width: 480},
-    content: `<p>${esc(t("SLL.Collect.hint"))}</p><div class="sll-collect-list">${sections.join("")}</div>`,
+    content: `<p>${esc(t(loot ? "SLL.Collect.hint" : "SLL.Collect.hintStash"))}</p><div class="sll-collect-list">${sections.join("")}</div>`,
     rejectClose: false,
-    ok: {label: t("SLL.Collect.take"), callback: (event, button) => {
+    ok: {label: t(loot ? "SLL.Collect.take" : "SLL.Collect.takeStash"), callback: (event, button) => {
       const FDE = foundry.applications.ux?.FormDataExtended ?? globalThis.FormDataExtended;
       return foundry.utils.expandObject(new FDE(button.form).object);
     }}

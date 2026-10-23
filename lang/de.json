@@ -179,6 +179,11 @@
       "split": "Teilen",
       "splitHintPool": "Die Münzen gehen zu gleichen Teilen an die gewählten Charaktere. Was sich nicht teilen lässt, bleibt in der Beute."
     },
+    "CoinValues": {
+      "intro": "Wert einer Münze in {coin}, der kleinsten Münze. Münzen, die schon in der Beute und in der Gruppenkasse liegen, behalten ihren Wert in {coin}.",
+      "system": "Werte des Systems",
+      "invalid": "Jede Münze braucht eine ganze Zahl ab 1."
+    },
     "Collect": {
       "title": "Aus dem Kampf einsammeln",
       "hint": "Wähle, was die Besiegten zurücklassen. Es kommt in die Beute, und das Protokoll vermerkt, woher es stammt.",
@@ -304,6 +309,11 @@
       "genericCoinName": {
         "name": "Name der Münze",
         "hint": "Für Systeme ohne eingebaute Unterstützung, das Kürzel hinter Beträgen."
+      },
+      "coinValues": {
+        "name": "Münzwerte",
+        "label": "Münzwerte festlegen",
+        "hint": "Was jede Münze wert ist, für Runden mit eigenen Wechselkursen. Unveränderte Münzen nutzen die Kurse des Systems."
       }
     },
     "SELFTEST": {

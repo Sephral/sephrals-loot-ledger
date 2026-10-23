@@ -42,6 +42,7 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 | Offer to collect after a fight | Ask the GM when a combat ends (only with the loot table) |
 | Chat messages | For everyone, only for the GM, or none |
 | Self test | Checks the party inventory, the log and the system support (GM) |
+| Coin values | D&D 5e only: what each coin is worth in copper, for tables with their own exchange rates (GM) |
 
 Settings that belong to a switched off part are hidden in the settings dialog.
 
@@ -59,7 +60,7 @@ The log lives in the journal *Loot log*, one page per day, readable even without
 ## Game systems
 
 * **Crucible:** coins are the hero's coins. Equipped and invested gear is taken off when it changes hands. Equipped gear cannot be handed over during a fight (unequipping costs action points there), and cursed invested items only by the GM. Natural weapons and armor stay with their creature, and adversary gear stops scaling with the owner's level once a hero owns it.
-* **D&D 5e:** coins stay separate (pp, gp, ep, sp, cp). Shares of a split are paid in gold, silver and copper. Equipped and attuned items are taken off, also inside containers, and containers move with their contents. The window lists what a container holds, and its value includes the contents. Unidentified items keep their unidentified name in the window and the log.
+* **D&D 5e:** coins stay separate (pp, gp, ep, sp, cp). Shares of a split are paid in gold, silver and copper. The module exchanges coins at the rates of the system. Tables with their own rates, for example 100 copper to a silver and 100 silver to a gold, set them under *Coin values*. Only the values that differ from the system are stored, and coins already in the loot or the party fund keep their worth in copper. Equipped and attuned items are taken off, also inside containers, and containers move with their contents. The window lists what a container holds, and its value includes the contents. Unidentified items keep their unidentified name in the window and the log.
 * **Other systems:** the module works with any system whose items have a quantity. In the module settings the GM names the actor type of player characters, where items keep their quantity and price and where characters keep their coins (one number). Without a coin path the coin features stay off. The self test tells whether the paths fit.
 
 Other modules can add support for more systems through the module's API.

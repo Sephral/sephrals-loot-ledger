@@ -21,6 +21,39 @@ export function sortDenominations(denominations) {
 }
 
 /**
+ * The coins with the worth the GM set for them. Coins without a valid value (a whole number of at least 1) keep the
+ * worth the system gives them.
+ * @param {Denomination[]} denominations
+ * @param {Record<string, number>} [custom]
+ * @returns {Denomination[]}
+ */
+export function applyCoinValues(denominations, custom={}) {
+  return denominations.map(d => {
+    const value = Number(custom?.[d.key]);
+    return (Number.isInteger(value) && (value >= 1)) ? {...d, value} : d;
+  });
+}
+
+/**
+ * The coin values typed into the settings dialog, as far as they differ from the system. The smallest coin is the base
+ * unit and always worth 1, so amounts the module keeps in base units stay the same.
+ * @param {Record<string, *>} input           Values by coin key
+ * @param {Denomination[]} denominations      The coins as the system defines them
+ * @returns {Record<string, number>|null}     null when a value is not a whole number of at least 1
+ */
+export function coinValueChanges(input, denominations) {
+  const smallest = sortDenominations(denominations).at(-1);
+  const changes = {};
+  for ( const d of denominations ) {
+    if ( d.key === smallest?.key ) continue;
+    const value = Number(input?.[d.key]);
+    if ( !Number.isInteger(value) || (value < 1) ) return null;
+    if ( value !== d.value ) changes[d.key] = value;
+  }
+  return changes;
+}
+
+/**
  * Split an amount evenly. Nobody gets a fraction, and the remainder is reported instead of being dropped.
  * @param {number} total
  * @param {number} count

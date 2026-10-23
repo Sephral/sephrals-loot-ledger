@@ -3,9 +3,9 @@
  * 14 both offer.
  */
 
-import {esc, parts, setting, t} from "./config.mjs";
+import {MODULE_ID, esc, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
-import {parseCoins} from "./coins.mjs";
+import {coinValueChanges, parseCoins, sortDenominations} from "./coins.mjs";
 
 const {DialogV2} = foundry.applications.api;
 
@@ -106,6 +106,39 @@ export async function askCoins(title, {byCoin=false, note=false}={}) {
     return null;
   }
   return {coins: base, note: result.note ?? ""};
+}
+
+/**
+ * GM: set the worth of each coin, for tables with their own exchange rates. Only the values that differ from the system
+ * are stored, so the other coins keep following the system.
+ * @returns {Promise<Record<string, number>|null>}   The stored values, or null when nothing changed
+ */
+export async function editCoinValues() {
+  const a = adapter();
+  const system = sortDenominations(a.systemDenominations());
+  const current = new Map(a.denominations().map(d => [d.key, d.value]));
+  const smallest = system.at(-1);
+  if ( !smallest ) return null;
+  const rows = system.map(d => `<div class="form-group"><label>1 ${esc(d.abbr)} =</label><div class="form-fields">`
+    + `<input type="number" name="coin.${esc(d.key)}" value="${current.get(d.key) ?? d.value}" min="1" step="1"`
+    + `${d.key === smallest.key ? " disabled" : ""}><span>${esc(smallest.abbr)}</span></div></div>`).join("");
+  const result = await DialogV2.wait({
+    window: {title: t("SLL.SETTINGS.coinValues.name")},
+    content: `<p>${esc(t("SLL.CoinValues.intro", {coin: smallest.abbr}))}</p>${rows}`,
+    rejectClose: false,
+    buttons: [
+      {action: "save", label: t("SLL.Dialog.ok"), default: true, callback: (event, button) => formData(button).coin ?? {}},
+      {action: "system", label: t("SLL.CoinValues.system"), callback: () => "system"}
+    ]
+  });
+  if ( !result ) return null;
+  const values = (result === "system") ? {} : coinValueChanges(result, system);
+  if ( !values ) {
+    ui.notifications.warn(t("SLL.CoinValues.invalid"));
+    return null;
+  }
+  await game.settings.set(MODULE_ID, "coinValues", values);
+  return values;
 }
 
 /**

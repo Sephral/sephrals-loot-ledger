@@ -5,6 +5,8 @@
  * forgets the contents), and the place in a container.
  */
 
+import {MODULE_ID} from "../config.mjs";
+import {applyCoinValues} from "../coins.mjs";
 import {BaseAdapter, sameData, stackCompare} from "./base.mjs";
 
 /** The coins payouts are made in; platinum and electrum stay with those who already have them. */
@@ -17,6 +19,9 @@ export class Dnd5eAdapter extends BaseAdapter {
   characterTypes = ["character"];
 
   separateCoins = true;
+
+  /** Tables with their own exchange rates set the worth of each coin in the module settings. */
+  coinValuesConfigurable = true;
 
   /** @override */
   stashType() {
@@ -116,6 +121,14 @@ export class Dnd5eAdapter extends BaseAdapter {
 
   /** @override */
   denominations() {
+    return applyCoinValues(this.systemDenominations(), customCoinValues());
+  }
+
+  /**
+   * The coins with the exchange rates of the system (CONFIG.DND5E.currencies), worth in the smallest coin.
+   * @returns {import("../coins.mjs").Denomination[]}
+   */
+  systemDenominations() {
     const config = CONFIG.DND5E?.currencies ?? {};
     const max = Math.max(...Object.values(config).map(c => Number(c.conversion) || 0), 1);
     return Object.entries(config).map(([key, c]) => ({key, value: Math.round(max / (Number(c.conversion) || 1)),
@@ -172,6 +185,18 @@ export class Dnd5eAdapter extends BaseAdapter {
     if ( typeof CONFIG.Item.documentClass?.createWithContents !== "function" ) problems.push("SLL.SELFTEST.Containers");
     if ( !(game.documentTypes?.Actor ?? []).includes("group") ) problems.push("SLL.SELFTEST.StashType");
     return problems;
+  }
+}
+
+/**
+ * The coin values the GM set, safely before the settings exist.
+ * @returns {Record<string, number>}
+ */
+function customCoinValues() {
+  try {
+    return game.settings.get(MODULE_ID, "coinValues") ?? {};
+  } catch {
+    return {};
   }
 }
 

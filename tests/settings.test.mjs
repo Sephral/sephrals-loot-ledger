@@ -92,3 +92,13 @@ test("the self test is a GM menu", () => {
   const {menus} = register("crucible");
   assert.equal(menus.get("selfTest").restricted, true);
 });
+
+test("only D&D 5e gets the coin values menu, the values are a hidden world setting", () => {
+  const dnd5e = register("dnd5e");
+  assert.equal(dnd5e.menus.get("coinValuesMenu").restricted, true);
+  assert.equal(dnd5e.menus.get("coinValuesMenu").name, "SLL.SETTINGS.coinValues.name");
+  assert.equal(dnd5e.settings.get("coinValues").config, false);
+  assert.equal(dnd5e.settings.get("coinValues").scope, "world");
+  assert.deepEqual(dnd5e.settings.get("coinValues").default, {});
+  for ( const system of ["crucible", "pf2e"] ) assert.equal(register(system).menus.has("coinValuesMenu"), false, system);
+});

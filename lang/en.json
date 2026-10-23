@@ -179,6 +179,11 @@
       "split": "Split",
       "splitHintPool": "The coins go in equal shares to the characters you pick. What cannot be split stays in the loot."
     },
+    "CoinValues": {
+      "intro": "Worth of one coin in {coin}, the smallest coin. Coins already in the loot and the party fund keep their worth in {coin}.",
+      "system": "System values",
+      "invalid": "Every coin needs a whole number of at least 1."
+    },
     "Collect": {
       "title": "Collect from the fight",
       "hint": "Pick what the defeated leave behind. It moves into the loot, and the log notes where it came from.",
@@ -304,6 +309,11 @@
       "genericCoinName": {
         "name": "Name of the coin",
         "hint": "For systems without built in support, the short name shown after amounts."
+      },
+      "coinValues": {
+        "name": "Coin values",
+        "label": "Set coin values",
+        "hint": "What each coin is worth, for tables with their own exchange rates. Coins you leave unchanged use the rates of the system."
       }
     },
     "SELFTEST": {

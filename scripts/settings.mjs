@@ -5,8 +5,9 @@
  */
 
 import {MODULE_ID} from "./config.mjs";
-import {hasAdapter} from "./adapters/index.mjs";
+import {adapter, hasAdapter} from "./adapters/index.mjs";
 import {refreshLedger} from "./app.mjs";
+import {editCoinValues} from "./dialogs.mjs";
 import {FOLLOW_FOUNDRY, applyModuleLanguage} from "./language.mjs";
 import {runSelfTest} from "./selftest.mjs";
 
@@ -116,6 +117,15 @@ class LedgerSelfTestMenu extends foundry.applications.api.ApplicationV2 {
   }
 }
 
+/** The menu button which opens the coin values dialog (D&D 5e). */
+class LedgerCoinValuesMenu extends foundry.applications.api.ApplicationV2 {
+  /** @override */
+  async render() {
+    if ( game.user.isGM ) await editCoinValues();
+    return this;
+  }
+}
+
 /* -------------------------------------------- */
 
 /**
@@ -142,6 +152,10 @@ export function registerSettings() {
   game.settings.register(MODULE_ID, "pending", {scope: "world", config: false, type: Array, default: [],
     onChange: redraw});
 
+  // Worth of each coin for tables with their own exchange rates, only the values that differ from the system
+  game.settings.register(MODULE_ID, "coinValues", {scope: "world", config: false, type: Object, default: {},
+    onChange: redraw});
+
   // The newer Foundry and system versions the GM was already told about
   game.settings.register(MODULE_ID, "acknowledgedVersions", {scope: "client", config: false, type: String, default: ""});
 
@@ -151,6 +165,15 @@ export function registerSettings() {
     hint: "SLL.SELFTEST.Hint",
     icon: "fa-solid fa-stethoscope",
     type: LedgerSelfTestMenu,
+    restricted: true
+  });
+
+  if ( adapter().coinValuesConfigurable ) game.settings.registerMenu(MODULE_ID, "coinValuesMenu", {
+    name: "SLL.SETTINGS.coinValues.name",
+    label: "SLL.SETTINGS.coinValues.label",
+    hint: "SLL.SETTINGS.coinValues.hint",
+    icon: "fa-solid fa-coins",
+    type: LedgerCoinValuesMenu,
     restricted: true
   });
 }

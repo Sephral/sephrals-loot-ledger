@@ -2,6 +2,7 @@
 
 **The dragon is dead and the hoard lies open. Who takes the ring, who carries the rope, and where did the healing potions go?** Loot Ledger gives your group one shared party inventory, a fair way to hand out loot and a log everyone can read, so nothing disappears quietly.
 
+[![Foundry VTT package](https://img.shields.io/badge/Foundry%20VTT-Package%20page-fe6a1f?logo=foundryvirtualtabletop&logoColor=white)](https://foundryvtt.com/packages/sephrals-loot-ledger)
 [![Join Discord](https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?logo=discord&logoColor=white)](https://discord.gg/7BjCgDYaBP)
 [![More modules by Sephral](https://img.shields.io/badge/GitHub-More%20modules%20by%20Sephral-181717?logo=github&logoColor=white)](https://github.com/Sephral)
 
@@ -32,7 +33,7 @@ A GM has to be online for anything to change hands. Players can still look at ev
 
 ## Install
 
-Use the manifest URL `https://github.com/Sephral/sephrals-loot-ledger/releases/latest/download/module.json` in Foundry's module installer.
+Search for **Loot Ledger** in Foundry's module browser or open the [package page](https://foundryvtt.com/packages/sephrals-loot-ledger).
 
 Foundry VTT 13 and 14 · built in support for Crucible and D&D 5e, other systems through a few settings · English and German
 

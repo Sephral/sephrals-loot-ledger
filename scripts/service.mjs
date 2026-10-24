@@ -13,9 +13,39 @@ import {applyOperations, isBusy} from "./ops.mjs";
 import {balance, pickWinner} from "./rules.mjs";
 import {areaOf, isContained, isLedgerActor, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
 import {postApproval, postEntries, postOffer, postRolls, resolveCard} from "./chat.mjs";
+import {countFeature} from "./usage.mjs";
 
 /** Requests run one after another. */
 let queue = Promise.resolve();
+
+/**
+ * Usage counters by action, counted once per successful request. Answers to open requests and the module's own log
+ * entries count nothing.
+ */
+const FEATURES = {
+  claim: "lootClaim",
+  distribute: "lootDistribute",
+  split: "coinSplit",
+  deposit: "stashTransfer",
+  withdraw: "stashTransfer",
+  give: "itemGive",
+  spend: "fundCoins",
+  depositCoins: "fundCoins",
+  withdrawCoins: "fundCoins",
+  collect: "combatCollect",
+  undo: "logUndo"
+};
+
+/**
+ * The usage counter of a request, if it has one.
+ * @param {string} action
+ * @param {object} payload
+ * @returns {string|null}
+ */
+function featureOf(action, payload) {
+  if ( action === "addCoins" ) return (payload.area === "fund") ? "fundCoins" : null;
+  return FEATURES[action] ?? null;
+}
 
 /**
  * Handle a request (active GM only).
@@ -30,7 +60,10 @@ export function handleRequest(action, payload, user) {
     if ( !fn ) return fail("SLL.Error.unknownAction");
     if ( !ledgerActor() ) return fail("SLL.Error.noStorage");
     try {
-      return await fn(payload ?? {}, user);
+      const result = await fn(payload ?? {}, user);
+      const feature = result?.ok ? featureOf(action, payload ?? {}) : null;
+      if ( feature ) countFeature(MODULE_ID, feature);
+      return result;
     } catch(err) {
       // Expected refusals (the item is gone, not enough coins) carry a message key and need no stack trace
       const key = String(err?.message ?? "");

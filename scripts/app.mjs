@@ -13,6 +13,7 @@ import {describe, entries, verify} from "./ledger.mjs";
 import {CLAIM_RANK, balance, pickWinner} from "./rules.mjs";
 import {areaItems, isContained, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
 import {report, request} from "./transport.mjs";
+import {markUsed} from "./usage.mjs";
 
 const {ApplicationV2, HandlebarsApplicationMixin} = foundry.applications.api;
 
@@ -36,6 +37,7 @@ export async function openLedger({tab}={}) {
     app.bringToFront();
   }
   else await app.render({force: true});
+  markUsed(MODULE_ID);
   return app;
 }
 

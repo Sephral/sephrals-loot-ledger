@@ -10,12 +10,18 @@ import {handleRequest, rememberLedgerItems, watchLedgerItems} from "./service.mj
 import {onRenderSettingsConfig, registerSettings} from "./settings.mjs";
 import {ensureStorage, isLedgerActor, ledgerActor} from "./storage.mjs";
 import {registerTransport, report, request} from "./transport.mjs";
+import {registerUsage} from "./usage.mjs";
 
 /** The name of the tool in the token controls. */
 const TOOL = "sll-ledger";
 
 Hooks.once("init", () => {
   registerSettings();
+  registerUsage(MODULE_ID, {
+    features: ["lootClaim", "lootDistribute", "coinSplit", "stashTransfer", "itemGive", "fundCoins", "combatCollect",
+      "logUndo"],
+    settings: ["lootTable", "partyFund", "distribution"]
+  });
   registerTransport(handleRequest);
 
   Hooks.on("getSceneControlButtons", onGetSceneControlButtons);

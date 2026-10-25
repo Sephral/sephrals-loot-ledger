@@ -318,7 +318,7 @@
       }
     },
     "SELFTEST": {
-      "Title": "Beutebuch Selbsttest",
+      "Title": "Beutebuch-Selbsttest",
       "Run": "Selbsttest starten",
       "Hint": "Prüft Gruppeninventar, Protokoll und die Anbindung an dein Spielsystem. Nach jedem Update von Foundry oder dem System ausführen.",
       "Passed": "Selbsttest bestanden: {checks} Prüfungen, Systemanbindung {system}.",

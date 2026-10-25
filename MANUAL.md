@@ -48,6 +48,19 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 
 Settings that belong to a switched off part are hidden in the settings dialog.
 
+## Usage statistics
+
+The module can take part in a small usage report shared by all of Sephral’s modules. Nothing is counted or sent until the GM agrees: shortly after the world starts, the active GM is asked, and the question comes back at every start until there is an answer. The answer counts for all of Sephral’s modules in the world. *Share usage statistics* in the module settings turns the report on or off at any time, and *Manage statistics* below it shows what the report contains right now.
+
+With the GM’s consent only the active GM’s browser counts, and it sends at most one report a day. The question lists everything the report contains, from the Foundry version to a random world ID. For the Loot Ledger it holds:
+
+* on how many of the last 30 days the module was used
+* how often loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight and log entries are undone
+* the settings *Loot table*, *Party fund* and *How loot is handed out* (only the chosen option)
+* where errors occur in the module code: file, line and error type, never the error message
+
+No names, chat messages, notes, dice results or other content of the world are sent.
+
 ## Who can do what
 
 * **Players** act for the characters they own. They put things into the party inventory, take things out, pay into the party fund, take coins up to the limit, give items to other characters and claim loot.

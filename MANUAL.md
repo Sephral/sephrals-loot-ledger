@@ -9,6 +9,8 @@ Open the Loot Ledger from the token controls on the left (scroll icon) or with t
 * **Log:** every change, newest first, with who asked for it. The line on top shows whether the log is unchanged.
 * **Balance:** what each character took from the loot, the party inventory and the party fund, minus what they put in, today and in total.
 
+Click the picture or the name of an item to open its sheet, for example to read what a piece of loot does before you claim it. Players see the items of the party inventory and the loot read only. In D&D 5e, unidentified items show only their unidentified name and description.
+
 If you play more than one character, pick the one you act for at the top. The gear in the title bar opens the module's settings.
 
 The loot table, the party fund and the balance can be switched off in the settings. With all three off the Loot Ledger is a plain party inventory with a log. A part that is switched off stays visible while it still holds something: leftover loot can be handed out or moved into the party inventory, and coins left in the party fund can still be taken out.

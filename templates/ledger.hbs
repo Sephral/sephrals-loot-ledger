@@ -84,9 +84,9 @@
       <ol class="sll-items plain" data-list="stash">
         {{#each stash}}
         <li class="sll-item" data-item-id="{{id}}" data-area="stash" data-name="{{name}}">
-          <img src="{{img}}" alt="">
+          <img src="{{img}}" alt="" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">
           <div class="sll-item-info">
-            <span class="sll-item-name">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
             <small>{{#if value}}{{value}}{{/if}}{{#if origin}}{{#if value}} · {{/if}}{{origin}}{{/if}}</small>
             {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
           </div>
@@ -115,9 +115,9 @@
       <ol class="sll-items plain" data-list="mine">
         {{#each mine}}
         <li class="sll-item {{#if blocked}}blocked{{/if}}" data-item-id="{{id}}" data-area="mine" data-name="{{name}}">
-          <img src="{{img}}" alt="">
+          <img src="{{img}}" alt="" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">
           <div class="sll-item-info">
-            <span class="sll-item-name">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
             <small>{{#if blocked}}{{blocked}}{{else}}{{value}}{{/if}}</small>
             {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
           </div>
@@ -167,9 +167,9 @@
       <ol class="sll-items plain">
         {{#each pool}}
         <li class="sll-item sll-loot" data-item-id="{{id}}" data-area="pool" data-name="{{name}}">
-          <img src="{{img}}" alt="">
+          <img src="{{img}}" alt="" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">
           <div class="sll-item-info">
-            <span class="sll-item-name">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
             <small>{{value}}</small>
             {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
             {{#if claims.length}}

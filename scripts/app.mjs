@@ -64,6 +64,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     position: {width: 640, height: 720},
     actions: {
       showTab: LootLedger.#onTab,
+      showItem: LootLedger.#onShowItem,
       claim: LootLedger.#onClaim,
       award: LootLedger.#onAward,
       distribute: LootLedger.#onDistribute,
@@ -393,6 +394,17 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
   static #onTab(event, target) {
     this.tab = target.dataset.tab;
     this.render();
+  }
+
+  /**
+   * Open the sheet of an item, so players can look at loot before they claim it. Players only observe the party
+   * inventory, so its items open read only.
+   * @this {LootLedger}
+   */
+  static #onShowItem(event, target) {
+    const row = target.closest("[data-item-id]");
+    const actor = (row?.dataset.area === "mine") ? this.#acting() : ledgerActor();
+    actor?.items.get(row?.dataset.itemId)?.sheet?.render(true);
   }
 
   /** @this {LootLedger} */

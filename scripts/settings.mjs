@@ -7,6 +7,7 @@
 import {MODULE_ID} from "./config.mjs";
 import {adapter, hasAdapter} from "./adapters/index.mjs";
 import {refreshLedger} from "./app.mjs";
+import {registerDebugMenu} from "./debug-file.mjs";
 import {editCoinValues} from "./dialogs.mjs";
 import {FOLLOW_FOUNDRY, applyModuleLanguage} from "./language.mjs";
 import {runSelfTest} from "./selftest.mjs";
@@ -129,7 +130,7 @@ class LedgerCoinValuesMenu extends foundry.applications.api.ApplicationV2 {
 /* -------------------------------------------- */
 
 /**
- * Register all settings of the module and the self-test menu button.
+ * Register all settings of the module and the menu buttons for the self-test and the debug file.
  */
 export function registerSettings() {
   const generic = !hasAdapter();
@@ -167,6 +168,8 @@ export function registerSettings() {
     type: LedgerSelfTestMenu,
     restricted: true
   });
+
+  registerDebugMenu(MODULE_ID, {name: "SLL.DEBUG.Title", label: "SLL.DEBUG.Save", hint: "SLL.DEBUG.Hint"});
 
   if ( adapter().coinValuesConfigurable ) game.settings.registerMenu(MODULE_ID, "coinValuesMenu", {
     name: "SLL.SETTINGS.coinValues.name",

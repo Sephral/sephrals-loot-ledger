@@ -7,6 +7,7 @@
  */
 
 import {MODULE_ID, generation, t} from "./config.mjs";
+import {debugTrace, payloadInfo, resultInfo} from "./trace.mjs";
 
 /** The query name. */
 const QUERY = `${MODULE_ID}.request`;
@@ -29,12 +30,27 @@ export function registerTransport(handle) {
   CONFIG.queries[QUERY] = async (data, options={}) => {
     // Foundry 13 does not name the sender of a query, so it never takes this path
     const user = options.user ?? null;
-    if ( !user ) return {ok: false, error: "SLL.Error.unknownSender"};
-    return handler(data.action, data.payload ?? {}, user);
+    const started = Date.now();
+    const result = user ? await handler(data.action, data.payload ?? {}, user)
+      : {ok: false, error: "SLL.Error.unknownSender"};
+    debugTrace.add("handled", {action: data.action, route: "query", user: user?.id ?? null, ...resultInfo(result),
+      ms: Date.now() - started, payload: payloadInfo(data.payload)});
+    return result;
   };
   Hooks.on("createChatMessage", onCreateRequest);
   Hooks.on("updateChatMessage", onAnswer);
   Hooks.on("renderChatMessageHTML", hideRequest);
+}
+
+/**
+ * Which way a request of this client travels: handled right here (active GM), as a query (Foundry 14), as a chat
+ * message (Foundry 13), or nowhere because no GM is online.
+ * @returns {"gm"|"query"|"chat"|"noGM"}
+ */
+export function requestRoute() {
+  if ( game.user.isActiveGM ) return "gm";
+  if ( !game.users.activeGM ) return "noGM";
+  return (generation() >= 14) ? "query" : "chat";
 }
 
 /**
@@ -44,15 +60,21 @@ export function registerTransport(handle) {
  * @returns {Promise<object>}   {ok: true, ...} or {ok: false, error}
  */
 export async function request(action, payload={}) {
-  if ( game.user.isActiveGM ) return handler(action, payload, game.user);
-  const gm = game.users.activeGM;
-  if ( !gm ) return {ok: false, error: "SLL.Error.noGM"};
+  const started = Date.now();
+  const route = requestRoute();
+  const trace = (result, extra={}) => {
+    debugTrace.add("request", {action, route, ...resultInfo(result), ms: Date.now() - started,
+      payload: payloadInfo(payload), ...extra});
+    return result;
+  };
+  if ( route === "gm" ) return trace(await handler(action, payload, game.user));
+  if ( route === "noGM" ) return trace({ok: false, error: "SLL.Error.noGM"});
   try {
-    if ( generation() >= 14 ) return await gm.query(QUERY, {action, payload}, {timeout: 30000});
-    return await chatRequest(action, payload);
+    if ( route === "query" ) return trace(await game.users.activeGM.query(QUERY, {action, payload}, {timeout: 30000}));
+    return trace(await chatRequest(action, payload));
   } catch(err) {
     console.error(`${MODULE_ID} | Request ${action} failed`, err);
-    return {ok: false, error: "SLL.Error.requestFailed"};
+    return trace({ok: false, error: "SLL.Error.requestFailed"}, {exception: String(err?.message ?? err)});
   }
 }
 
@@ -93,11 +115,12 @@ async function chatRequest(action, payload) {
       resolve(result);
     });
   });
-  await ChatMessage.implementation.create({
+  const message = await ChatMessage.implementation.create({
     content: "<span></span>",
     whisper: game.users.filter(u => u.isGM).map(u => u.id),
     flags: {[MODULE_ID]: {request: {id, action, payload}}}
   });
+  debugTrace.add("chat request sent", {action, requestId: id, messageId: message?.id ?? null});
   return answer;
 }
 
@@ -109,13 +132,18 @@ async function onCreateRequest(message) {
   const req = message.getFlag(MODULE_ID, "request");
   if ( !req || !game.user.isActiveGM || message.getFlag(MODULE_ID, "answer") ) return;
   const user = message.author;
+  const started = Date.now();
   let result;
+  let exception;
   try {
     result = user ? await handler(req.action, req.payload ?? {}, user) : {ok: false, error: "SLL.Error.unknownSender"};
   } catch(err) {
     console.error(`${MODULE_ID} | Request ${req.action} failed`, err);
     result = {ok: false, error: "SLL.Error.requestFailed"};
+    exception = String(err?.message ?? err);
   }
+  debugTrace.add("handled", {action: req.action, route: "chat", user: user?.id ?? null, messageId: message.id,
+    requestId: req.id, ...resultInfo(result), ms: Date.now() - started, payload: payloadInfo(req.payload), exception});
   await message.update({[`flags.${MODULE_ID}.answer`]: result});
   setTimeout(() => message.delete().catch(() => {}), 3000);
 }
@@ -129,7 +157,13 @@ function onAnswer(message) {
   const answer = message.getFlag(MODULE_ID, "answer");
   if ( !req || !answer ) return;
   const resolve = waiting.get(req.id);
-  if ( !resolve ) return;
+  if ( !resolve ) {
+    // The asking client has stopped waiting: the answer came after the timeout
+    if ( message.author?.id === game.user.id ) {
+      debugTrace.add("late answer", {action: req.action, requestId: req.id, messageId: message.id});
+    }
+    return;
+  }
   waiting.delete(req.id);
   resolve(answer);
 }

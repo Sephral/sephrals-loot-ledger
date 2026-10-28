@@ -340,6 +340,13 @@
       "Containers": "Containers cannot be handed over with their contents.",
       "CharacterType": "The actor type of player characters from the settings does not exist.",
       "QuantityPath": "Items have no quantity at the path from the settings."
+    },
+    "DEBUG": {
+      "Title": "Debug file",
+      "Save": "Save debug file",
+      "Hint": "Saves one file for bug reports about all of Sephral’s modules in this world: versions, settings and what the modules recorded, such as the latest chat messages they read. It contains chat text and whispers, check it before you share it.",
+      "Entry": "Save Debug File (Sephral’s Modules)",
+      "Saved": "Debug file {file} saved. It contains chat text and whispers, check it before you share it."
     }
   }
 }

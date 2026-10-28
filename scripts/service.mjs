@@ -12,6 +12,7 @@ import {append, entries} from "./ledger.mjs";
 import {applyOperations, isBusy} from "./ops.mjs";
 import {balance, pickWinner} from "./rules.mjs";
 import {areaOf, isContained, isLedgerActor, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
+import {debugTrace} from "./trace.mjs";
 import {postApproval, postEntries, postOffer, postRolls, resolveCard} from "./chat.mjs";
 import {countFeature} from "./usage.mjs";
 
@@ -69,6 +70,7 @@ export function handleRequest(action, payload, user) {
       const key = String(err?.message ?? "");
       if ( key.startsWith("SLL.") ) return fail(key);
       console.error(`${MODULE_ID} | ${action} failed`, err);
+      debugTrace.add("action failed", {action, user: user?.id ?? null, exception: String(err?.stack ?? err)});
       return fail("SLL.Error.requestFailed");
     }
   });

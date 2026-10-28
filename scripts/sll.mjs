@@ -3,6 +3,8 @@ import {adapter, registerAdapter, BaseAdapter} from "./adapters/index.mjs";
 import {openLedger, scheduleRefresh} from "./app.mjs";
 import {onRenderChatMessage} from "./chat.mjs";
 import {onDeleteCombat, openCollect} from "./collect.mjs";
+import {registerDebug} from "./debug.mjs";
+import {saveDebugFile} from "./debug-file.mjs";
 import {applyModuleLanguage} from "./language.mjs";
 import {entries, verify} from "./ledger.mjs";
 import {noticeNewVersions, runSelfTest} from "./selftest.mjs";
@@ -23,6 +25,7 @@ Hooks.once("init", () => {
     settings: ["lootTable", "partyFund", "distribution"]
   });
   registerTransport(handleRequest);
+  registerDebug();
 
   Hooks.on("getSceneControlButtons", onGetSceneControlButtons);
   Hooks.on("renderActorDirectory", onRenderActorDirectory);
@@ -64,7 +67,9 @@ Hooks.once("init", () => {
     /** The adapter base class to extend. */
     BaseAdapter,
     /** Check the storage, the log and the system adapter (GM). */
-    runSelfTest
+    runSelfTest,
+    /** Save the debug file of Sephral's modules (GM): about one chat message, or without an id the latest picture. */
+    saveDebugFile: messageId => saveDebugFile(messageId ?? null, {moduleId: MODULE_ID})
   };
 });
 

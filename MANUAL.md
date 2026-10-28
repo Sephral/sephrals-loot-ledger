@@ -44,6 +44,7 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 | Offer to collect after a fight | Ask the GM when a combat ends (only with the loot table) |
 | Chat messages | For everyone, only for the GM, or none |
 | Self test | Checks the party inventory, the log and the system support (GM) |
+| Debug file | Saves a file for bug reports, see [Debug file](#debug-file) (GM) |
 | Coin values | D&D 5e only: what each coin is worth in copper, for tables with their own exchange rates (GM) |
 
 Settings that belong to a switched off part are hidden in the settings dialog.
@@ -93,6 +94,19 @@ Other modules can add support for more systems through the module's API.
 | `ledgerActor()` | The actor which holds the loot and the party inventory |
 | `registerAdapter(systemId, adapter)` | Adds support for another system, see `BaseAdapter` |
 | `runSelfTest()` | Runs the self test (GM) |
+| `saveDebugFile(messageId)` | Saves a debug file about one chat message, or without an id about the latest ones (GM) |
+
+## Debug file
+
+For bug reports the GM can save a debug file, one file for all of Sephral’s modules in the world: in the settings with *Save debug file*, or for a single Loot Ledger message with *Save Debug File (Sephral’s Modules)* in its context menu in the chat. For the Loot Ledger it holds:
+
+* the versions of Foundry, the system and the module, and the active modules,
+* the settings of the Loot Ledger, including the open approvals and offers,
+* how requests reach the GM (query or chat message) and the state of the ledger: the party inventory actor and log journal, the coins, the loot with its claims, the open requests and the check of the log,
+* the Loot Ledger messages among the latest 50 chat messages, or the one message, with what each one refers to and whether its request is still open,
+* the recent requests to the GM this browser sent or handled: action, way, result and duration. Item data and notes are left out, only ids and sizes are kept.
+
+The file contains chat text and whispers. Check it before you share it.
 
 ## Limits
 

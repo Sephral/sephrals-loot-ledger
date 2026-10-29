@@ -435,6 +435,126 @@
   width: 70px;
 }
 
+/* Loot from a roll table */
+.sll-loot-roll .window-content {
+  padding: 8px;
+}
+
+.sll-roll {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sll-roll .sll-spacer {
+  flex: 1;
+}
+
+.sll-roll-head,
+.sll-roll-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sll-roll-head label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sll-roll-head input[name=draws] {
+  width: 70px;
+}
+
+.sll-roll-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 420px;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.sll-roll-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.15);
+}
+
+.sll-roll-line.off {
+  opacity: 0.55;
+}
+
+.sll-roll-line img {
+  width: 28px;
+  height: 28px;
+  border: none;
+  object-fit: contain;
+}
+
+.sll-roll-line > i {
+  width: 28px;
+  text-align: center;
+}
+
+.sll-roll-line.coins > i {
+  color: #e2b54c;
+}
+
+.sll-roll-gap {
+  width: 16px;
+}
+
+.sll-roll-name {
+  flex: 1;
+}
+
+.sll-roll-line.item .sll-roll-name {
+  cursor: pointer;
+}
+
+.sll-roll-line input[name=quantity] {
+  width: 56px;
+}
+
+.sll-roll-formula {
+  opacity: 0.7;
+}
+
+.sll-roll-warn {
+  color: #ff9f6b;
+}
+
+.sll-roll .sll-icon,
+.sll-roll .sll-hint {
+  flex: none;
+}
+
+.sll-roll button.sll-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+/* Quantity field in Foundry's roll table sheet */
+.roll-table-sheet td.details .sll-quantity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: var(--font-size-12, 12px);
+  opacity: 0.85;
+}
+
+.roll-table-sheet td.details .sll-quantity input {
+  width: 70px;
+  height: 22px;
+}
+
 /* Chat cards */
 .sll-card ul {
   margin: 0;
@@ -476,6 +596,8 @@
 }
 
 /* Light interface theme */
+.theme-light .sll-roll-line,
+.sll-loot-roll.theme-light .sll-roll-line,
 .theme-light .sll-ledger .sll-item,
 .theme-light .sll-ledger .sll-entry,
 .sll-ledger.theme-light .sll-item,

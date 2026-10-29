@@ -7,7 +7,23 @@
 import {MODULE_ID, TESTED_VERSIONS, esc, generation, t} from "./config.mjs";
 import {adapter, hasAdapter} from "./adapters/index.mjs";
 import {verify} from "./ledger.mjs";
+import {pilesApi} from "./piles.mjs";
 import {ledgerActor, ledgerJournal} from "./storage.mjs";
+
+/** The functions of Item Piles' API the bridge needs. */
+const PILE_FUNCTIONS = ["isItemPileLootable", "isValidItemPile", "getActorItems", "getActorCurrencies", "removeItems",
+  "removeAttributes", "addItems", "createItemPile"];
+
+/**
+ * The installed versions of what the module was verified against.
+ * @returns {Record<string, string>}
+ */
+function currentVersions() {
+  const current = {core: game.version, [game.system.id]: game.system.version};
+  const piles = game.modules.get("item-piles");
+  if ( piles?.active ) current["item-piles"] = piles.version;
+  return current;
+}
 
 /**
  * Run all checks.
@@ -34,6 +50,11 @@ function checkAll() {
   check(hasAdapter(), "SLL.SELFTEST.Generic", {system: game.system.title});
   for ( const problem of adapter().selfTest() ) check(false, problem);
   check(adapter().partyMembers().length > 0, "SLL.SELFTEST.NoCharacters");
+  // Item Piles: the functions the bridge calls
+  const piles = pilesApi();
+  if ( piles ) check(PILE_FUNCTIONS.every(name => typeof piles[name] === "function"), "SLL.SELFTEST.ItemPiles");
+  // Roll tables: the result editor the quantity field goes into
+  check(!!foundry.applications.sheets?.TableResultConfig, "SLL.SELFTEST.TableResult");
   return {problems, checks};
 }
 
@@ -42,7 +63,7 @@ function checkAll() {
  * @returns {string}
  */
 function versionLine() {
-  const current = {core: game.version, [game.system.id]: game.system.version};
+  const current = currentVersions();
   return Object.entries(TESTED_VERSIONS).filter(([id]) => id in current)
     .map(([id, tested]) => t("SLL.SELFTEST.Version", {id, current: current[id] ?? "–", tested}))
     .join(", ");
@@ -79,7 +100,7 @@ export async function runSelfTest({report=true}={}) {
  */
 export function noticeNewVersions() {
   if ( !game.user.isGM ) return;
-  const current = {core: game.version, [game.system.id]: game.system.version};
+  const current = currentVersions();
   const newer = Object.entries(current)
     .filter(([id, version]) => TESTED_VERSIONS[id] && version && foundry.utils.isNewerVersion(version, TESTED_VERSIONS[id]))
     .map(([id, version]) => `${id} ${version}`);

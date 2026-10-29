@@ -7,10 +7,13 @@ import {registerDebug} from "./debug.mjs";
 import {saveDebugFile} from "./debug-file.mjs";
 import {applyModuleLanguage} from "./language.mjs";
 import {entries, verify} from "./ledger.mjs";
+import {dropLeftovers, onRenderTokenHUD, openPiles} from "./piles.mjs";
 import {noticeNewVersions, runSelfTest} from "./selftest.mjs";
 import {handleRequest, rememberLedgerItems, watchLedgerItems} from "./service.mjs";
 import {onRenderSettingsConfig, registerSettings} from "./settings.mjs";
 import {ensureStorage, isLedgerActor, ledgerActor} from "./storage.mjs";
+import {onGetHeaderControls, onGetRollTableContextOptions, onRenderRollTableSheet, onRenderTableResultConfig, openLootRoll}
+  from "./tables.mjs";
 import {registerTransport, report, request} from "./transport.mjs";
 import {registerUsage} from "./usage.mjs";
 
@@ -21,7 +24,7 @@ Hooks.once("init", () => {
   registerSettings();
   registerUsage(MODULE_ID, {
     features: ["lootClaim", "lootDistribute", "coinSplit", "stashTransfer", "itemGive", "fundCoins", "combatCollect",
-      "logUndo"],
+      "logUndo", "pileTake", "pileDrop", "tableLoot"],
     settings: ["lootTable", "partyFund", "distribution"]
   });
   registerTransport(handleRequest);
@@ -33,6 +36,11 @@ Hooks.once("init", () => {
   Hooks.on("deleteCombat", onDeleteCombat);
   Hooks.on("dropActorSheetData", onDropActorSheetData);
   Hooks.on("renderSettingsConfig", onRenderSettingsConfig);
+  Hooks.on("renderTokenHUD", onRenderTokenHUD);
+  Hooks.on("renderTableResultConfig", onRenderTableResultConfig);
+  Hooks.on("renderRollTableSheet", onRenderRollTableSheet);
+  Hooks.on("getHeaderControlsRollTableSheet", onGetHeaderControls);
+  Hooks.on("getRollTableContextOptions", onGetRollTableContextOptions);
 
   // Changes made past the module and redraws of the window
   for ( const kind of ["create", "update", "delete"] ) {
@@ -52,6 +60,12 @@ Hooks.once("init", () => {
     open: openLedger,
     /** Open the dialog which collects the belongings of defeated combatants (GM). */
     collect: openCollect,
+    /** Open the dialog which takes the contents of Item Piles into the loot (GM), by default those on the scene. */
+    takeFromPiles: openPiles,
+    /** Leave the loot nobody claimed as a new Item Pile on the scene (GM). */
+    dropLeftovers,
+    /** Roll loot on a roll table (a RollTable or its UUID) in the preview window (GM). */
+    rollLoot: openLootRoll,
     /** Send a request to the GM, like the window does. */
     request: async (action, payload) => report(await request(action, payload)),
     /** All log entries in order. */

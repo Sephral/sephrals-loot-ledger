@@ -1,0 +1,36 @@
+<div class="sll-roll">
+  <div class="sll-roll-head">
+    <label>{{localize "SLL.Table.draws"}} <input type="text" name="draws" value="{{draws}}"></label>
+    <span class="sll-spacer"></span>
+    <button type="button" data-action="rerollAll"><i class="fa-solid fa-dice" inert></i> {{localize "SLL.Table.rerollAll"}}</button>
+  </div>
+
+  <ol class="sll-roll-lines plain">
+    {{#each lines}}
+    <li class="sll-roll-line {{kind}} {{#unless include}}off{{/unless}}" data-line-id="{{id}}">
+      {{#if selectable}}<input type="checkbox" name="include" {{checked include}} aria-label="{{localize "SLL.Table.include"}}">{{else}}<span class="sll-roll-gap"></span>{{/if}}
+      {{#if img}}<img src="{{img}}" alt="">{{else}}<i class="fa-solid {{icon}}" inert></i>{{/if}}
+      {{#if isItem}}
+      <span class="sll-roll-name" data-action="openItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{name}}</span>
+      <input type="number" name="quantity" value="{{quantity}}" min="0" step="1" aria-label="{{localize "SLL.Dialog.quantity"}}">
+      {{else}}
+      <span class="sll-roll-name">{{name}}</span>
+      {{#if isCoins}}<strong>{{coinsText}}</strong>{{/if}}
+      {{/if}}
+      {{#if invalid}}<i class="fa-solid fa-triangle-exclamation sll-roll-warn" data-tooltip="{{localize "SLL.Table.invalid"}}" inert></i>{{/if}}
+      {{#if formula}}<small class="sll-roll-formula" data-tooltip="{{localize "SLL.Table.quantity"}}">{{formula}}</small>{{/if}}
+      {{#if canReroll}}<button type="button" class="sll-icon" data-action="rerollLine" data-tooltip="{{localize "SLL.Table.rerollLine"}}"><i class="fa-solid fa-rotate" inert></i></button>{{/if}}
+    </li>
+    {{else}}
+    <li class="sll-empty">{{localize "SLL.Table.empty"}}</li>
+    {{/each}}
+  </ol>
+
+  {{#if coinsNowhere}}<p class="sll-hint"><i class="fa-solid fa-circle-info" inert></i> {{localize "SLL.Table.coinsNowhere"}}</p>{{/if}}
+
+  <footer class="sll-roll-foot">
+    <span>{{summary}}</span>
+    <span class="sll-spacer"></span>
+    <button type="button" data-action="addToLoot" {{#unless canAdd}}disabled{{/unless}}><i class="fa-solid fa-sack" inert></i> {{addLabel}}</button>
+  </footer>
+</div>

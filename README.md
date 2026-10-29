@@ -19,6 +19,7 @@
 * **An open log:** every item and every coin that changes hands is written into a journal all players can read. Only the GM's client writes it, and any later change shows up.
 * **Clean handovers:** equipped, attuned or invested items are taken off on the way, containers keep their contents, and stacks merge.
 * **Gifts with consent:** a character can give something to a friend, who accepts or declines first.
+* **Loot from tables and piles:** roll a table with quantities like 2d4 or 3d6 gp and see the loot before it lands, or empty a pile from Item Piles into the loot right from its token.
 * **Your table, your rules:** free access or GM approval, a limit for the party fund, chat messages for everyone or only for the GM. Switch off the loot table, the party fund or the balance, and the Loot Ledger is simply a shared party inventory.
 
 ## How it works

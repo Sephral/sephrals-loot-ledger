@@ -24,6 +24,34 @@ The loot table, the party fund and the balance can be switched off in the settin
 * **Hand out from the party inventory:** the gift icon next to an item of the party inventory gives it to a character of your choice.
 * **Approvals:** requests that need your approval appear on top of the window and as a chat message only you see.
 * **Undo:** most log entries can be reversed with the arrow button. Items and coins go back where they came from, and the log records the undo.
+* **Roll a table:** roll loot on a roll table, look at it first and add it in one step, see [Loot from roll tables](#loot-from-roll-tables).
+* **Item Piles:** take what an item pile holds into the loot, or leave unwanted loot as a new pile, see [Item Piles](#item-piles).
+
+## Loot from roll tables
+
+The GM rolls loot from the context menu of a roll table in the sidebar or a compendium (*Roll loot*), from the table's window (*Roll loot* in its menu) or with *Roll a table* on the Loot tab. A preview window shows what was drawn:
+
+* **Items** come with their quantity. Change a quantity in its field, 0 leaves the item out.
+* **Coins:** text results that are only coins, like `3d6 gp`, `2d4 × 10 gp` or `50 gp, 3 sp`, become coins. The module knows the coins of the system by key and abbreviation.
+* **Other tables:** a result that is another table is drawn there, as often as its quantity says.
+* **Everything else** (texts, actors, journals) is shown but stays out.
+
+The arrow button of a line draws that line again from the table it came from, *Roll again* draws everything again, *Draws* sets how often the table is drawn (a number or a formula). The checkbox leaves a line out. *Into the loot* adds the rest in one step, the log notes the table. Items are copied, the table and its items stay as they are. With the loot table switched off, everything goes into the party inventory and the coins into the party fund.
+
+**Quantities:** every table result can carry a quantity, a number or a formula like `2d4`. Set it in the table's edit mode (the field below each result) or in the result's own editor (*Quantity (Loot Ledger)*). For an item it is how many, for another table how often it is drawn, for a coin text how often the coins count. Empty means 1. A formula that cannot be rolled counts as 1 and is marked in the preview.
+
+The preview does not mark results as drawn, so tables without replacement keep all their results.
+
+## Item Piles
+
+With the module [Item Piles](https://foundryvtt.com/packages/item-piles) active, the GM can move loot between piles and the Loot Ledger. Item Piles takes and gives everything itself, so its own rules keep working, for example that an empty pile disappears. In D&D 5e Item Piles needs its companion *Item Piles: D&D 5e*.
+
+* **Take from a pile:** the token controls of a pile (right click on the token) have a scroll button. The Loot tab has *From item piles*, which lists all piles and containers on the scene you look at. Pick the items and the coins, and they move into the loot, with the loot table switched off into the party inventory and the party fund. Merchants and vaults are left alone, and so is what Item Piles hides from looting, like spells.
+* **Coins:** the coins of a pile count when they match a coin of the system. Coins the module cannot count, for example a secondary currency, stay in the pile and the dialog names them.
+* **Undo:** taking from a pile can be undone while the pile still exists. Items go back into the pile, coins onto its actor. Containers cannot go back.
+* **Leave as item pile:** the button on the Loot tab puts the loot nobody claimed into a new pile next to the selected token, or in the middle of the view. Coins stay in the loot. This cannot be undone from the log. Take the pile back instead.
+
+Piles never count as characters, even where Item Piles builds them from the character type.
 
 ## Settings
 
@@ -56,7 +84,7 @@ The module can take part in a small usage report shared by all of Sephral’s mo
 With the GM’s consent only the active GM’s browser counts, and it sends at most one report a day. The counts are kept in a hidden world setting, so all browsers and computers of the GM count together, and turning the statistics off deletes them. A copy of a world gets its own world ID. The question lists everything the report contains, from the Foundry version to a random world ID. For the Loot Ledger it holds:
 
 * on how many of the last 30 days the module was used
-* how often loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight and log entries are undone
+* how often loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight, log entries are undone, loot is taken from item piles or left as an item pile, and loot rolled on a table is added
 * the settings *Loot table*, *Party fund* and *How loot is handed out* (only the chosen option)
 * where errors occur in the module code: file, line and error type, never the error message
 
@@ -89,6 +117,9 @@ Other modules can add support for more systems through the module's API.
 | --- | --- |
 | `open({tab})` | Opens the window, optionally on `"stash"`, `"pool"`, `"log"` or `"balance"` |
 | `collect()` | Opens the dialog which collects the loot of the last fight (GM) |
+| `rollLoot(table)` | Rolls loot on a roll table (the table or its UUID) in the preview window (GM) |
+| `takeFromPiles(uuids)` | Opens the dialog which takes the contents of item piles into the loot, without UUIDs the piles of the current scene (GM, Item Piles) |
+| `dropLeftovers()` | Leaves the loot nobody claimed as a new item pile on the scene (GM, Item Piles) |
 | `entries()` | All log entries in order |
 | `verify()` | Checks the log for later changes |
 | `ledgerActor()` | The actor which holds the loot and the party inventory |

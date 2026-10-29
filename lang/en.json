@@ -27,7 +27,8 @@
       "pool": "Loot",
       "stash": "Party inventory",
       "fund": "Party fund",
-      "outside": "outside"
+      "outside": "outside",
+      "newPile": "a new item pile"
     },
     "Claim": {
       "need": "Need",
@@ -161,7 +162,8 @@
       "roll": "highest roll",
       "remainder": "rest of the split",
       "unclaimed": "nobody claimed it",
-      "approved": "approved by {name}"
+      "approved": "approved by {name}",
+      "table": "rolled on {name}"
     },
     "Balance": {
       "hint": "What each character took from the loot, the party inventory and the party fund, minus what they put in. Gifts between characters count for the one who receives them.",
@@ -198,7 +200,14 @@
       "distributed": "{count} items handed out, {rest} moved to the party inventory.",
       "collected": "{count} things moved into the loot.",
       "nothingToCollect": "The defeated have nothing to leave behind.",
-      "collectedStash": "{count} things put into the party inventory."
+      "collectedStash": "{count} things put into the party inventory.",
+      "pilesEmpty": "The item piles here hold nothing the Loot Ledger can take.",
+      "noPiles": "There is no item pile on this scene.",
+      "pilePartly": "{count} things taken. Some of it stayed in the pile, see the console.",
+      "pileDropped": "{count} items left as an item pile.",
+      "rolledLoot": "{count} things added to the loot.",
+      "rolledStash": "{count} things put into the party inventory.",
+      "pileDroppedPartly": "{count} items left as an item pile. The rest stayed in the loot, see the console."
     },
     "Error": {
       "noGM": "No GM is online.",
@@ -224,7 +233,11 @@
       "alreadyUndone": "This entry was already undone.",
       "dropOwn": "Drop items from your own character here.",
       "lootOff": "The loot table is switched off.",
-      "fundOff": "The party fund is switched off."
+      "fundOff": "The party fund is switched off.",
+      "noItemPiles": "Item Piles is not active.",
+      "pileFailed": "The item pile did not hand anything over.",
+      "noScene": "Open a scene first.",
+      "nothingRolled": "Nothing to add."
     },
     "Block": {
       "cursed": "Cursed and invested: only the GM can take it off.",
@@ -339,7 +352,9 @@
       "StashType": "The system has no group actor type for the party inventory.",
       "Containers": "Containers cannot be handed over with their contents.",
       "CharacterType": "The actor type of player characters from the settings does not exist.",
-      "QuantityPath": "Items have no quantity at the path from the settings."
+      "QuantityPath": "Items have no quantity at the path from the settings.",
+      "ItemPiles": "Item Piles is active, but some of its functions the Loot Ledger uses are missing. Taking from piles may not work.",
+      "TableResult": "Foundry's editor for table results was not found, so the quantity field is missing."
     },
     "DEBUG": {
       "Title": "Debug file",
@@ -347,6 +362,37 @@
       "Hint": "Saves one file for bug reports about all of Sephral’s modules in this world: versions, settings and what the modules recorded, such as the latest chat messages they read. It contains chat text and whispers, check it before you share it.",
       "Entry": "Save Debug File (Sephral’s Modules)",
       "Saved": "Debug file {file} saved. It contains chat text and whispers, check it before you share it."
+    },
+    "Piles": {
+      "title": "Take from item piles",
+      "take": "From item piles",
+      "hud": "Into the Loot Ledger",
+      "hint": "Pick what to take from the item piles. It moves into the loot, and the log notes the pile.",
+      "hintStash": "Pick what to take from the item piles. It goes into the party inventory, and the log notes the pile.",
+      "kept": "Stays in the pile, the Loot Ledger cannot count it: {list}",
+      "drop": "Leave as item pile",
+      "dropConfirm": "Leave the loot nobody claimed as a new item pile on this scene, next to the selected token or in the middle of the view? Coins stay in the loot."
+    },
+    "Table": {
+      "roll": "Roll loot",
+      "rollButton": "Roll a table",
+      "title": "Loot from {name}",
+      "pick": "Roll loot on a table",
+      "table": "Table",
+      "pickHint": "Each result can have a quantity, set in the table. Results like 3d6 gp become coins.",
+      "none": "There are no roll tables in this world.",
+      "draws": "Draws",
+      "rerollAll": "Roll again",
+      "rerollLine": "Draw this line again",
+      "include": "Into the loot",
+      "empty": "Nothing was drawn.",
+      "invalid": "This formula cannot be rolled, so 1 counts.",
+      "summary": "{items} items",
+      "summaryCoins": "{items} items and {coins}",
+      "coinsNowhere": "The loot table and the party fund are switched off, so the coins are left out.",
+      "quantity": "Quantity (Loot Ledger)",
+      "quantityShort": "Qty",
+      "quantityHint": "A number or a formula like 2d4: how many of the item, how often another table is drawn, or how often a coin text like 3d6 gp counts. Empty means 1."
     }
   }
 }

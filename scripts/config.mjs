@@ -10,7 +10,7 @@ export const MODULE_ID = "sephrals-loot-ledger";
 export const TEMPLATES = `modules/${MODULE_ID}/templates`;
 
 /** The Foundry versions the module was verified against (see the self-test). */
-export const TESTED_VERSIONS = {core: "14.369", crucible: "0.11.2", dnd5e: "6.0.6"};
+export const TESTED_VERSIONS = {core: "14.369", crucible: "0.11.2", dnd5e: "6.0.6", "item-piles": "3.3.4"};
 
 /**
  * Read a setting of this module.

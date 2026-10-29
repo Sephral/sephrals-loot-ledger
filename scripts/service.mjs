@@ -14,6 +14,8 @@ import {balance, pickWinner} from "./rules.mjs";
 import {areaOf, isContained, isLedgerActor, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
 import {debugTrace} from "./trace.mjs";
 import {postApproval, postEntries, postOffer, postRolls, resolveCard} from "./chat.mjs";
+import {clampRequests} from "./pile-map.mjs";
+import {isLootablePile, pileContents, pilesApi} from "./piles.mjs";
 import {countFeature} from "./usage.mjs";
 
 /** Requests run one after another. */
@@ -34,7 +36,10 @@ const FEATURES = {
   depositCoins: "fundCoins",
   withdrawCoins: "fundCoins",
   collect: "combatCollect",
-  undo: "logUndo"
+  undo: "logUndo",
+  takePile: "pileTake",
+  dropPile: "pileDrop",
+  addRolled: "tableLoot"
 };
 
 /**
@@ -651,12 +656,183 @@ const ACTIONS = {
     return ok({notice: loot ? "SLL.Notice.collected" : "SLL.Notice.collectedStash", data: {count: log.length}});
   },
 
+  /**
+   * GM: take items and coins of Item Piles into the loot, like collecting after a fight. Everything leaves the pile
+   * through Item Piles' API. The loot takes the items first; if the pile then refuses to hand them over, the loot is put
+   * back as it was, so nothing exists twice.
+   */
+  async takePile({sources}, user) {
+    if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const api = pilesApi();
+    if ( !api ) return fail("SLL.Error.noItemPiles");
+    const {loot, fund} = parts();
+    const area = loot ? "pool" : "stash";
+    const coinArea = loot ? "pool" : (fund ? "fund" : null);
+    const a = adapter();
+    const target = ledgerActor();
+    const log = [];
+    let failed = 0;
+    for ( const source of (sources ?? []) ) {
+      const pile = await fromUuid(source.pileUuid);
+      const actor = pile?.actor ?? pile;
+      if ( !(actor instanceof Actor) || isLedgerActor(actor) || !isLootablePile(pile) ) continue;
+      const from = {kind: "pile", uuid: pile.uuid, name: pile.name ?? actor.name};
+      const {items, coins} = pileContents(pile);
+      const byId = new Map(items.map(i => [i.id, i]));
+      const picks = clampRequests(source.items, new Map(items.map(i => [i.id, Math.max(a.quantity(i), 1)])));
+      const plan = (source.coins && coinArea) ? coins : null;
+      const undo = [];
+      const entries = [];
+      const removal = [];
+      try {
+        for ( const {id, quantity} of picks ) {
+          const item = byId.get(id);
+          const info = itemInfo(item, quantity);
+          const itemId = await placeCopy(item, quantity, target, area, undo);
+          entries.push({...by(user), kind: "add", from, to: place(area), item: info, ref: {itemId}});
+          if ( quantity < Math.max(a.quantity(item), 1) ) removal.push({_id: id, quantity});
+          else for ( const _id of a.deleteIds(item) ) removal.push({_id, quantity: Math.max(a.quantity(actor.items.get(_id)), 1)});
+        }
+        if ( plan?.items.length ) removal.push(...plan.items);
+        if ( removal.length ) {
+          const before = new Map(removal.map(r => [r._id, a.quantity(actor.items.get(r._id))]));
+          await api.removeItems(pile, removal);
+          // Item Piles deletes an empty pile with its token; otherwise every item must be gone or fewer
+          const removed = !fromUuidSync(pile.uuid) || removal.some(r => {
+            const item = actor.items.get(r._id);
+            return !item || (a.quantity(item) < before.get(r._id));
+          });
+          if ( !removed ) throw new Error("SLL.Error.pileFailed");
+        }
+      } catch(err) {
+        for ( const step of undo.reverse() ) await step().catch(e => console.error(`${MODULE_ID} | Rollback failed`, e));
+        console.warn(`${MODULE_ID} | Taking from the pile ${from.name} failed`, err);
+        failed++;
+        continue;
+      }
+      // Coins: the currency items left with the items above, the coins kept as attributes leave now. Item Piles changes
+      // attributes only when it gets the actor (with a token it reports a change but leaves the actor as it is), and only
+      // what really left the pile counts.
+      let base = plan?.itemBase ?? 0;
+      const paths = Object.keys(plan?.attributes ?? {});
+      if ( paths.length ) {
+        const before = Object.fromEntries(paths.map(p => [p, Number(foundry.utils.getProperty(actor, p)) || 0]));
+        try {
+          await api.removeAttributes(actor, plan.attributes);
+        } catch(err) {
+          console.warn(`${MODULE_ID} | The coins of the pile ${from.name} stay there`, err);
+        }
+        let short = false;
+        for ( const path of paths ) {
+          const gone = Math.min(Math.max(before[path] - (Number(foundry.utils.getProperty(actor, path)) || 0), 0),
+            plan.attributes[path]);
+          base += gone * plan.units[path];
+          if ( gone < plan.attributes[path] ) short = true;
+        }
+        if ( short ) failed++;
+      }
+      if ( base ) {
+        const stored = storedCoins();
+        await applyOperations([{action: "update", documentName: "Actor",
+          updates: [coinsUpdate({[coinArea]: stored[coinArea] + base})]}]);
+        entries.push({...by(user), kind: "add", from, to: place(coinArea), coins: base});
+      }
+      log.push(...entries);
+    }
+    if ( !log.length ) return fail(failed ? "SLL.Error.pileFailed" : "SLL.Error.nothingCollected");
+    await record(log);
+    if ( failed ) return ok({notice: "SLL.Notice.pilePartly", data: {count: log.length}});
+    return ok({notice: loot ? "SLL.Notice.collected" : "SLL.Notice.collectedStash", data: {count: log.length}});
+  },
+
+  /** GM: leave the loot nobody claimed as a new Item Pile on a scene. Coins stay in the loot. */
+  async dropPile({sceneId, position}, user) {
+    if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const api = pilesApi();
+    if ( !api ) return fail("SLL.Error.noItemPiles");
+    if ( !game.scenes.get(sceneId) || !Number.isFinite(position?.x) || !Number.isFinite(position?.y) ) {
+      return fail("SLL.Error.noScene");
+    }
+    const a = adapter();
+    const items = ledgerActor().items.filter(i => (areaOf(i) === "pool") && !isContained(i)
+      && !Object.values(flag(i, "claims") ?? {}).some(c => (c === "need") || (c === "want")));
+    if ( !items.length ) return fail("SLL.Error.nothingUnclaimed");
+    // An empty pile first, then the items through addItems: Item Piles 3.3 kept only some of the items handed to
+    // createItemPile. Only what arrived in the pile leaves the loot.
+    const created = await api.createItemPile({sceneId, position: {x: position.x, y: position.y}});
+    const pile = created?.tokenUuid ? fromUuidSync(created.tokenUuid) : null;
+    if ( !pile?.actor ) return fail("SLL.Error.pileFailed");
+    const name = item => item.name ?? item._source?.name;
+    const count = () => {
+      const totals = new Map();
+      for ( const i of pile.actor.items ) totals.set(name(i), (totals.get(name(i)) ?? 0) + (a.quantity(i) || 1));
+      return totals;
+    };
+    const before = count();
+    for ( const item of items ) {
+      const data = await a.transferData(item, a.quantity(item) || 1);
+      for ( const d of data ) if ( d.flags ) delete d.flags[MODULE_ID];
+      try {
+        await api.addItems(pile, data.map(d => ({item: d, quantity: a.quantity(d) || 1})));
+      } catch(err) {
+        console.warn(`${MODULE_ID} | ${item.name} did not go into the new pile`, err);
+      }
+    }
+    const after = count();
+    const moved = items.filter(item => ((after.get(name(item)) ?? 0) - (before.get(name(item)) ?? 0)) >= (a.quantity(item) || 1));
+    if ( !moved.length ) {
+      await pile.delete().catch(() => {});
+      return fail("SLL.Error.pileFailed");
+    }
+    const to = {kind: "pile", uuid: pile.uuid, name: pile.name || t("SLL.Place.newPile")};
+    const infos = moved.map(item => itemInfo(item, a.quantity(item) || 1));
+    await applyOperations([{action: "delete", documentName: "Item", parent: ledgerActor(),
+      ids: moved.flatMap(i => a.deleteIds(i))}]);
+    await record(infos.map(info => ({...by(user), kind: "move", from: place("pool"), to, item: info})));
+    if ( moved.length < items.length ) return ok({notice: "SLL.Notice.pileDroppedPartly", data: {count: moved.length}});
+    return ok({notice: "SLL.Notice.pileDropped", data: {count: moved.length}});
+  },
+
+  /**
+   * GM: add loot rolled on a table: copies of the items with their quantities, and coins. Without the loot table the
+   * items go into the stash and the coins into the party fund, or nowhere if that is switched off too.
+   */
+  async addRolled({items, coins, table}, user) {
+    if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const {loot, fund} = parts();
+    const area = loot ? "pool" : "stash";
+    const coinArea = loot ? "pool" : (fund ? "fund" : null);
+    const a = adapter();
+    const target = ledgerActor();
+    const note = table ? t("SLL.Reason.table", {name: String(table)}) : "";
+    const log = [];
+    for ( const {uuid, quantity} of (items ?? []) ) {
+      const item = await fromUuid(uuid);
+      if ( !(item instanceof Item) ) continue;
+      const data = item.toObject();
+      a.setQuantity(data, Math.max(Math.floor(Number(quantity) || 1), 1));
+      await addCopy(data, area, target, log, user, note);
+    }
+    const base = Math.max(Math.floor(Number(coins) || 0), 0);
+    if ( base && coinArea && ((a.id !== "generic") || a.hasCoins) ) {
+      const stored = storedCoins();
+      await applyOperations([{action: "update", documentName: "Actor",
+        updates: [coinsUpdate({[coinArea]: stored[coinArea] + base})]}]);
+      log.push({...by(user), kind: "add", from: place("outside"), to: place(coinArea), coins: base, note});
+    }
+    if ( !log.length ) return fail("SLL.Error.nothingRolled");
+    await record(log);
+    return ok({notice: loot ? "SLL.Notice.rolledLoot" : "SLL.Notice.rolledStash", data: {count: log.length}});
+  },
+
   /** GM: reverse a log entry. */
   async undo({entryId}, user) {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
     const all = entries();
     const entry = all.find(e => e.id === entryId);
-    if ( !entry || ["undo", "edit", "remove"].includes(entry.kind) ) return fail("SLL.Error.cannotUndo");
+    if ( !entry || ["undo", "edit", "remove"].includes(entry.kind) || (entry.to?.kind === "pile") ) {
+      return fail("SLL.Error.cannotUndo");
+    }
     if ( all.some(e => (e.kind === "undo") && (e.undoes === entryId)) ) return fail("SLL.Error.alreadyUndone");
     await reverse(entry);
     await record([{...by(user), kind: "undo", undoes: entry.id, from: entry.to, to: entry.from, item: entry.item,
@@ -695,8 +871,9 @@ async function moveUnclaimed(user, {all=false}={}) {
  * @param {Actor} target
  * @param {object[]} log
  * @param {User} user
+ * @param {string} [note]
  */
-async function addCopy(data, area, target, log, user) {
+async function addCopy(data, area, target, log, user, note="") {
   const a = adapter();
   const temp = new CONFIG.Item.documentClass(foundry.utils.deepClone(data), {parent: target});
   if ( !a.isTransferable(temp) ) return;
@@ -715,7 +892,65 @@ async function addCopy(data, area, target, log, user) {
   else await applyOperations([{action: "create", documentName: "Item", parent: target, data: [copy],
     options: {keepId: true}}]);
   log.push({...by(user), kind: "add", from: place("outside"), to: place(area), item: itemInfo(temp, amount),
-    ref: {itemId: stack?.id ?? copy._id}});
+    ref: {itemId: stack?.id ?? copy._id}, note});
+}
+
+/**
+ * Put a copy of a number of units of an item into an area of the ledger actor, merged into a matching stack. The item
+ * itself stays where it is; the caller takes it away.
+ * @param {Item} item
+ * @param {number} quantity
+ * @param {Actor} target          The ledger actor
+ * @param {"pool"|"stash"} area
+ * @param {Function[]} undo       Receives a step which takes the copy out again
+ * @returns {Promise<string>}     The id of the item which holds the units now
+ */
+async function placeCopy(item, quantity, target, area, undo) {
+  const a = adapter();
+  const qpath = a.quantityPath;
+  const created = await a.transferData(item, quantity);
+  for ( const data of created ) {
+    data._id ??= foundry.utils.randomID();
+    data.flags ??= {};
+    data.flags[MODULE_ID] = {area};
+  }
+  const [top] = created;
+  const stack = (created.length === 1) ? a.findStack(target, top, i => areaOf(i) === area) : null;
+  if ( stack ) {
+    const before = a.quantity(stack);
+    await applyOperations([{action: "update", documentName: "Item", parent: target,
+      updates: [{_id: stack.id, [qpath]: before + quantity}]}]);
+    undo.push(() => applyOperations([{action: "update", documentName: "Item", parent: target,
+      updates: [{_id: stack.id, [qpath]: before}]}]));
+    return stack.id;
+  }
+  await applyOperations([{action: "create", documentName: "Item", parent: target, data: created, options: {keepId: true}}]);
+  undo.push(() => applyOperations([{action: "delete", documentName: "Item", parent: target,
+    ids: created.map(d => d._id)}]));
+  return top._id;
+}
+
+/**
+ * Undo taking an item from an Item Pile: it goes back into the pile through Item Piles' API, if the pile still exists.
+ * Containers cannot go back, their contents would lose their place.
+ * @param {object} entry   The log entry
+ * @param {Item} item      The item on the ledger actor
+ * @param {number} amount
+ */
+async function returnToPile(entry, item, amount) {
+  const api = pilesApi();
+  const pile = entry.from?.uuid ? await fromUuid(entry.from.uuid) : null;
+  if ( !api || !pile ) throw new Error("SLL.Error.cannotUndo");
+  const a = adapter();
+  const data = await a.transferData(item, amount);
+  if ( data.length !== 1 ) throw new Error("SLL.Error.cannotUndo");
+  if ( data[0].flags ) delete data[0].flags[MODULE_ID];
+  if ( (await api.addItems(pile, [{item: data[0], quantity: amount}])) === false ) throw new Error("SLL.Error.cannotUndo");
+  const total = a.quantity(item) || 1;
+  if ( amount >= total ) await applyOperations([{action: "delete", documentName: "Item", parent: item.parent,
+    ids: a.deleteIds(item)}]);
+  else await applyOperations([{action: "update", documentName: "Item", parent: item.parent,
+    updates: [{_id: item.id, [a.quantityPath]: total - amount}]}]);
 }
 
 /**
@@ -783,8 +1018,10 @@ async function reverse(entry) {
     const item = holder?.items.get(entry.ref?.itemId);
     if ( !holder || !item ) throw new Error("SLL.Error.cannotUndo");
     const amount = Math.min(entry.item.quantity, a.quantity(item) || 1);
+    // Taken from an Item Pile: back into the pile
+    if ( entry.from?.kind === "pile" ) await returnToPile(entry, item, amount);
     // Added from the sidebar, a compendium or a link: undoing removes it again
-    if ( entry.from?.kind === "outside" ) {
+    else if ( entry.from?.kind === "outside" ) {
       const total = a.quantity(item) || 1;
       if ( amount >= total ) await applyOperations([{action: "delete", documentName: "Item", parent: holder,
         ids: a.deleteIds(item)}]);
@@ -812,6 +1049,14 @@ async function reverse(entry) {
       if ( next[take] < entry.coins ) throw new Error("SLL.Error.cannotUndo");
       next[take] -= entry.coins;
     }
+    // Coins from an Item Pile go back onto the pile's actor (a token's own actor for unlinked piles)
+    let pile = null;
+    if ( give === "pile" ) {
+      const doc = entry.from?.uuid ? await fromUuid(entry.from.uuid) : null;
+      pile = doc?.actor ?? doc;
+      if ( !(pile instanceof Actor) ) throw new Error("SLL.Error.cannotUndo");
+    }
+    const pileUpdate = pile ? a.receiveUpdate(pile, entry.coins) : null;
     if ( give === "actor" ) {
       const actor = actorOf(entry.from);
       if ( !actor ) throw new Error("SLL.Error.cannotUndo");
@@ -820,6 +1065,7 @@ async function reverse(entry) {
     else if ( ["pool", "fund"].includes(give) ) next[give] += entry.coins;
     updates.push(coinsUpdate(next));
     await applyOperations([{action: "update", documentName: "Actor", updates}]);
+    if ( pileUpdate ) await pile.update(pileUpdate);
   }
 }
 

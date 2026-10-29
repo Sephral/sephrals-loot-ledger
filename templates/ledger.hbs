@@ -72,6 +72,8 @@
     {{#if isGM}}{{#unless lootOn}}
     <section class="sll-toolbar">
       <button type="button" data-action="collect"><i class="fa-solid fa-skull" inert></i> {{localize "SLL.Pool.collect"}}</button>
+      {{#if pilesOn}}<button type="button" data-action="takePiles"><i class="fa-solid fa-box-open" inert></i> {{localize "SLL.Piles.take"}}</button>{{/if}}
+      <button type="button" data-action="rollTable"><i class="fa-solid fa-dice" inert></i> {{localize "SLL.Table.rollButton"}}</button>
     </section>
     {{/unless}}{{/if}}
 
@@ -154,8 +156,11 @@
     <section class="sll-toolbar">
       {{#if lootOn}}
       <button type="button" data-action="collect"><i class="fa-solid fa-skull" inert></i> {{localize "SLL.Pool.collect"}}</button>
+      {{#if pilesOn}}<button type="button" data-action="takePiles"><i class="fa-solid fa-box-open" inert></i> {{localize "SLL.Piles.take"}}</button>{{/if}}
+      <button type="button" data-action="rollTable"><i class="fa-solid fa-dice" inert></i> {{localize "SLL.Table.rollButton"}}</button>
       <button type="button" data-action="distribute"><i class="fa-solid fa-scale-balanced" inert></i> {{localize "SLL.Pool.distribute"}}</button>
       {{#if hasUnclaimed}}<button type="button" data-action="unclaimed"><i class="fa-solid fa-box-archive" inert></i> {{localize "SLL.Pool.unclaimed"}}</button>{{/if}}
+      {{#if (and pilesOn hasUnclaimed)}}<button type="button" data-action="dropPile"><i class="fa-solid fa-sack-xmark" inert></i> {{localize "SLL.Piles.drop"}}</button>{{/if}}
       {{else if hasUnclaimed}}
       <button type="button" data-action="unclaimed"><i class="fa-solid fa-box-archive" inert></i> {{localize "SLL.Pool.allToStash"}}</button>
       {{/if}}

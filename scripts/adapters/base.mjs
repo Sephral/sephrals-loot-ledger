@@ -48,7 +48,7 @@ export class BaseAdapter {
    * @returns {boolean}
    */
   isCharacter(actor) {
-    return !!actor && this.characterTypes.includes(actor.type);
+    return !!actor && this.characterTypes.includes(actor.type) && !isItemPile(actor);
   }
 
   /**
@@ -341,6 +341,21 @@ export class BaseAdapter {
    */
   selfTest() {
     return [];
+  }
+}
+
+/**
+ * Is an actor an Item Pile? Item Piles makes its piles out of the character type in some systems (D&D 5e), and a pile
+ * must never count as a party member.
+ * @param {Actor} actor
+ * @returns {boolean}
+ */
+function isItemPile(actor) {
+  if ( !game.modules?.get("item-piles")?.active ) return false;
+  try {
+    return !!game.itempiles?.API?.isValidItemPile(actor);
+  } catch {
+    return false;
   }
 }
 

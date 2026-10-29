@@ -27,7 +27,8 @@
       "pool": "Beute",
       "stash": "Gruppeninventar",
       "fund": "Gruppenkasse",
-      "outside": "außerhalb"
+      "outside": "außerhalb",
+      "newPile": "einen neuen Stapel"
     },
     "Claim": {
       "need": "Brauche",
@@ -161,7 +162,8 @@
       "roll": "höchster Wurf",
       "remainder": "Rest der Teilung",
       "unclaimed": "niemand wollte es",
-      "approved": "freigegeben von {name}"
+      "approved": "freigegeben von {name}",
+      "table": "gewürfelt auf {name}"
     },
     "Balance": {
       "hint": "Was jeder Charakter aus Beute, Gruppeninventar und Gruppenkasse genommen hat, abzüglich dessen, was er hineingelegt hat. Geschenke zwischen Charakteren zählen beim Empfänger.",
@@ -198,7 +200,14 @@
       "distributed": "{count} Gegenstände verteilt, {rest} ins Gruppeninventar gelegt.",
       "collected": "{count} Dinge in die Beute gelegt.",
       "nothingToCollect": "Die Besiegten hinterlassen nichts.",
-      "collectedStash": "{count} Dinge ins Gruppeninventar gelegt."
+      "collectedStash": "{count} Dinge ins Gruppeninventar gelegt.",
+      "pilesEmpty": "Die Stapel hier enthalten nichts, was das Beutebuch nehmen kann.",
+      "noPiles": "In dieser Szene liegt kein Stapel.",
+      "pilePartly": "{count} Dinge genommen. Ein Teil blieb im Stapel, siehe Konsole.",
+      "pileDropped": "{count} Gegenstände als Stapel liegen gelassen.",
+      "rolledLoot": "{count} Dinge in die Beute gelegt.",
+      "rolledStash": "{count} Dinge ins Gruppeninventar gelegt.",
+      "pileDroppedPartly": "{count} Gegenstände als Stapel liegen gelassen. Der Rest blieb in der Beute, siehe Konsole."
     },
     "Error": {
       "noGM": "Keine Spielleitung online.",
@@ -224,7 +233,11 @@
       "alreadyUndone": "Dieser Eintrag wurde schon rückgängig gemacht.",
       "dropOwn": "Zieh hier Gegenstände deines eigenen Charakters hinein.",
       "lootOff": "Die Beuteverteilung ist abgeschaltet.",
-      "fundOff": "Die Gruppenkasse ist abgeschaltet."
+      "fundOff": "Die Gruppenkasse ist abgeschaltet.",
+      "noItemPiles": "Item Piles ist nicht aktiv.",
+      "pileFailed": "Der Stapel hat nichts herausgegeben.",
+      "noScene": "Öffne zuerst eine Szene.",
+      "nothingRolled": "Nichts hinzuzufügen."
     },
     "Block": {
       "cursed": "Verflucht und investiert: Nur die Spielleitung kann es abnehmen.",
@@ -339,7 +352,9 @@
       "StashType": "Das System hat keinen Gruppen-Akteurtyp für das Gruppeninventar.",
       "Containers": "Behälter lassen sich nicht mit ihrem Inhalt weitergeben.",
       "CharacterType": "Der Akteurtyp der Spielercharaktere aus den Einstellungen existiert nicht.",
-      "QuantityPath": "Gegenstände haben unter dem Pfad aus den Einstellungen keine Menge."
+      "QuantityPath": "Gegenstände haben unter dem Pfad aus den Einstellungen keine Menge.",
+      "ItemPiles": "Item Piles ist aktiv, aber einige Funktionen, die das Beutebuch nutzt, fehlen. Das Nehmen aus Stapeln funktioniert vielleicht nicht.",
+      "TableResult": "Foundrys Editor für Tabellenergebnisse wurde nicht gefunden, das Mengenfeld fehlt deshalb."
     },
     "DEBUG": {
       "Title": "Debug-Datei",
@@ -347,6 +362,37 @@
       "Hint": "Speichert eine Datei für Fehlerberichte über alle Module von Sephral in dieser Welt: Versionen, Einstellungen und was die Module aufgezeichnet haben, etwa die letzten Chatnachrichten, die sie gelesen haben. Sie enthält Chattext und Flüsternachrichten, prüfe sie vor dem Teilen.",
       "Entry": "Debug-Datei speichern (Sephral’s Module)",
       "Saved": "Debug-Datei {file} gespeichert. Sie enthält Chattext und Flüsternachrichten, prüfe sie vor dem Teilen."
+    },
+    "Piles": {
+      "title": "Aus Stapeln nehmen",
+      "take": "Aus Stapeln",
+      "hud": "Ins Beutebuch",
+      "hint": "Wähle, was du aus den Stapeln nimmst. Es kommt in die Beute, und das Protokoll vermerkt den Stapel.",
+      "hintStash": "Wähle, was du aus den Stapeln nimmst. Es kommt ins Gruppeninventar, und das Protokoll vermerkt den Stapel.",
+      "kept": "Bleibt im Stapel, das Beutebuch kann es nicht zählen: {list}",
+      "drop": "Als Stapel liegen lassen",
+      "dropConfirm": "Die Beute, die niemand haben will, als neuen Stapel in dieser Szene liegen lassen, neben dem gewählten Token oder in der Mitte der Ansicht? Münzen bleiben in der Beute."
+    },
+    "Table": {
+      "roll": "Beute würfeln",
+      "rollButton": "Tabelle würfeln",
+      "title": "Beute aus {name}",
+      "pick": "Beute auf einer Tabelle würfeln",
+      "table": "Tabelle",
+      "pickHint": "Jedes Ergebnis kann eine Menge haben, die du in der Tabelle einträgst. Ergebnisse wie 3d6 gp werden zu Münzen.",
+      "none": "In dieser Welt gibt es keine Würfeltabellen.",
+      "draws": "Ziehungen",
+      "rerollAll": "Neu würfeln",
+      "rerollLine": "Diese Zeile neu ziehen",
+      "include": "In die Beute",
+      "empty": "Nichts gezogen.",
+      "invalid": "Diese Formel lässt sich nicht würfeln, es zählt 1.",
+      "summary": "{items} Gegenstände",
+      "summaryCoins": "{items} Gegenstände und {coins}",
+      "coinsNowhere": "Beutetisch und Gruppenkasse sind ausgeschaltet, die Münzen bleiben deshalb draußen.",
+      "quantity": "Menge (Beutebuch)",
+      "quantityShort": "Menge",
+      "quantityHint": "Eine Zahl oder Formel wie 2d4: wie viele vom Gegenstand, wie oft eine andere Tabelle gezogen wird oder wie oft ein Münztext wie 3d6 gp zählt. Leer heißt 1."
     }
   }
 }

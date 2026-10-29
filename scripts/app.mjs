@@ -9,9 +9,11 @@ import {MODULE_ID, TEMPLATES, flag, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {openCollect} from "./collect.mjs";
 import {askCoins, askQuantity, askRecipient, askSplit, confirm} from "./dialogs.mjs";
-import {describe, entries, verify} from "./ledger.mjs";
+import {describe, entries, placeName, verify} from "./ledger.mjs";
+import {dropLeftovers, openPiles, pilesApi} from "./piles.mjs";
 import {CLAIM_RANK, balance, pickWinner} from "./rules.mjs";
 import {areaItems, isContained, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
+import {pickTable} from "./tables.mjs";
 import {report, request} from "./transport.mjs";
 import {markUsed} from "./usage.mjs";
 
@@ -76,6 +78,9 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       addCoins: LootLedger.#onAddCoins,
       spend: LootLedger.#onSpend,
       collect: LootLedger.#onCollect,
+      takePiles: LootLedger.#onTakePiles,
+      dropPile: LootLedger.#onDropPile,
+      rollTable: LootLedger.#onRollTable,
       take: LootLedger.#onTake,
       deposit: LootLedger.#onDeposit,
       give: LootLedger.#onGive,
@@ -166,6 +171,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     context.tabs = visible.map(id => ({id, label: t(`SLL.Tab.${id}`),
       active: id === this.tab, badge: (id === "pool") && hasLoot ? (areaItems("pool").length || "") : ""}));
     context.lootOn = on.loot;
+    context.pilesOn = isGM && !!pilesApi();
     context.noGM = !game.users.activeGM;
     if ( !ledger ) return context;
 
@@ -235,7 +241,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       stashValue += row.worth;
       let e = lastIn.stash.get(item.id);
       if ( e?.from?.kind === "pool" ) e = lastIn.pool.get(item.id) ?? e;
-      if ( e ) row.origin = t("SLL.Stash.origin", {name: (e.from?.kind === "actor") ? e.from.name : t(`SLL.Place.${e.from?.kind ?? "outside"}`),
+      if ( e ) row.origin = t("SLL.Stash.origin", {name: placeName(e.from),
         date: new Date(e.time).toLocaleDateString(game.i18n.lang)});
       return row;
     });
@@ -282,7 +288,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       user: e.userName, text: describe(e, byId), img: e.item?.img ?? null,
       value: ((e.item?.value ?? 0) + (e.coins ?? 0)) ? a.formatCoins((e.item?.value ?? 0) + (e.coins ?? 0)) : "",
       undone: undone.has(e.id),
-      canUndo: isGM && !["undo", "edit", "remove"].includes(e.kind) && !undone.has(e.id)
+      canUndo: isGM && !["undo", "edit", "remove"].includes(e.kind) && (e.to?.kind !== "pile") && !undone.has(e.id)
     }));
     const check = verify();
     context.check = {ok: check.ok, count: check.count,
@@ -489,6 +495,21 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @this {LootLedger} */
   static async #onCollect() {
     await openCollect();
+  }
+
+  /** GM: take the contents of Item Piles on the scene into the loot. @this {LootLedger} */
+  static async #onTakePiles() {
+    await openPiles();
+  }
+
+  /** GM: leave the loot nobody claimed as a new Item Pile. @this {LootLedger} */
+  static async #onDropPile() {
+    await dropLeftovers();
+  }
+
+  /** GM: roll loot on a roll table. @this {LootLedger} */
+  static async #onRollTable() {
+    await pickTable();
   }
 
   /** @this {LootLedger} */

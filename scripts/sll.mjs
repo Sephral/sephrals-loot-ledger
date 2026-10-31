@@ -1,10 +1,11 @@
-import {MODULE_ID, t} from "./config.mjs";
+import {MODULE_ID, TESTED_VERSIONS, t} from "./config.mjs";
 import {adapter, registerAdapter, BaseAdapter} from "./adapters/index.mjs";
 import {openLedger, scheduleRefresh} from "./app.mjs";
 import {onRenderChatMessage} from "./chat.mjs";
 import {onDeleteCombat, openCollect} from "./collect.mjs";
 import {registerDebug} from "./debug.mjs";
 import {saveDebugFile} from "./debug-file.mjs";
+import {registerHubModule} from "./hub.mjs";
 import {applyModuleLanguage} from "./language.mjs";
 import {entries, verify} from "./ledger.mjs";
 import {dropLeftovers, onRenderTokenHUD, openPiles} from "./piles.mjs";
@@ -21,6 +22,7 @@ import {registerUsage} from "./usage.mjs";
 const TOOL = "sll-ledger";
 
 Hooks.once("init", () => {
+  registerHubModule({moduleId: MODULE_ID, tested: TESTED_VERSIONS});
   registerSettings();
   registerUsage(MODULE_ID, {
     features: ["lootClaim", "lootDistribute", "coinSplit", "stashTransfer", "itemGive", "fundCoins", "combatCollect",

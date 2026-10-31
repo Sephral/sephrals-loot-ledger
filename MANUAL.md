@@ -139,6 +139,10 @@ For bug reports the GM can save a debug file, one file for all of Sephral’s mo
 
 The file contains chat text and whispers. Check it before you share it.
 
+## Sephral’s Modules
+
+The first button in the module settings, *Sephral’s Modules* (GMs only), opens one window for all of Sephral's modules in the world: the version, self test, settings, manual and demo video of each, a button that switches on an installed module that is off (Foundry then reloads the world for everyone), and the debug file. Below, *More from Sephral* lists other modules that fit the game system of the world, shown only after a click, each with its demo video. The list is part of the module. Only a video you start is loaded, from the module page on GitHub.
+
 ## Limits
 
 * A GM has to be online for every change.

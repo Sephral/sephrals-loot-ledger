@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check scripts/adapters/base.mjs && node --check scripts/adapters/crucible.mjs && node --check scripts/adapters/dnd5e.mjs && node --check scripts/adapters/generic.mjs && node --check scripts/adapters/index.mjs && node --check scripts/app.mjs && node --check scripts/chain.mjs && node --check scripts/chat.mjs && node --check scripts/coins.mjs && node --check scripts/collect.mjs && node --check scripts/config.mjs && node --check scripts/debug-file.mjs && node --check scripts/debug.mjs && node --check scripts/dialogs.mjs && node --check scripts/language.mjs && node --check scripts/ledger.mjs && node --check scripts/loot-roll.mjs && node --check scripts/ops.mjs && node --check scripts/pile-map.mjs && node --check scripts/piles.mjs && node --check scripts/rules.mjs && node --check scripts/selftest.mjs && node --check scripts/service.mjs && node --check scripts/settings.mjs && node --check scripts/sll.mjs && node --check scripts/storage.mjs && node --check scripts/tables.mjs && node --check scripts/trace.mjs && node --check scripts/transport.mjs",
+    "check": "node build/check.mjs",
     "check:manifest": "node build/validate-manifest.mjs",
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage",

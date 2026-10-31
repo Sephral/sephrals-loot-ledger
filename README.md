@@ -8,7 +8,7 @@
 
 ![Loot Ledger demo](media/demo.gif)
 
-*The demo uses heroes, adversaries and the arena map of Crucible's playtest adventure.*
+*The demo plays in D&D 5e with heroes and monsters from the SRD and a chest from Item Piles.*
 
 ## Highlights
 

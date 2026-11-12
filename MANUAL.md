@@ -86,7 +86,7 @@ With the GM’s consent only the active GM’s browser counts, and it sends at m
 * on how many of the last 30 days the module was used
 * how often loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight, log entries are undone, loot is taken from item piles or left as an item pile, and loot rolled on a table is added
 * the settings *Loot table*, *Party fund* and *How loot is handed out* (only the chosen option)
-* where errors occur in the module code: file, line and error type, never the error message
+* where errors occur in the module code: file, line, error type and whether the error arose in the module itself, in Foundry, in the game system or in another module, never the error message or the name of another module
 
 No names, chat messages, notes, dice results or other content of the world are sent.
 

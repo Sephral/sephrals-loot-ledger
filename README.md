@@ -8,19 +8,19 @@
 
 ![Loot Ledger demo](media/demo.gif)
 
-*The demo plays in D&D 5e with heroes and monsters from the SRD and a chest from Item Piles.*
+*The demo plays in D&D 5e with heroes and monsters from the SRD.*
 
 ## Highlights
 
-* **A party inventory that just works:** players put things in and take things out with one click or by dragging them from their sheet. Coins go into a shared party fund.
-* **Fair loot:** after a fight the GM collects what the defeated leave behind. Everyone marks *Need*, *Want* or *Pass*, and the loot goes to the strongest claim, then to whoever received the least so far, or to the highest roll.
-* **Nothing wanted, nothing lost:** loot nobody claims lands in the party inventory.
+* **Unidentified items in every system:** give an item a cover name, picture and description. Players see only the cover, in the loot, the log and on their character, until you reveal it or a character passes the check you set.
+* **A party inventory that just works:** players put things in and take them out with one click or by dragging. Coins go into a shared party fund.
+* **Fair loot:** after a fight the GM collects what the defeated leave behind. Everyone marks *Need*, *Want* or *Pass*, and the loot goes to the strongest claim, then to whoever received the least, or to the highest roll. Unclaimed loot lands in the party inventory.
 * **Every copper counts:** coins are split in equal shares, and the rest goes into the party fund instead of vanishing.
-* **An open log:** every item and every coin that changes hands is written into a journal all players can read. Only the GM's client writes it, and any later change shows up.
+* **An open log:** every item and coin that changes hands is written into a journal all players can read. Only the GM's client writes it, and any later change shows up.
 * **Clean handovers:** equipped, attuned or invested items are taken off on the way, containers keep their contents, and stacks merge.
-* **Gifts with consent:** a character can give something to a friend, who accepts or declines first.
-* **Loot from tables and piles:** roll a table with quantities like 2d4 or 3d6 gp and see the loot before it lands, or empty a pile from Item Piles into the loot right from its token.
-* **Your table, your rules:** free access or GM approval, a limit for the party fund, chat messages for everyone or only for the GM. Switch off the loot table, the party fund or the balance, and the Loot Ledger is simply a shared party inventory.
+* **Gifts with consent:** a character gives something to a friend, who accepts or declines first.
+* **Loot from tables and piles:** roll a table with quantities like 2d4 or 3d6 gp and see the loot first, or empty an Item Piles pile into the loot from its token.
+* **Your table, your rules:** free access or GM approval, a fund limit, chat messages for everyone or only the GM. Every part can be switched off.
 
 ## How it works
 

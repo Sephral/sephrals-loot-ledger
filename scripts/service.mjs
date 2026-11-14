@@ -17,6 +17,8 @@ import {postApproval, postEntries, postOffer, postRolls, resolveCard} from "./ch
 import {clampRequests} from "./pile-map.mjs";
 import {isLootablePile, pileContents, pilesApi} from "./piles.mjs";
 import {countFeature} from "./usage.mjs";
+import {carriedFlags, checkFormula, checkPasses, hasTried} from "./cover-logic.mjs";
+import {coverItem, markTried, readSecret, revealItem} from "./cover.mjs";
 
 /** Requests run one after another. */
 let queue = Promise.resolve();
@@ -39,7 +41,10 @@ const FEATURES = {
   undo: "logUndo",
   takePile: "pileTake",
   dropPile: "pileDrop",
-  addRolled: "tableLoot"
+  addRolled: "tableLoot",
+  cover: "itemCover",
+  reveal: "itemReveal",
+  identify: "itemIdentify"
 };
 
 /**
@@ -136,7 +141,7 @@ function place(where) {
  */
 function itemInfo(item, quantity) {
   const a = adapter();
-  return {name: a.displayName(item), img: item.img, quantity, value: a.value(item, quantity)};
+  return {name: a.displayName(item), img: a.displayImg(item), quantity, value: a.value(item, quantity)};
 }
 
 /**
@@ -204,7 +209,9 @@ async function moveItem(item, quantity, target, area) {
   for ( const data of created ) {
     data._id ??= foundry.utils.randomID();
     data.flags ??= {};
-    if ( toLedger ) data.flags[MODULE_ID] = {area};
+    // The cover travels with the item, claims and the area do not
+    const carried = carriedFlags(data.flags[MODULE_ID], toLedger ? area : null);
+    if ( Object.keys(carried).length ) data.flags[MODULE_ID] = carried;
     else delete data.flags[MODULE_ID];
   }
   const [top] = created;
@@ -630,12 +637,19 @@ const ACTIONS = {
     for ( const source of (sources ?? []) ) {
       const actor = await fromUuid(source.actorUuid);
       if ( !(actor instanceof Actor) || isLedgerActor(actor) ) continue;
-      for ( const {id, quantity} of (source.items ?? []) ) {
+      for ( const {id, quantity, cover} of (source.items ?? []) ) {
         const item = actor.items.get(id);
         if ( !item || !a.isTransferable(item) ) continue;
         const amount = amountOf(item, quantity);
-        const info = itemInfo(item, amount);
+        let info = itemInfo(item, amount);
         const {itemId} = await moveItem(item, amount, target, area);
+        // Covered before it is logged, so the log and the chat card never name it. A stack that already exists keeps its look.
+        const placed = target.items.get(itemId);
+        if ( cover && placed && !a.isCovered(placed) && (a.quantity(placed) === amount) ) {
+          await coverItem(placed, {});
+          info = itemInfo(placed, amount);
+          countFeature(MODULE_ID, "itemCover");
+        }
         log.push({...by(user), kind: "add", from: place(actor), to: place(area), item: info, ref: {itemId}});
       }
       // Coins: all of them, coin by coin where the system keeps them separately
@@ -830,7 +844,7 @@ const ACTIONS = {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
     const all = entries();
     const entry = all.find(e => e.id === entryId);
-    if ( !entry || ["undo", "edit", "remove"].includes(entry.kind) || (entry.to?.kind === "pile") ) {
+    if ( !entry || ["undo", "edit", "remove", "reveal"].includes(entry.kind) || (entry.to?.kind === "pile") ) {
       return fail("SLL.Error.cannotUndo");
     }
     if ( all.some(e => (e.kind === "undo") && (e.undoes === entryId)) ) return fail("SLL.Error.alreadyUndone");
@@ -882,7 +896,7 @@ async function addCopy(data, area, target, log, user, note="") {
   delete copy.folder;
   a.cleanData(copy);
   copy._id = foundry.utils.randomID();
-  copy.flags = {...(copy.flags ?? {}), [MODULE_ID]: {area}};
+  copy.flags = {...(copy.flags ?? {}), [MODULE_ID]: carriedFlags(copy.flags?.[MODULE_ID], area)};
   const amount = Math.max(a.quantity(copy), 1);
   const stack = a.findStack(target, copy, i => areaOf(i) === area);
   if ( stack ) {
@@ -1116,3 +1130,96 @@ ACTIONS._edit = async ({entry}, user) => {
   await record([entry]);
   return ok();
 };
+
+/* -------------------------------------------- */
+/*  Unidentified items                          */
+/* -------------------------------------------- */
+
+/**
+ * The item a cover request is about: a world or other item by UUID, an item of the loot or the party inventory, or one
+ * a character carries.
+ * @param {object} payload
+ * @returns {Promise<Item>}
+ */
+async function coverTarget({uuid, itemId, area, actorId}) {
+  if ( uuid ) {
+    const item = await fromUuid(uuid);
+    if ( !(item instanceof Item) ) throw new Error("SLL.Error.itemGone");
+    return item;
+  }
+  if ( area === "mine" ) {
+    const item = actorById(actorId)?.items.get(itemId);
+    if ( !item ) throw new Error("SLL.Error.itemGone");
+    return item;
+  }
+  return ledgerItem(itemId, (area === "stash") ? "stash" : "pool");
+}
+
+/**
+ * The place of an item for the log.
+ * @param {Item} item
+ * @returns {object|null}
+ */
+function holderPlace(item) {
+  if ( isLedgerActor(item.parent) ) return place(areaOf(item));
+  return (item.parent instanceof Actor) ? place(item.parent) : null;
+}
+
+/**
+ * Write the log entry of a revealed item. Items outside the party (world items) are not part of the log.
+ * @param {User} user
+ * @param {Item} item
+ * @param {{coverName: string, realName: string}} names
+ * @returns {Promise<void>}
+ */
+async function logReveal(user, item, {coverName}) {
+  const where = holderPlace(item);
+  if ( !where ) return;
+  await record([{...by(user), kind: "reveal", from: where, to: where, item: itemInfo(item, adapter().quantity(item) || 1),
+    note: coverName}]);
+}
+
+Object.assign(ACTIONS, {
+
+  /** GM: cover an item (name, picture, description and an optional identify check). */
+  async cover(payload, user) {
+    if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const item = await coverTarget(payload);
+    if ( !adapter().isTransferable(item) ) return fail("SLL.Error.notTransferable");
+    const {coverName} = await coverItem(item, {name: payload.name, img: payload.img, description: payload.description,
+      dc: payload.dc});
+    return ok({notice: "SLL.Notice.covered", data: {name: coverName}});
+  },
+
+  /** GM: reveal an item. */
+  async reveal(payload, user) {
+    if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const item = await coverTarget(payload);
+    if ( !adapter().isCovered(item) ) return fail("SLL.Error.notCovered");
+    const names = await revealItem(item);
+    await logReveal(user, item, names);
+    return ok({notice: "SLL.Notice.revealed", data: {name: names.realName}});
+  },
+
+  /** A character tries to identify an item with the check the GM set. One try per character and item. */
+  async identify({itemId, area, actorId}, user) {
+    const actor = actorById(actorId);
+    if ( !isCharacter(actor) || !owns(user, actor) ) return fail("SLL.Error.notYours");
+    const a = adapter();
+    const item = await coverTarget({itemId, area, actorId});
+    const cover = a.coverOf(item);
+    if ( !cover ) return fail("SLL.Error.notCovered");
+    const secret = cover.check ? readSecret(cover.secret, cover.store) : null;
+    if ( !secret?.dc ) return fail("SLL.Error.noCheck");
+    if ( hasTried(cover, actor.id) ) return fail("SLL.Error.alreadyTried");
+    const roll = await new Roll(checkFormula(setting("identifyFormula"), a.identifyBonus(actor))).evaluate();
+    const success = checkPasses(roll.total, secret.dc);
+    await markTried(item, actor.id);
+    await roll.toMessage({speaker: ChatMessage.getSpeaker({actor}),
+      flavor: t(success ? "SLL.Identify.success" : "SLL.Identify.failure", {actor: actor.name, item: cover.name})});
+    if ( !success ) return ok({notice: "SLL.Notice.notIdentified", data: {name: cover.name}});
+    const names = await revealItem(item);
+    await logReveal(user, item, names);
+    return ok({notice: "SLL.Notice.identified", data: {name: names.realName}});
+  }
+});

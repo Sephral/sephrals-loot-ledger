@@ -26,6 +26,11 @@ export class CrucibleAdapter extends BaseAdapter {
     return "adversary";
   }
 
+  /** Physical items keep the description players see in description.public. */
+  descriptionPath() {
+    return "system.description.public";
+  }
+
   /** @override */
   systemParty() {
     const actors = globalThis.crucible?.party?.system?.actors;

@@ -7,6 +7,7 @@
 
 import {MODULE_ID} from "../config.mjs";
 import {applyCoinValues} from "../coins.mjs";
+import {nativeCover} from "../cover-logic.mjs";
 import {BaseAdapter, sameData, stackCompare} from "./base.mjs";
 
 /** The coins payouts are made in; platinum and electrum stay with those who already have them. */
@@ -26,6 +27,36 @@ export class Dnd5eAdapter extends BaseAdapter {
   /** @override */
   stashType() {
     return "group";
+  }
+
+  /** dnd5e has system.identified with its own unidentified name and description. */
+  get nativeIdentification() {
+    return true;
+  }
+
+  /**
+   * The module's cover, or the one the GM made with dnd5e's own checkbox. A cover of the module that dnd5e's checkbox
+   * switched off again counts as revealed.
+   * @override
+   */
+  coverOf(item) {
+    const own = super.coverOf(item);
+    const system = item?.system;
+    if ( own ) return ((own.mode === "system") && (system?.identified !== false)) ? null : own;
+    if ( system?.identified !== false ) return null;
+    return nativeCover({name: item.name, img: item.img, unidentifiedName: system.unidentified?.name,
+      unidentifiedDescription: system.unidentified?.description});
+  }
+
+  /** @override */
+  descriptionPath() {
+    return "system.description.value";
+  }
+
+  /** Identifying a magic item is an Arcana or Investigation check, the better one counts. */
+  identifyBonus(actor) {
+    const skills = actor?.system?.skills ?? {};
+    return Math.max(Number(skills.arc?.total) || 0, Number(skills.inv?.total) || 0);
   }
 
   /** @override */

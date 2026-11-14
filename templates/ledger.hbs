@@ -88,13 +88,17 @@
         <li class="sll-item" data-item-id="{{id}}" data-area="stash" data-name="{{name}}">
           <img src="{{img}}" alt="" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">
           <div class="sll-item-info">
-            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{#if covered}}<i class="fa-solid fa-mask sll-covered" data-tooltip="{{localize "SLL.Cover.covered"}}" inert></i> {{/if}}{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            {{#if realName}}<small class="sll-real">{{localize "SLL.Cover.real" name=realName}}{{#if dc}} · {{localize "SLL.Cover.dcShort" dc=dc}}{{/if}}</small>{{/if}}
             <small>{{#if value}}{{value}}{{/if}}{{#if origin}}{{#if value}} · {{/if}}{{origin}}{{/if}}</small>
             {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
           </div>
           {{#if heavy}}<i class="fa-solid fa-weight-hanging sll-heavy" data-tooltip="{{localize "SLL.Heavy"}}" inert></i>{{/if}}
           {{#if ../acting}}<button type="button" data-action="take">{{localize "SLL.Stash.take"}}</button>{{/if}}
+          {{#if canIdentify}}<button type="button" class="sll-icon" data-action="identify" data-tooltip="{{localize "SLL.Cover.identify"}}"><i class="fa-solid fa-magnifying-glass" inert></i></button>{{/if}}
           {{#if ../isGM}}
+          {{#if covered}}<button type="button" class="sll-icon" data-action="reveal" data-tooltip="{{localize "SLL.Cover.reveal"}}"><i class="fa-solid fa-eye" inert></i></button>{{/if}}
+          <button type="button" class="sll-icon" data-action="cover" data-tooltip="{{#if covered}}{{localize "SLL.Cover.edit"}}{{else}}{{localize "SLL.Cover.cover"}}{{/if}}"><i class="fa-solid fa-mask" inert></i></button>
           <button type="button" class="sll-icon" data-action="handOut" data-tooltip="{{localize "SLL.Stash.handOut"}}"><i class="fa-solid fa-gift" inert></i></button>
           {{#if @root.lootOn}}<button type="button" class="sll-icon" data-action="toPool" data-tooltip="{{localize "SLL.Stash.toPool"}}"><i class="fa-solid fa-sack" inert></i></button>{{/if}}
           <button type="button" class="sll-icon" data-action="remove" data-tooltip="{{localize "SLL.Pool.remove"}}"><i class="fa-solid fa-trash" inert></i></button>
@@ -119,10 +123,16 @@
         <li class="sll-item {{#if blocked}}blocked{{/if}}" data-item-id="{{id}}" data-area="mine" data-name="{{name}}">
           <img src="{{img}}" alt="" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">
           <div class="sll-item-info">
-            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{#if covered}}<i class="fa-solid fa-mask sll-covered" data-tooltip="{{localize "SLL.Cover.covered"}}" inert></i> {{/if}}{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            {{#if realName}}<small class="sll-real">{{localize "SLL.Cover.real" name=realName}}{{#if dc}} · {{localize "SLL.Cover.dcShort" dc=dc}}{{/if}}</small>{{/if}}
             <small>{{#if blocked}}{{blocked}}{{else}}{{value}}{{/if}}</small>
             {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
           </div>
+          {{#if canIdentify}}<button type="button" class="sll-icon" data-action="identify" data-tooltip="{{localize "SLL.Cover.identify"}}"><i class="fa-solid fa-magnifying-glass" inert></i></button>{{/if}}
+          {{#if @root.isGM}}
+          {{#if covered}}<button type="button" class="sll-icon" data-action="reveal" data-tooltip="{{localize "SLL.Cover.reveal"}}"><i class="fa-solid fa-eye" inert></i></button>{{/if}}
+          <button type="button" class="sll-icon" data-action="cover" data-tooltip="{{#if covered}}{{localize "SLL.Cover.edit"}}{{else}}{{localize "SLL.Cover.cover"}}{{/if}}"><i class="fa-solid fa-mask" inert></i></button>
+          {{/if}}
           {{#unless blocked}}
           <button type="button" data-action="deposit">{{localize "SLL.Stash.deposit"}}</button>
           <button type="button" class="sll-icon" data-action="give" data-tooltip="{{localize "SLL.Stash.give"}}"><i class="fa-solid fa-hand-holding-hand" inert></i></button>
@@ -174,7 +184,8 @@
         <li class="sll-item sll-loot" data-item-id="{{id}}" data-area="pool" data-name="{{name}}">
           <img src="{{img}}" alt="" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">
           <div class="sll-item-info">
-            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{#if covered}}<i class="fa-solid fa-mask sll-covered" data-tooltip="{{localize "SLL.Cover.covered"}}" inert></i> {{/if}}{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            {{#if realName}}<small class="sll-real">{{localize "SLL.Cover.real" name=realName}}{{#if dc}} · {{localize "SLL.Cover.dcShort" dc=dc}}{{/if}}</small>{{/if}}
             <small>{{value}}</small>
             {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
             {{#if claims.length}}
@@ -184,6 +195,7 @@
             {{/if}}
           </div>
           {{#if heavy}}<i class="fa-solid fa-weight-hanging sll-heavy" data-tooltip="{{localize "SLL.Heavy"}}" inert></i>{{/if}}
+          {{#if canIdentify}}<button type="button" class="sll-icon" data-action="identify" data-tooltip="{{localize "SLL.Cover.identify"}}"><i class="fa-solid fa-magnifying-glass" inert></i></button>{{/if}}
           {{#if (and ../acting @root.lootOn)}}
           <div class="sll-claim-buttons">
             {{#each claimButtons}}<button type="button" class="{{claim}} {{#if active}}active{{/if}}" data-action="claim" data-claim="{{claim}}">{{label}}</button>{{/each}}
@@ -192,6 +204,8 @@
           {{#if ../isGM}}
           <div class="sll-gm">
             <select name="winner">{{#each options}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select>
+            {{#if covered}}<button type="button" class="sll-icon" data-action="reveal" data-tooltip="{{localize "SLL.Cover.reveal"}}"><i class="fa-solid fa-eye" inert></i></button>{{/if}}
+            <button type="button" class="sll-icon" data-action="cover" data-tooltip="{{#if covered}}{{localize "SLL.Cover.edit"}}{{else}}{{localize "SLL.Cover.cover"}}{{/if}}"><i class="fa-solid fa-mask" inert></i></button>
             <button type="button" class="sll-icon" data-action="award" data-tooltip="{{localize "SLL.Pool.award"}}"><i class="fa-solid fa-gift" inert></i></button>
             <button type="button" class="sll-icon" data-action="toStash" data-tooltip="{{localize "SLL.Pool.toStash"}}"><i class="fa-solid fa-box-archive" inert></i></button>
             <button type="button" class="sll-icon" data-action="remove" data-tooltip="{{localize "SLL.Pool.remove"}}"><i class="fa-solid fa-trash" inert></i></button>

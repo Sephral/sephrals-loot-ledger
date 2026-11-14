@@ -16,6 +16,7 @@ import {ensureStorage, isLedgerActor, ledgerActor} from "./storage.mjs";
 import {onGetHeaderControls, onGetRollTableContextOptions, onRenderRollTableSheet, onRenderTableResultConfig, openLootRoll}
   from "./tables.mjs";
 import {registerTransport, report, request} from "./transport.mjs";
+import {addDirectoryEntries} from "./cover.mjs";
 import {registerUsage} from "./usage.mjs";
 
 /** The name of the tool in the token controls. */
@@ -26,8 +27,8 @@ Hooks.once("init", () => {
   registerSettings();
   registerUsage(MODULE_ID, {
     features: ["lootClaim", "lootDistribute", "coinSplit", "stashTransfer", "itemGive", "fundCoins", "combatCollect",
-      "logUndo", "pileTake", "pileDrop", "tableLoot"],
-    settings: ["lootTable", "partyFund", "distribution"]
+      "logUndo", "pileTake", "pileDrop", "tableLoot", "itemCover", "itemReveal", "itemIdentify"],
+    settings: ["lootTable", "partyFund", "distribution", "coverSafe", "coverSecrets"]
   });
   registerTransport(handleRequest);
   registerDebug();
@@ -43,6 +44,7 @@ Hooks.once("init", () => {
   Hooks.on("renderRollTableSheet", onRenderRollTableSheet);
   Hooks.on("getHeaderControlsRollTableSheet", onGetHeaderControls);
   Hooks.on("getRollTableContextOptions", onGetRollTableContextOptions);
+  Hooks.on("getItemContextOptions", (app, entries) => addDirectoryEntries(app, entries, async (action, payload) => report(await request(action, payload))));
 
   // Changes made past the module and redraws of the window
   for ( const kind of ["create", "update", "delete"] ) {
@@ -82,6 +84,12 @@ Hooks.once("init", () => {
     registerAdapter,
     /** The adapter base class to extend. */
     BaseAdapter,
+    /** Cover an item as unidentified (GM): {name, img, description, dc}, every field optional. */
+    coverItem: async (item, input = {}) => report(await request("cover", {uuid: item.uuid, ...input})),
+    /** Reveal a covered item (GM). */
+    revealItem: async item => report(await request("reveal", {uuid: item.uuid})),
+    /** Is an item covered? */
+    isCovered: item => adapter().isCovered(item),
     /** Check the storage, the log and the system adapter (GM). */
     runSelfTest,
     /** Save the debug file of Sephral's modules (GM): about one chat message, or without an id the latest picture. */

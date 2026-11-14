@@ -9,6 +9,7 @@ import {adapter, hasAdapter} from "./adapters/index.mjs";
 import {verify} from "./ledger.mjs";
 import {pilesApi} from "./piles.mjs";
 import {ledgerActor, ledgerJournal} from "./storage.mjs";
+import {readSecret, secretsJournal} from "./cover.mjs";
 
 /** The functions of Item Piles' API the bridge needs. */
 const PILE_FUNCTIONS = ["isItemPileLootable", "isValidItemPile", "getActorItems", "getActorCurrencies", "removeItems",
@@ -53,6 +54,14 @@ function checkAll() {
   // Item Piles: the functions the bridge calls
   const piles = pilesApi();
   if ( piles ) check(PILE_FUNCTIONS.every(name => typeof piles[name] === "function"), "SLL.SELFTEST.ItemPiles");
+  // Unidentified items: the journal with the real values is hidden, and every swapped item still has its secret
+  const secrets = secretsJournal();
+  check(!secrets || ((secrets.ownership?.default ?? 0) === CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE), "SLL.SELFTEST.CoverSecrets");
+  const lost = (actor?.items ?? []).filter(i => {
+    const cover = adapter().coverOf(i);
+    return cover && (cover.mode === "swap") && !readSecret(cover.secret, cover.store);
+  }).length;
+  check(!lost, "SLL.SELFTEST.CoverSecret", {count: lost});
   // Roll tables: the result editor the quantity field goes into
   check(!!foundry.applications.sheets?.TableResultConfig, "SLL.SELFTEST.TableResult");
   return {problems, checks};

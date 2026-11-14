@@ -71,8 +71,11 @@ export async function openCollect(uuids) {
     if ( !items.length && !coins ) return "";
     const rows = items.map(item => {
       const qty = a.quantity(item);
-      return `<label class="sll-check"><input type="checkbox" name="pick.a${index}.${esc(item.id)}" checked>`
-        + `<img src="${esc(item.img)}" alt=""> ${esc(a.displayName(item))}${qty > 1 ? ` <small>× ${qty}</small>` : ""}</label>`;
+      // Covered before it is logged: the mask hides the item from the log and the chat card
+      const mask = a.isCovered(item) ? "" : `<label class="sll-cover-toggle" data-tooltip="${esc(t("SLL.Cover.collectToggle"))}">`
+        + `<input type="checkbox" name="cover.a${index}.${esc(item.id)}"><i class="fa-solid fa-mask" inert></i></label>`;
+      return `<div class="sll-check-row"><label class="sll-check"><input type="checkbox" name="pick.a${index}.${esc(item.id)}" checked>`
+        + `<img src="${esc(a.displayImg(item))}" alt=""> ${esc(a.displayName(item))}${qty > 1 ? ` <small>× ${qty}</small>` : ""}</label>${mask}</div>`;
     }).join("");
     const coinRow = coins ? `<label class="sll-check"><input type="checkbox" name="coins.a${index}" checked>`
       + `<i class="fa-solid fa-coins" inert></i> ${esc(a.formatCoins(coins))}</label>` : "";
@@ -95,7 +98,8 @@ export async function openCollect(uuids) {
   if ( !result ) return;
   const sources = actors.map((actor, index) => ({
     actorUuid: actor.uuid,
-    items: Object.entries(result.pick?.[`a${index}`] ?? {}).filter(([, on]) => on).map(([id]) => ({id})),
+    items: Object.entries(result.pick?.[`a${index}`] ?? {}).filter(([, on]) => on)
+      .map(([id]) => ({id, cover: !!result.cover?.[`a${index}`]?.[id]})),
     coins: !!result.coins?.[`a${index}`]
   })).filter(s => s.items.length || s.coins);
   if ( !sources.length ) return;

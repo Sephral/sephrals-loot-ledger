@@ -6,6 +6,8 @@
  */
 
 import {canPay, changePurse, formatCoins, payout, sortDenominations, toBase} from "../coins.mjs";
+import {MODULE_ID} from "../config.mjs";
+import {COVER_FLAG, stackIdentity} from "../cover-logic.mjs";
 
 /**
  * @typedef {import("../coins.mjs").Denomination} Denomination
@@ -177,6 +179,83 @@ export class BaseAdapter {
    */
   displayName(item) {
     return item.name;
+  }
+
+  /* -------------------------------------------- */
+  /*  Unidentified items                          */
+  /* -------------------------------------------- */
+
+  /**
+   * Does the system have its own identification the module can switch (D&D 5e: system.identified)?
+   * @type {boolean}
+   */
+  get nativeIdentification() {
+    return false;
+  }
+
+  /**
+   * How a cover goes on an item: "system" uses the system's own identification, "swap" puts the cover on the item and
+   * keeps the real values GM-only. Systems without identification always swap. The setting "coverSafe" makes systems
+   * with identification swap too, so the real name never reaches a player's client.
+   * @returns {"system"|"swap"}
+   */
+  coverMode() {
+    let safe = false;
+    try {
+      safe = !!game.settings.get(MODULE_ID, "coverSafe");
+    } catch {
+      safe = false;
+    }
+    return (this.nativeIdentification && !safe) ? "system" : "swap";
+  }
+
+  /**
+   * The cover of an item, or null for an item that is identified.
+   * @param {Item|object} item
+   * @returns {object|null}
+   */
+  coverOf(item) {
+    return foundry.utils.getProperty(item, `flags.${MODULE_ID}.${COVER_FLAG}`) ?? null;
+  }
+
+  /**
+   * Is an item covered?
+   * @param {Item|object} item
+   * @returns {boolean}
+   */
+  isCovered(item) {
+    return !!this.coverOf(item);
+  }
+
+  /**
+   * The picture of an item as players may see it.
+   * @param {Item} item
+   * @returns {string}
+   */
+  displayImg(item) {
+    return this.coverOf(item)?.img || item.img;
+  }
+
+  /**
+   * Where an item keeps its description, as an update path, or null when the item has none the module can swap.
+   * @param {Item|object} item
+   * @returns {string|null}
+   */
+  descriptionPath(item) {
+    for ( const path of ["system.description.value", "system.description.public", "system.description",
+      "system.details.description"] ) {
+      if ( typeof foundry.utils.getProperty(item, path) === "string" ) return path;
+    }
+    return null;
+  }
+
+  /**
+   * The bonus a character adds to the check which identifies an item.
+   * @param {Actor} actor
+   * @returns {number}
+   */
+  identifyBonus(actor) {
+    return 0;
   }
 
   /**
@@ -384,6 +463,11 @@ export function stackCompare(data, adapter) {
   delete copy.ownership;
   delete copy.folder;
   foundry.utils.setProperty(copy, adapter.quantityPath, 0);
-  if ( copy.flags ) delete copy.flags["sephrals-loot-ledger"];
+  if ( copy.flags ) {
+    // Two covered items only stack when they hide the same thing
+    const identity = stackIdentity(copy.flags[MODULE_ID]?.[COVER_FLAG]);
+    delete copy.flags[MODULE_ID];
+    if ( identity ) copy.flags[MODULE_ID] = {[COVER_FLAG]: identity};
+  }
   return copy;
 }

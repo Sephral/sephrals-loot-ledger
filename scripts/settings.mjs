@@ -20,6 +20,7 @@ import {runSelfTest} from "./selftest.mjs";
  * @property {{min: number, max: number, step: number}} [range]
  * @property {"world"|"client"} [scope="world"]
  * @property {boolean} [generic]              Only for systems without an own adapter
+ * @property {boolean} [native]               Only for systems with their own identification
  * @property {string[]} [requires]            Switches this setting depends on; it hides while one of them is off
  * @property {Function} [onChange]
  */
@@ -50,6 +51,10 @@ export const SETTINGS = {
   collectPrompt: {type: Boolean, default: true, requires: ["lootTable"]},
   chatCards: {type: String, default: "all", choices: {
     all: "SLL.SETTINGS.chatCards.all", gm: "SLL.SETTINGS.chatCards.gm", off: "SLL.SETTINGS.chatCards.off"}},
+  identifyFormula: {type: String, default: "1d20"},
+  coverSafe: {type: Boolean, default: false, native: true, onChange: redraw},
+  coverSecrets: {type: String, default: "journal", choices: {
+    journal: "SLL.SETTINGS.coverSecrets.journal", device: "SLL.SETTINGS.coverSecrets.device"}},
   genericCharacterType: {type: String, default: "character", generic: true, onChange: redraw},
   genericQuantity: {type: String, default: "system.quantity", generic: true, onChange: redraw},
   genericPrice: {type: String, default: "system.price", generic: true, onChange: redraw},
@@ -139,7 +144,7 @@ export function registerSettings() {
       name: `SLL.SETTINGS.${key}.name`,
       hint: `SLL.SETTINGS.${key}.hint`,
       scope: def.scope ?? "world",
-      config: def.generic ? generic : true,
+      config: def.generic ? generic : (def.native ? adapter().nativeIdentification : true),
       type: def.range ? new foundry.data.fields.NumberField({...def.range, initial: def.default}) : def.type,
       choices: def.choices,
       default: def.default,

@@ -153,7 +153,8 @@
       "openJournal": "Open as journal",
       "undoTitle": "Undo",
       "undoConfirm": "Reverse this entry? Items and coins go back where they came from, and the log records the undo.",
-      "empty": "Nothing recorded yet."
+      "empty": "Nothing recorded yet.",
+      "reveal": "{note} was identified: {what}"
     },
     "Reason": {
       "single": "strongest claim",
@@ -207,7 +208,11 @@
       "pileDropped": "{count} items left as an item pile.",
       "rolledLoot": "{count} things added to the loot.",
       "rolledStash": "{count} things put into the party inventory.",
-      "pileDroppedPartly": "{count} items left as an item pile. The rest stayed in the loot, see the console."
+      "pileDroppedPartly": "{count} items left as an item pile. The rest stayed in the loot, see the console.",
+      "covered": "{name} is covered.",
+      "revealed": "{name} is revealed.",
+      "identified": "Identified: {name}.",
+      "notIdentified": "You cannot make out {name}."
     },
     "Error": {
       "noGM": "No GM is online.",
@@ -237,7 +242,12 @@
       "noItemPiles": "Item Piles is not active.",
       "pileFailed": "The item pile did not hand anything over.",
       "noScene": "Open a scene first.",
-      "nothingRolled": "Nothing to add."
+      "nothingRolled": "Nothing to add.",
+      "notCovered": "That item is not covered.",
+      "noCheck": "There is no check for this item. Ask the GM.",
+      "alreadyTried": "Your character already tried to identify this item.",
+      "secretMissing": "The real values of this item are missing. They were kept in the secrets journal.",
+      "deviceStore": "This browser cannot keep the real values. Switch the setting \"Where the real values are kept\" to the journal."
     },
     "Block": {
       "cursed": "Cursed and invested: only the GM can take it off.",
@@ -328,6 +338,20 @@
         "name": "Coin values",
         "label": "Set coin values",
         "hint": "What each coin is worth, for tables with their own exchange rates. Coins you leave unchanged use the rates of the system."
+      },
+      "identifyFormula": {
+        "name": "Identify check",
+        "hint": "The roll a character makes to identify an item that has a check. A bonus of the character comes on top where the system has one (D&D 5e: Arcana or Investigation, the better one)."
+      },
+      "coverSafe": {
+        "name": "Keep real names out of the players' data",
+        "hint": "D&D 5e has its own identification, the real name and picture stay in the item's data. With this switch the module swaps the cover onto the item and keeps the real values GM-only, like in systems without identification."
+      },
+      "coverSecrets": {
+        "name": "Where the real values are kept",
+        "hint": "For covered items outside the system's own identification. The journal can be opened by GMs only and every GM can reveal, but Foundry sends every world document to all browsers, so a player with the browser console could read it. The GM's browser keeps them away from every other client: they are never sent anywhere, but only that browser can reveal the item or run its check, and copies of the world do not carry them.",
+        "journal": "A journal only GMs can open",
+        "device": "The GM's browser only"
       }
     },
     "SELFTEST": {
@@ -354,7 +378,9 @@
       "CharacterType": "The actor type of player characters from the settings does not exist.",
       "QuantityPath": "Items have no quantity at the path from the settings.",
       "ItemPiles": "Item Piles is active, but some of its functions the Loot Ledger uses are missing. Taking from piles may not work.",
-      "TableResult": "Foundry's editor for table results was not found, so the quantity field is missing."
+      "TableResult": "Foundry's editor for table results was not found, so the quantity field is missing.",
+      "CoverSecrets": "The journal with the real values of covered items is visible to players.",
+      "CoverSecret": "The real values of {count} covered items are not available in this browser. If they were kept on a device, open the world in that browser."
     },
     "DEBUG": {
       "Title": "Debug file",
@@ -393,6 +419,37 @@
       "quantity": "Quantity (Loot Ledger)",
       "quantityShort": "Qty",
       "quantityHint": "A number or a formula like 2d4: how many of the item, how often another table is drawn, or how often a coin text like 3d6 gp counts. Empty means 1."
+    },
+    "Cover": {
+      "title": "Unidentified item",
+      "hint": "Players see only the cover of {name}: the name, the picture and the description you give here.",
+      "name": "Cover name",
+      "img": "Cover picture",
+      "description": "Cover description",
+      "dc": "Identify check",
+      "dcHint": "Optional. A character who owns or sees the item can try to identify it with one roll against this number. Leave it empty if only you reveal the item.",
+      "modeSystem": "This system has its own identification, the module switches it on. The real name and picture stay in the item's data, the system shows the cover.",
+      "modeSwap": "The real name, picture and description are kept in a journal only GMs can open. The item itself carries the cover until it is revealed. Foundry sends every world document to every browser, so a player who opens the browser console could still read them. The setting \"Where the real values are kept\" can keep them in the GM's browser only.",
+      "confirm": "Cover",
+      "cover": "Cover as unidentified",
+      "edit": "Change the cover",
+      "reveal": "Reveal",
+      "revealConfirm": "Reveal {name}? Everyone then sees what it is.",
+      "covered": "Unidentified",
+      "real": "Really: {name}",
+      "dcShort": "Check {dc}",
+      "identify": "Try to identify",
+      "defaultName": "Unidentified {type}",
+      "journalName": "Loot Ledger secrets (GM only)",
+      "secretPage": "Secret",
+      "collectToggle": "Cover as unidentified before it goes into the loot",
+      "menuCover": "Cover as unidentified (Loot Ledger)",
+      "menuReveal": "Reveal (Loot Ledger)",
+      "modeDevice": "The real name, picture and description stay in this browser and are never sent to the world. Only this browser can reveal the item or run its check."
+    },
+    "Identify": {
+      "success": "{actor} identifies {item}",
+      "failure": "{actor} cannot make out {item}"
     }
   }
 }

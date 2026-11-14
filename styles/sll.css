@@ -613,3 +613,32 @@
 .sll-ledger.theme-light .sll-check-line {
   background: rgb(0 0 0 / 0.06);
 }
+
+/* Unidentified items */
+.sll-ledger .sll-covered {
+  color: var(--color-warm-2, #b5651d);
+  margin-right: 2px;
+}
+
+.sll-ledger .sll-real {
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.sll-check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sll-check-row .sll-check {
+  flex: 1;
+}
+
+.sll-cover-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  opacity: 0.75;
+  white-space: nowrap;
+}

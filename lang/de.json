@@ -153,7 +153,8 @@
       "openJournal": "Als Journal öffnen",
       "undoTitle": "Rückgängig",
       "undoConfirm": "Diesen Eintrag rückgängig machen? Gegenstände und Münzen gehen dorthin zurück, wo sie herkamen, und das Protokoll vermerkt es.",
-      "empty": "Noch nichts aufgezeichnet."
+      "empty": "Noch nichts aufgezeichnet.",
+      "reveal": "{note} wurde bestimmt: {what}"
     },
     "Reason": {
       "single": "stärkster Anspruch",
@@ -207,7 +208,11 @@
       "pileDropped": "{count} Gegenstände als Stapel liegen gelassen.",
       "rolledLoot": "{count} Dinge in die Beute gelegt.",
       "rolledStash": "{count} Dinge ins Gruppeninventar gelegt.",
-      "pileDroppedPartly": "{count} Gegenstände als Stapel liegen gelassen. Der Rest blieb in der Beute, siehe Konsole."
+      "pileDroppedPartly": "{count} Gegenstände als Stapel liegen gelassen. Der Rest blieb in der Beute, siehe Konsole.",
+      "covered": "{name} ist verhüllt.",
+      "revealed": "{name} ist enthüllt.",
+      "identified": "Bestimmt: {name}.",
+      "notIdentified": "Du kannst {name} nicht bestimmen."
     },
     "Error": {
       "noGM": "Keine Spielleitung online.",
@@ -237,7 +242,12 @@
       "noItemPiles": "Item Piles ist nicht aktiv.",
       "pileFailed": "Der Stapel hat nichts herausgegeben.",
       "noScene": "Öffne zuerst eine Szene.",
-      "nothingRolled": "Nichts hinzuzufügen."
+      "nothingRolled": "Nichts hinzuzufügen.",
+      "notCovered": "Dieser Gegenstand ist nicht verhüllt.",
+      "noCheck": "Für diesen Gegenstand gibt es keine Probe. Frag die Spielleitung.",
+      "alreadyTried": "Deine Figur hat schon versucht, diesen Gegenstand zu bestimmen.",
+      "secretMissing": "Die echten Werte dieses Gegenstands fehlen. Sie lagen im Journal der Geheimnisse.",
+      "deviceStore": "Dieser Browser kann die echten Werte nicht speichern. Stelle \"Wo die echten Werte liegen\" auf das Journal um."
     },
     "Block": {
       "cursed": "Verflucht und investiert: Nur die Spielleitung kann es abnehmen.",
@@ -328,6 +338,20 @@
         "name": "Münzwerte",
         "label": "Münzwerte festlegen",
         "hint": "Was jede Münze wert ist, für Runden mit eigenen Wechselkursen. Unveränderte Münzen nutzen die Kurse des Systems."
+      },
+      "identifyFormula": {
+        "name": "Probe zum Bestimmen",
+        "hint": "Der Wurf, mit dem eine Figur einen Gegenstand bestimmt, für den es eine Probe gibt. Ein Bonus der Figur kommt dazu, wo das System einen kennt (D&D 5e: Arkane Kunde oder Nachforschungen, der bessere zählt)."
+      },
+      "coverSafe": {
+        "name": "Echte Namen aus den Daten der Spieler heraushalten",
+        "hint": "D&D 5e hat eine eigene Bestimmung, der echte Name und das echte Bild bleiben in den Daten des Gegenstands. Mit diesem Schalter legt das Modul die Verhüllung auf den Gegenstand und hält die echten Werte bei der Spielleitung, wie in Systemen ohne Bestimmung."
+      },
+      "coverSecrets": {
+        "name": "Wo die echten Werte liegen",
+        "hint": "Für verhüllte Gegenstände außerhalb der eigenen Bestimmung des Systems. Das Journal kann nur die Spielleitung öffnen und jede Spielleitung kann enthüllen, aber Foundry schickt jedes Weltdokument an alle Browser, wer als Spieler die Browserkonsole nutzt, kann es also lesen. Der Browser der Spielleitung hält sie von allen anderen Clients fern: Sie werden nirgends hingeschickt, aber nur dieser Browser kann den Gegenstand enthüllen oder seine Probe auswerten, und Kopien der Welt enthalten sie nicht.",
+        "journal": "Ein Journal, das nur die Spielleitung öffnen kann",
+        "device": "Nur der Browser der Spielleitung"
       }
     },
     "SELFTEST": {
@@ -354,7 +378,9 @@
       "CharacterType": "Der Akteurtyp der Spielercharaktere aus den Einstellungen existiert nicht.",
       "QuantityPath": "Gegenstände haben unter dem Pfad aus den Einstellungen keine Menge.",
       "ItemPiles": "Item Piles ist aktiv, aber einige Funktionen, die das Beutebuch nutzt, fehlen. Das Nehmen aus Stapeln funktioniert vielleicht nicht.",
-      "TableResult": "Foundrys Editor für Tabellenergebnisse wurde nicht gefunden, das Mengenfeld fehlt deshalb."
+      "TableResult": "Foundrys Editor für Tabellenergebnisse wurde nicht gefunden, das Mengenfeld fehlt deshalb.",
+      "CoverSecrets": "Das Journal mit den echten Werten verhüllter Gegenstände ist für Spieler sichtbar.",
+      "CoverSecret": "Die echten Werte von {count} verhüllten Gegenständen sind in diesem Browser nicht vorhanden. Lagen sie auf einem Gerät, öffne die Welt in diesem Browser."
     },
     "DEBUG": {
       "Title": "Debug-Datei",
@@ -393,6 +419,37 @@
       "quantity": "Menge (Beutebuch)",
       "quantityShort": "Menge",
       "quantityHint": "Eine Zahl oder Formel wie 2d4: wie viele vom Gegenstand, wie oft eine andere Tabelle gezogen wird oder wie oft ein Münztext wie 3d6 gp zählt. Leer heißt 1."
+    },
+    "Cover": {
+      "title": "Unidentifizierter Gegenstand",
+      "hint": "Spieler sehen von {name} nur die Verhüllung: den Namen, das Bild und die Beschreibung, die du hier einträgst.",
+      "name": "Name der Verhüllung",
+      "img": "Bild der Verhüllung",
+      "description": "Beschreibung der Verhüllung",
+      "dc": "Probe zum Bestimmen",
+      "dcHint": "Optional. Eine Figur, der der Gegenstand gehört oder die ihn sehen kann, darf ihn mit einem Wurf gegen diese Zahl bestimmen. Lass das Feld leer, wenn nur du den Gegenstand enthüllst.",
+      "modeSystem": "Dieses System hat eine eigene Bestimmung, das Modul schaltet sie ein. Der echte Name und das echte Bild bleiben in den Daten des Gegenstands, das System zeigt die Verhüllung.",
+      "modeSwap": "Der echte Name, das echte Bild und die echte Beschreibung liegen in einem Journal, das nur die Spielleitung öffnen kann. Der Gegenstand selbst trägt die Verhüllung, bis er enthüllt wird. Foundry schickt jedes Weltdokument an jeden Browser, wer als Spieler die Browserkonsole öffnet, kann sie also trotzdem lesen. Die Einstellung \"Wo die echten Werte liegen\" kann sie allein im Browser der Spielleitung halten.",
+      "confirm": "Verhüllen",
+      "cover": "Als unbestimmt verhüllen",
+      "edit": "Verhüllung ändern",
+      "reveal": "Enthüllen",
+      "revealConfirm": "{name} enthüllen? Danach sieht jeder, was es ist.",
+      "covered": "Unbestimmt",
+      "real": "In Wahrheit: {name}",
+      "dcShort": "Probe {dc}",
+      "identify": "Bestimmen versuchen",
+      "defaultName": "Unbestimmter Gegenstand ({type})",
+      "journalName": "Beute-Geheimnisse (nur Spielleitung)",
+      "secretPage": "Geheimnis",
+      "collectToggle": "Vor dem Einlagern in die Beute als unbestimmt verhüllen",
+      "menuCover": "Als unbestimmt verhüllen (Loot Ledger)",
+      "menuReveal": "Enthüllen (Loot Ledger)",
+      "modeDevice": "Der echte Name, das echte Bild und die echte Beschreibung bleiben in diesem Browser und gehen nie in die Welt. Nur dieser Browser kann den Gegenstand enthüllen oder seine Probe auswerten."
+    },
+    "Identify": {
+      "success": "{actor} bestimmt {item}",
+      "failure": "{actor} kann {item} nicht bestimmen"
     }
   }
 }

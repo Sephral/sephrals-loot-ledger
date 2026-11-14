@@ -27,6 +27,31 @@ The loot table, the party fund and the balance can be switched off in the settin
 * **Roll a table:** roll loot on a roll table, look at it first and add it in one step, see [Loot from roll tables](#loot-from-roll-tables).
 * **Item Piles:** take what an item pile holds into the loot, or leave unwanted loot as a new pile, see [Item Piles](#item-piles).
 
+## Unidentified items
+
+The GM marks an item as unidentified and gives it a cover: a name, a picture and a description. Players see only the cover in the loot, the party inventory, the log, the chat cards and on their character, until the item is revealed.
+
+* **Cover an item:** the mask button next to an item in the loot, the party inventory or the list of the acting character. Items in the sidebar get the entry *Cover as unidentified (Loot Ledger)* in their context menu. The dialog suggests *Unidentified* with the item type, a core picture and an empty description. *Identify check* is optional: a number, the difficulty of one roll a character may make.
+* **Cover before it enters the loot:** log entries and chat cards written earlier keep the name they had. So cover items at the source: in the sidebar, or with the mask toggle next to each item in the collect dialog after a fight. A covered item keeps its cover when it moves to the loot, the party inventory or a character, and two covered items stack only when they hide the same thing.
+* **Reveal:** the eye button (GM). The log notes *Cover was identified: Real name*, and everyone sees the real item. Changing a cover keeps the real values.
+* **The identify check:** a character who sees a covered item with a check gets a magnifier button. One roll per character and item, the formula is the setting *Identify check* (1d20 by default). In D&D 5e the better of Arcana and Investigation is added. The roll goes to the chat without the difficulty. A success reveals the item for everyone, a failure only costs the try. Everything runs on the GM's client.
+* **For the GM** the list shows what is behind the cover (*Really: …*) and the difficulty.
+
+How the cover is kept depends on the system:
+
+* **With its own identification (D&D 5e):** the module switches `system.identified` off and fills the system's unidentified name and description. The sheets show the cover by themselves, and the GM can also reveal with the checkbox of the sheet. The cover picture is used in the Loot Ledger, not on the sheet.
+* **All other systems (Crucible and the generic adapter):** the item itself carries the cover (name, picture and, where the item has one, the description). The real values wait in a secret store until the item is revealed. Crucible's description is the public one.
+* **The setting *Keep real names out of the players' data* (D&D 5e)** uses this second way in D&D 5e too.
+* **The setting *Where the real values are kept*** picks the secret store. *A journal only GMs can open* works for every GM. *The GM's browser only* keeps the values in the browser of the GM who covers the item, so only that browser can reveal the item or run its check, and a copy of the world does not carry them.
+
+What can leak, honestly:
+
+* Foundry sends every world document to every browser and hides some of them only in the interface. The secret journal has no sidebar entry and is invisible to players, but a player who opens the browser console can read it. Only *The GM's browser only* keeps the real values out of every other browser.
+* With D&D 5e's own identification the real name and picture stay in the item's data, and the sheet picture is the real one. Use the setting above if that matters.
+* The numbers and options of an item (type, price, bonuses, properties) are not covered in any system. A player who opens the sheet of a covered item in a system without identification sees them.
+* A log entry or chat card written before the item was covered, and a reveal, show the real name.
+* The self test checks that the secret journal is hidden and that every covered item still has its secret.
+
 ## Loot from roll tables
 
 The GM rolls loot from the context menu of a roll table in the sidebar or a compendium (*Roll loot*), from the table's window (*Roll loot* in its menu) or with *Roll a table* on the Loot tab. A preview window shows what was drawn:
@@ -71,6 +96,9 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 | Rest of a coin split | Into the party fund, or it stays in the loot (only with the loot table and the party fund) |
 | Offer to collect after a fight | Ask the GM when a combat ends (only with the loot table) |
 | Chat messages | For everyone, only for the GM, or none |
+| Identify check | The roll a character makes to identify a covered item, 1d20 by default |
+| Keep real names out of the players' data | D&D 5e only: cover items the same way as in other systems (GM) |
+| Where the real values are kept | A journal only GMs can open, or the GM's browser only (GM) |
 | Self test | Checks the party inventory, the log and the system support (GM) |
 | Debug file | Saves a file for bug reports, see [Debug file](#debug-file) (GM) |
 | Coin values | D&D 5e only: what each coin is worth in copper, for tables with their own exchange rates (GM) |
@@ -84,7 +112,7 @@ The module can take part in a small usage report shared by all of Sephral’s mo
 With the GM’s consent only the active GM’s browser counts, and it sends at most one report a day. The counts are kept in a hidden world setting, so all browsers and computers of the GM count together, and turning the statistics off deletes them. A copy of a world gets its own world ID. The question lists everything the report contains, from the Foundry version to a random world ID. For the Loot Ledger it holds:
 
 * on how many of the last 30 days the module was used
-* how often loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight, log entries are undone, loot is taken from item piles or left as an item pile, and loot rolled on a table is added
+* how often items are covered, revealed and identified, loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight, log entries are undone, loot is taken from item piles or left as an item pile, and loot rolled on a table is added
 * the settings *Loot table*, *Party fund* and *How loot is handed out* (only the chosen option)
 * where errors occur in the module code: file, line, error type and whether the error arose in the module itself, in Foundry, in the game system or in another module, never the error message or the name of another module
 
@@ -104,7 +132,7 @@ The log lives in the journal *Loot log*, one page per day, readable even without
 ## Game systems
 
 * **Crucible:** coins are the hero's coins. Equipped and invested gear is taken off when it changes hands. Equipped gear cannot be handed over during a fight (unequipping costs action points there), and cursed invested items only by the GM. Natural weapons and armor stay with their creature, and adversary gear stops scaling with the owner's level once a hero owns it.
-* **D&D 5e:** coins stay separate (pp, gp, ep, sp, cp). Shares of a split are paid in gold, silver and copper. The module exchanges coins at the rates of the system. Tables with their own rates, for example 100 copper to a silver and 100 silver to a gold, set them under *Coin values*. Only the values that differ from the system are stored, and coins already in the loot or the party fund keep their worth in copper. Equipped and attuned items are taken off, also inside containers, and containers move with their contents. The window lists what a container holds, and its value includes the contents. Unidentified items keep their unidentified name in the window and the log.
+* **D&D 5e:** coins stay separate (pp, gp, ep, sp, cp). Shares of a split are paid in gold, silver and copper. The module exchanges coins at the rates of the system. Tables with their own rates, for example 100 copper to a silver and 100 silver to a gold, set them under *Coin values*. Only the values that differ from the system are stored, and coins already in the loot or the party fund keep their worth in copper. Equipped and attuned items are taken off, also inside containers, and containers move with their contents. The window lists what a container holds, and its value includes the contents. Unidentified items use dnd5e's own identification, see [Unidentified items](#unidentified-items).
 * **Other systems:** the module works with any system whose items have a quantity. In the module settings the GM names the actor type of player characters, where items keep their quantity and price and where characters keep their coins (one number). Without a coin path the coin features stay off. The self test tells whether the paths fit.
 
 Other modules can add support for more systems through the module's API.
@@ -117,6 +145,9 @@ Other modules can add support for more systems through the module's API.
 | --- | --- |
 | `open({tab})` | Opens the window, optionally on `"stash"`, `"pool"`, `"log"` or `"balance"` |
 | `collect()` | Opens the dialog which collects the loot of the last fight (GM) |
+| `coverItem(item, {name, img, description, dc})` | Covers an item as unidentified, every field optional (GM) |
+| `revealItem(item)` | Reveals a covered item (GM) |
+| `isCovered(item)` | Is the item covered? |
 | `rollLoot(table)` | Rolls loot on a roll table (the table or its UUID) in the preview window (GM) |
 | `takeFromPiles(uuids)` | Opens the dialog which takes the contents of item piles into the loot, without UUIDs the piles of the current scene (GM, Item Piles) |
 | `dropLeftovers()` | Leaves the loot nobody claimed as a new item pile on the scene (GM, Item Piles) |

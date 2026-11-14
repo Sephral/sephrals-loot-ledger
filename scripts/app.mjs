@@ -14,6 +14,8 @@ import {dropLeftovers, openPiles, pilesApi} from "./piles.mjs";
 import {CLAIM_RANK, balance, pickWinner} from "./rules.mjs";
 import {areaItems, isContained, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
 import {pickTable} from "./tables.mjs";
+import {askCover, gmInfo} from "./cover.mjs";
+import {hasTried} from "./cover-logic.mjs";
 import {report, request} from "./transport.mjs";
 import {markUsed} from "./usage.mjs";
 
@@ -91,7 +93,10 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       undo: LootLedger.#onUndo,
       answer: LootLedger.#onAnswer,
       cancel: LootLedger.#onCancel,
-      openJournal: LootLedger.#onOpenJournal
+      openJournal: LootLedger.#onOpenJournal,
+      cover: LootLedger.#onCover,
+      reveal: LootLedger.#onReveal,
+      identify: LootLedger.#onIdentify
     }
   };
 
@@ -196,10 +201,21 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
         return (n > 1) ? `${a.displayName(i)} × ${n}` : a.displayName(i);
       });
       const row = {
-        id: item.id, area, name: a.displayName(item), img: item.img, quantity: qty, many: qty > 1,
+        id: item.id, area, name: a.displayName(item), img: a.displayImg(item), quantity: qty, many: qty > 1,
         value: value ? a.formatCoins(value) : "", worth: value,
         contents: contents.length ? t("SLL.Stash.contains", {list: contents.join(", ")}) : ""
       };
+      // Unidentified: players see the cover only, the GM also sees what is behind it
+      const cover = a.coverOf(item);
+      if ( cover ) {
+        row.covered = true;
+        row.canIdentify = !!cover.check && !!acting && !hasTried(cover, acting.id);
+        if ( isGM ) {
+          const info = gmInfo(item);
+          row.realName = info?.realName ?? "";
+          row.dc = info?.dc ?? "";
+        }
+      }
       if ( capacity ) {
         const weight = a.weight(item, Math.max(qty, 1));
         row.heavy = (capacity.value + weight) > capacity.max;
@@ -288,7 +304,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       user: e.userName, text: describe(e, byId), img: e.item?.img ?? null,
       value: ((e.item?.value ?? 0) + (e.coins ?? 0)) ? a.formatCoins((e.item?.value ?? 0) + (e.coins ?? 0)) : "",
       undone: undone.has(e.id),
-      canUndo: isGM && !["undo", "edit", "remove"].includes(e.kind) && (e.to?.kind !== "pile") && !undone.has(e.id)
+      canUndo: isGM && !["undo", "edit", "remove", "reveal"].includes(e.kind) && (e.to?.kind !== "pile") && !undone.has(e.id)
     }));
     const check = verify();
     context.check = {ok: check.ok, count: check.count,
@@ -460,6 +476,43 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     const quantity = await askQuantity(t("SLL.Stash.toPool"), LootLedger.#quantity(itemId));
     if ( !quantity ) return;
     report(await request("moveArea", {itemId, to: "pool", quantity}));
+  }
+
+  /**
+   * The item behind a clicked row, with the area it is shown in.
+   * @this {LootLedger}
+   * @param {HTMLElement} target
+   * @returns {{item: Item|undefined, payload: object}}
+   */
+  static #rowItem(target) {
+    const row = target.closest("[data-item-id]");
+    const area = row?.dataset.area;
+    const actor = (area === "mine") ? this.#acting() : ledgerActor();
+    return {item: actor?.items.get(row?.dataset.itemId), payload: {itemId: row?.dataset.itemId, area, actorId: this.#acting()?.id}};
+  }
+
+  /** @this {LootLedger} */
+  static async #onCover(event, target) {
+    const {item, payload} = LootLedger.#rowItem.call(this, target);
+    if ( !item ) return;
+    const input = await askCover(item);
+    if ( !input ) return;
+    report(await request("cover", {...payload, ...input}));
+  }
+
+  /** @this {LootLedger} */
+  static async #onReveal(event, target) {
+    const {item, payload} = LootLedger.#rowItem.call(this, target);
+    if ( !item ) return;
+    if ( !await confirm(t("SLL.Cover.reveal"), t("SLL.Cover.revealConfirm", {name: item.name})) ) return;
+    report(await request("reveal", payload));
+  }
+
+  /** @this {LootLedger} */
+  static async #onIdentify(event, target) {
+    const {payload} = LootLedger.#rowItem.call(this, target);
+    if ( !payload.actorId ) return ui.notifications.warn(t("SLL.Error.noCharacter"));
+    report(await request("identify", payload));
   }
 
   /** @this {LootLedger} */

@@ -27,6 +27,18 @@ function currentVersions() {
 }
 
 /**
+ * A short list of names in the client's language: the first three and how many more.
+ * @param {string[]} names
+ * @returns {string}
+ */
+function nameList(names) {
+  const shown = names.slice(0, 3);
+  if ( names.length > 3 ) shown.push(t("SLL.SELFTEST.More", {count: names.length - 3}));
+  try { return new Intl.ListFormat(game.i18n.lang, {type: "conjunction"}).format(shown); }
+  catch { return shown.join(", "); }
+}
+
+/**
  * Run all checks.
  * @returns {{problems: string[], checks: number}}
  */
@@ -50,7 +62,13 @@ function checkAll() {
   if ( generation() >= 14 ) check(typeof CONFIG.queries?.[`${MODULE_ID}.request`] === "function", "SLL.SELFTEST.Query");
   check(hasAdapter(), "SLL.SELFTEST.Generic", {system: game.system.title});
   for ( const problem of adapter().selfTest() ) check(false, problem);
-  check(adapter().partyMembers().length > 0, "SLL.SELFTEST.NoCharacters");
+  // Player characters: name the characters that only miss a player as owner, the usual cause
+  if ( adapter().partyMembers().length ) check(true, "SLL.SELFTEST.NoCharacters");
+  else {
+    const unowned = game.actors.filter(a => adapter().isCharacter(a) && !a.hasPlayerOwner).map(a => a.name);
+    if ( unowned.length ) check(false, "SLL.SELFTEST.NoCharactersOwner", {names: nameList(unowned)});
+    else check(false, "SLL.SELFTEST.NoCharacters");
+  }
   // Item Piles: the functions the bridge calls
   const piles = pilesApi();
   if ( piles ) check(PILE_FUNCTIONS.every(name => typeof piles[name] === "function"), "SLL.SELFTEST.ItemPiles");

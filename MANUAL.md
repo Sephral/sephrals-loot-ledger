@@ -99,7 +99,7 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 | Identify check | The roll a character makes to identify a covered item, 1d20 by default |
 | Keep real names out of the players' data | D&D 5e only: cover items the same way as in other systems (GM) |
 | Where the real values are kept | A journal only GMs can open, or the GM's browser only (GM) |
-| Self test | Checks the party inventory, the log and the system support (GM) |
+| Self test | Checks the party inventory, the log, the system support and the player characters, and names what to fix (GM) |
 | Debug file | Saves a file for bug reports, see [Debug file](#debug-file) (GM) |
 | Coin values | D&D 5e only: what each coin is worth in copper, for tables with their own exchange rates (GM) |
 

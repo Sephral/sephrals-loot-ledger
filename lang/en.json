@@ -17,7 +17,8 @@
       "stash": "Party inventory",
       "pool": "Loot",
       "log": "Log",
-      "balance": "Balance"
+      "balance": "Balance",
+      "wishes": "Wish list"
     },
     "Storage": {
       "actorName": "Party inventory",
@@ -154,7 +155,12 @@
       "undoTitle": "Undo",
       "undoConfirm": "Reverse this entry? Items and coins go back where they came from, and the log records the undo.",
       "empty": "Nothing recorded yet.",
-      "reveal": "{note} was identified: {what}"
+      "reveal": "{note} was identified: {what}",
+      "sale": {
+        "item": "{what} sold to {merchant}",
+        "fund": "{what} from the sale to {merchant} into the party fund",
+        "actor": "{to} receives {what} from the sale to {merchant}"
+      }
     },
     "Reason": {
       "single": "strongest claim",
@@ -181,7 +187,8 @@
       "splitTitle": "Split the coins",
       "splitHint": "The coins go in equal shares to the characters you pick. What cannot be shared goes into the party fund.",
       "split": "Split",
-      "splitHintPool": "The coins go in equal shares to the characters you pick. What cannot be split stays in the loot."
+      "splitHintPool": "The coins go in equal shares to the characters you pick. What cannot be split stays in the loot.",
+      "cancel": "Cancel"
     },
     "CoinValues": {
       "intro": "Worth of one coin in {coin}, the smallest coin. Coins already in the loot and the party fund keep their worth in {coin}.",
@@ -212,7 +219,8 @@
       "covered": "{name} is covered.",
       "revealed": "{name} is revealed.",
       "identified": "Identified: {name}.",
-      "notIdentified": "You cannot make out {name}."
+      "notIdentified": "You cannot make out {name}.",
+      "sold": "{count} items sold for {offer}."
     },
     "Error": {
       "noGM": "No GM is online.",
@@ -248,7 +256,9 @@
       "noCheck": "There is no check for this item. Ask the GM.",
       "alreadyTried": "Your character already tried to identify this item.",
       "secretMissing": "The real values of this item are missing. They were kept in the secrets journal.",
-      "deviceStore": "This browser cannot keep the real values. Switch the setting \"Where the real values are kept\" to the journal."
+      "deviceStore": "This browser cannot keep the real values. Switch the setting \"Where the real values are kept\" to the journal.",
+      "noHaggle": "Haggling is not possible here.",
+      "nothingToSell": "There is nothing to sell, or nothing with a value."
     },
     "Block": {
       "cursed": "Cursed and invested: only the GM can take it off.",
@@ -353,6 +363,18 @@
         "hint": "For covered items outside the system's own identification. The journal can be opened by GMs only and every GM can reveal, but Foundry sends every world document to all browsers, so a player with the browser console could read it. The GM's browser keeps them away from every other client: they are never sent anywhere, but only that browser can reveal the item or run its check, and copies of the world do not carry them.",
         "journal": "A journal only GMs can open",
         "device": "The GM's browser only"
+      },
+      "wishList": {
+        "name": "Wish list",
+        "hint": "Players note what they look for. Matching loot gets a star in the loot table and the player gets a short notice."
+      },
+      "merchantShare": {
+        "name": "Merchant offer",
+        "hint": "What a merchant pays for sold items, in percent of their value. The GM can change it for each sale."
+      },
+      "merchantHaggleLimit": {
+        "name": "Haggling limit",
+        "hint": "The most a haggle moves the offer, in percent either way. 0 switches haggling off."
       }
     },
     "SELFTEST": {
@@ -454,6 +476,50 @@
     "Identify": {
       "success": "{actor} identifies {item}",
       "failure": "{actor} cannot make out {item}"
+    },
+    "Wish": {
+      "hint": "Note what you are looking for: a name, a part of a name, or drop an item here. When matching loot turns up in the loot table it gets a star and you get a short notice. The GM can see the wish lists.",
+      "mine": "Your wishes",
+      "theirs": "wishes",
+      "placeholder": "Name or part of a name, for example healing",
+      "add": "Add",
+      "remove": "Take off the list",
+      "none": "Nothing on your list yet.",
+      "dropHint": "Drop an item or a compendium link here to wish for exactly that item.",
+      "dropItem": "Only items can be wished for.",
+      "linked": "Wish for exactly this item",
+      "found": "In the loot: {items}",
+      "star": "On your wish list: {text}",
+      "wisher": "{name} wishes for: {text}",
+      "matched": "On your wish list: {item}",
+      "empty": "A wish needs at least two letters.",
+      "known": "That is already on your list.",
+      "full": "Your list is full ({max} wishes).",
+      "added": "Added."
+    },
+    "Merchant": {
+      "title": "Sell to a merchant",
+      "open": "Sell",
+      "openTooltip": "Sell items of the party inventory to a merchant",
+      "hint": "Pick what the merchant buys. The offer is a share of what the game system says the items are worth. Haggling is optional.",
+      "items": "Items",
+      "all": "All",
+      "nothing": "Nothing in the party inventory has a value a merchant would pay for.",
+      "name": "Merchant",
+      "defaultName": "the merchant",
+      "share": "The merchant pays",
+      "haggle": "Haggle",
+      "roll": "Roll",
+      "haggleHint": "One character rolls one skill check. The result moves the offer by at most {limit} % either way.",
+      "haggled": "{actor} rolled {skill}: {total} against {baseline}. The offer changes by {adjust} % (at most {limit} %).",
+      "payout": "Proceeds",
+      "toFund": "Into the party fund",
+      "toSplit": "Split among characters",
+      "value": "Value",
+      "offer": "Offer",
+      "sell": "Sell",
+      "noteShare": "{share} % of {value}",
+      "noteHaggle": "haggled with {skill} {adjust} %"
     }
   }
 }

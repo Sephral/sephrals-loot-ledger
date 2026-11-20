@@ -1,0 +1,80 @@
+<div class="sll-body sll-merchant">
+  <div class="sll-scroll">
+    <p class="sll-hint"><i class="fa-solid fa-circle-info" inert></i> {{localize "SLL.Merchant.hint"}}</p>
+
+    <section class="sll-list">
+      <header>
+        <h3>{{localize "SLL.Merchant.items"}}</h3>
+        {{#if hasItems}}<button type="button" data-action="all">{{localize "SLL.Merchant.all"}}</button>{{/if}}
+      </header>
+      <ol class="sll-items plain">
+        {{#each items}}
+        <li class="sll-item" data-item-id="{{id}}">
+          <input type="checkbox" data-pick {{#if on}}checked{{/if}}>
+          <img src="{{img}}" alt="">
+          <div class="sll-item-info">
+            <span class="sll-item-name">{{name}}</span>
+            <small>{{value}}</small>
+          </div>
+          {{#if many}}<input type="number" class="sll-qty" data-quantity value="{{quantity}}" min="1" max="{{max}}" step="1" data-tooltip="{{localize "SLL.Dialog.quantity"}}">{{else}}<input type="number" class="sll-qty" data-quantity value="1" min="1" max="1" hidden>{{/if}}
+        </li>
+        {{else}}
+        <li class="sll-empty">{{localize "SLL.Merchant.nothing"}}</li>
+        {{/each}}
+      </ol>
+    </section>
+
+    <section class="sll-merchant-form">
+      <div class="form-group">
+        <label>{{localize "SLL.Merchant.name"}}</label>
+        <input type="text" name="merchant" value="{{merchant}}" maxlength="60" placeholder="{{localize "SLL.Merchant.defaultName"}}">
+      </div>
+      <div class="form-group">
+        <label>{{localize "SLL.Merchant.share"}}</label>
+        <div class="form-fields">
+          <input type="number" name="share" value="{{share}}" min="1" max="200" step="5"> <span>%</span>
+        </div>
+      </div>
+
+      {{#if canHaggle}}
+      <div class="sll-haggle">
+        <div class="form-group">
+          <label>{{localize "SLL.Merchant.haggle"}}</label>
+          <div class="form-fields">
+            <select name="haggler" {{#if haggle}}disabled{{/if}}>
+              {{#each members}}<option value="{{id}}" {{#if haggler}}selected{{/if}}>{{name}}</option>{{/each}}
+            </select>
+            <button type="button" data-action="roll" {{#unless canRoll}}disabled{{/unless}}><i class="fa-solid fa-dice-d20" inert></i> {{localize "SLL.Merchant.roll"}}</button>
+          </div>
+          <p class="hint">{{localize "SLL.Merchant.haggleHint" limit=limit}}</p>
+        </div>
+        {{#if haggle}}<p class="sll-haggle-result {{#if (gt haggle.adjust 0)}}good{{else if (lt haggle.adjust 0)}}bad{{/if}}"><i class="fa-solid fa-handshake" inert></i> {{haggle.text}}</p>{{/if}}
+      </div>
+      {{/if}}
+
+      <div class="form-group sll-payout">
+        <label>{{localize "SLL.Merchant.payout"}}</label>
+        <div class="form-fields">
+          {{#if fundOn}}<label class="sll-check"><input type="radio" name="payout" value="fund" {{#if toFund}}checked{{/if}}> {{localize "SLL.Merchant.toFund"}}</label>{{/if}}
+          <label class="sll-check"><input type="radio" name="payout" value="split" {{#unless toFund}}checked{{/unless}}> {{localize "SLL.Merchant.toSplit"}}</label>
+        </div>
+      </div>
+      {{#unless toFund}}
+      <div class="sll-check-list">
+        {{#each members}}<label class="sll-check"><input type="checkbox" data-split="{{id}}" {{#if on}}checked{{/if}}><img src="{{img}}" alt=""> {{name}}</label>{{/each}}
+      </div>
+      {{/unless}}
+    </section>
+
+    <section class="sll-coins sll-merchant-sum">
+      <i class="fa-solid fa-coins" inert></i>
+      <span>{{localize "SLL.Merchant.value"}}: <strong>{{base}}</strong></span>
+      <span class="sll-spacer"></span>
+      <span>{{localize "SLL.Merchant.offer"}}: <strong>{{offer}}</strong></span>
+    </section>
+  </div>
+  <footer class="sll-merchant-footer">
+    <button type="button" data-action="cancel">{{localize "SLL.Dialog.cancel"}}</button>
+    <button type="button" data-action="sell" {{#unless canSell}}disabled{{/unless}}><i class="fa-solid fa-store" inert></i> {{localize "SLL.Merchant.sell"}}</button>
+  </footer>
+</div>

@@ -286,6 +286,24 @@ export class BaseAdapter {
   }
 
   /**
+   * Can a character haggle with a merchant (does the system have a skill check the module can roll)?
+   * @type {boolean}
+   */
+  get canHaggle() {
+    return false;
+  }
+
+  /**
+   * Roll the skill check which haggles with a merchant, without a chat message and without a dialog.
+   * @param {Actor} actor
+   * @returns {Promise<{total: number, skill: string, baseline: number}|null>}   The result, the name of the skill and
+   *   the result of an average haggle, or null where the system has no such check
+   */
+  async haggleRoll(actor) {
+    return null;
+  }
+
+  /**
    * Reset what must not travel with an item to another owner (equipped, attuned and similar).
    * @param {object} data   Item data, changed in place
    * @returns {object}

@@ -9,11 +9,14 @@ import {MODULE_ID, TEMPLATES, flag, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {openCollect} from "./collect.mjs";
 import {askCoins, askQuantity, askRecipient, askSplit, confirm} from "./dialogs.mjs";
-import {describe, entries, placeName, verify} from "./ledger.mjs";
+import {NOT_UNDOABLE, describe, entries, placeName, verify} from "./ledger.mjs";
 import {dropLeftovers, openPiles, pilesApi} from "./piles.mjs";
 import {CLAIM_RANK, balance, pickWinner} from "./rules.mjs";
 import {areaItems, isContained, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
 import {pickTable} from "./tables.mjs";
+import {openMerchant} from "./merchant.mjs";
+import {addWish, allWishes, removeWish, userWishes, wishTarget, wishesOn} from "./wish.mjs";
+import {MAX_WISHES, matchesWish} from "./wish-logic.mjs";
 import {askCover, gmInfo} from "./cover.mjs";
 import {hasTried} from "./cover-logic.mjs";
 import {report, request} from "./transport.mjs";
@@ -96,7 +99,10 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       openJournal: LootLedger.#onOpenJournal,
       cover: LootLedger.#onCover,
       reveal: LootLedger.#onReveal,
-      identify: LootLedger.#onIdentify
+      identify: LootLedger.#onIdentify,
+      addWish: LootLedger.#onAddWish,
+      removeWish: LootLedger.#onRemoveWish,
+      merchant: LootLedger.#onMerchant
     }
   };
 
@@ -113,6 +119,9 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Search terms of the lists, kept across redraws. */
   filters = {};
+
+  /** The wish being typed, kept across redraws. */
+  wishDraft = "";
 
   /* -------------------------------------------- */
 
@@ -169,13 +178,16 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     context.isGM = isGM;
     const stored = storedCoins();
     const hasLoot = areaItems("pool").length || stored.pool;
-    const visible = ["stash", (on.loot || hasLoot) && "pool", "log", on.balance && "balance"].filter(Boolean);
+    const wishes = wishesOn();
+    const visible = ["stash", (on.loot || hasLoot) && "pool", wishes && "wishes", "log", on.balance && "balance"]
+      .filter(Boolean);
     if ( !visible.includes(this.tab) ) this.tab = null;
     this.tab ??= hasLoot ? "pool" : "stash";
     context.tab = this.tab;
     context.tabs = visible.map(id => ({id, label: t(`SLL.Tab.${id}`),
       active: id === this.tab, badge: (id === "pool") && hasLoot ? (areaItems("pool").length || "") : ""}));
     context.lootOn = on.loot;
+    context.wishesOn = wishes;
     context.pilesOn = isGM && !!pilesApi();
     context.noGM = !game.users.activeGM;
     if ( !ledger ) return context;
@@ -231,6 +243,13 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
         .sort((x, y) => CLAIM_RANK[claims[y.id]] - CLAIM_RANK[claims[x.id]])
         .map(m => ({name: m.name, img: m.img, claim: claims[m.id], label: t(`SLL.Claim.${claims[m.id]}`)}));
       row.wanted = row.claims.some(c => c.claim !== "pass");
+      if ( wishes ) {
+        const target = wishTarget(item);
+        const hits = Object.entries(allWishes()).flatMap(([userId, list]) => list.filter(w => matchesWish(w, target))
+          .map(wish => ({user: game.users.get(userId), wish})));
+        if ( isGM ) row.wishers = hits.map(h => ({name: h.user?.name ?? "?", text: h.wish.text, color: h.user?.color?.css ?? ""}));
+        else row.wished = hits.find(h => h.user === game.user)?.wish.text ?? "";
+      }
       row.myClaim = acting ? (claims[acting.id] ?? null) : null;
       row.claimButtons = ["need", "want", "pass"].map(c => ({claim: c, label: t(`SLL.Claim.${c}`),
         active: row.myClaim === c}));
@@ -283,6 +302,19 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
         max: Math.round(capacity.max * 10) / 10}) : "";
     }
 
+    // Wish list
+    if ( wishes ) {
+      const poolTargets = areaItems("pool").map(item => ({name: a.displayName(item), target: wishTarget(item)}));
+      const view = (user, wish) => ({id: wish.id, userId: user.id, text: wish.text, img: wish.img ?? "", link: !!wish.uuid,
+        found: poolTargets.filter(p => matchesWish(wish, p.target)).map(p => p.name).join(", ")});
+      const mine = userWishes(game.user);
+      context.wishList = mine.map(w => view(game.user, w));
+      context.wishFull = mine.length >= MAX_WISHES;
+      context.wishMax = MAX_WISHES;
+      if ( isGM ) context.wishUsers = game.users.filter(u => (u !== game.user) && userWishes(u).length)
+        .map(u => ({id: u.id, name: u.name, color: u.color?.css ?? "", wishes: userWishes(u).map(w => view(u, w))}));
+    }
+
     // Open requests
     context.pending = pendingRequests().filter(r => {
       if ( isGM ) return true;
@@ -304,7 +336,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       user: e.userName, text: describe(e, byId), img: e.item?.img ?? null,
       value: ((e.item?.value ?? 0) + (e.coins ?? 0)) ? a.formatCoins((e.item?.value ?? 0) + (e.coins ?? 0)) : "",
       undone: undone.has(e.id),
-      canUndo: isGM && !["undo", "edit", "remove", "reveal"].includes(e.kind) && (e.to?.kind !== "pile") && !undone.has(e.id)
+      canUndo: isGM && !NOT_UNDOABLE.includes(e.kind) && (e.to?.kind !== "pile") && !undone.has(e.id)
     }));
     const check = verify();
     context.check = {ok: check.ok, count: check.count,
@@ -339,6 +371,17 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
       input.addEventListener("input", apply);
       apply();
     }
+    // The typed wish survives a redraw, Enter adds it
+    const wish = this.element.querySelector("input[name=wish]");
+    if ( wish ) {
+      wish.value = this.wishDraft;
+      wish.addEventListener("input", () => { this.wishDraft = wish.value; });
+      wish.addEventListener("keydown", event => {
+        if ( event.key !== "Enter" ) return;
+        event.preventDefault();
+        LootLedger.#onAddWish.call(this);
+      });
+    }
     const select = this.element.querySelector("select[name=acting]");
     select?.addEventListener("change", () => {
       this.actingId = select.value;
@@ -370,6 +413,7 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     event.preventDefault();
     const TE = foundry.applications.ux?.TextEditor?.implementation ?? globalThis.TextEditor;
     const data = TE.getDragEventData(event);
+    if ( area === "wish" ) return this.#onDropWish(data);
     if ( data?.type !== "Item" ) return;
     const item = await Item.implementation.fromDropData(data);
     if ( !item ) return;
@@ -386,6 +430,25 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
     const quantity = await askQuantity(t("SLL.Stash.deposit"), adapter().quantity(item));
     if ( !quantity ) return;
     report(await request("deposit", {actorId: item.parent.id, itemId: item.id, quantity}));
+  }
+
+  /**
+   * Drop an item or a compendium link on the wish list: the wish is that item.
+   * @param {object} data
+   */
+  async #onDropWish(data) {
+    if ( (data?.type !== "Item") || !data.uuid ) return ui.notifications.warn(t("SLL.Wish.dropItem"));
+    const item = await fromUuid(data.uuid);
+    if ( !item ) return ui.notifications.warn(t("SLL.Wish.dropItem"));
+    LootLedger.#wishNotice(await addWish({text: item.name, uuid: item.uuid, img: item.img}));
+  }
+
+  /**
+   * Tell what became of a new wish.
+   * @param {"added"|"empty"|"known"|"full"} result
+   */
+  static #wishNotice(result) {
+    if ( result !== "added" ) ui.notifications.warn(t(`SLL.Wish.${result}`, {max: MAX_WISHES}));
   }
 
   /* -------------------------------------------- */
@@ -657,6 +720,29 @@ export class LootLedger extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @this {LootLedger} */
   static async #onCancel(event, target) {
     report(await request("cancelRequest", {id: target.closest("[data-request-id]")?.dataset.requestId}));
+  }
+
+  /** Add the typed wish. @this {LootLedger} */
+  static async #onAddWish() {
+    const input = this.element.querySelector("input[name=wish]");
+    if ( !input ) return;
+    const result = await addWish({text: input.value});
+    LootLedger.#wishNotice(result);
+    if ( result === "added" ) {
+      this.wishDraft = "";
+      input.value = "";
+    }
+  }
+
+  /** @this {LootLedger} */
+  static async #onRemoveWish(event, target) {
+    const row = target.closest("[data-wish-id]");
+    await removeWish(row.dataset.userId, row.dataset.wishId);
+  }
+
+  /** GM: sell from the party inventory to a merchant. @this {LootLedger} */
+  static async #onMerchant() {
+    await openMerchant();
   }
 
   /** @this {LootLedger} */

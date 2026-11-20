@@ -18,6 +18,8 @@ import {onGetHeaderControls, onGetRollTableContextOptions, onRenderRollTableShee
 import {registerTransport, report, request} from "./transport.mjs";
 import {addDirectoryEntries} from "./cover.mjs";
 import {registerUsage} from "./usage.mjs";
+import {openMerchant} from "./merchant.mjs";
+import {onCreateItem, onUpdateItem, onUpdateUser, rememberWishes} from "./wish.mjs";
 
 /** The name of the tool in the token controls. */
 const TOOL = "sll-ledger";
@@ -27,7 +29,8 @@ Hooks.once("init", () => {
   registerSettings();
   registerUsage(MODULE_ID, {
     features: ["lootClaim", "lootDistribute", "coinSplit", "stashTransfer", "itemGive", "fundCoins", "combatCollect",
-      "logUndo", "pileTake", "pileDrop", "tableLoot", "itemCover", "itemReveal", "itemIdentify"],
+      "logUndo", "pileTake", "pileDrop", "tableLoot", "itemCover", "itemReveal", "itemIdentify", "wishAdded",
+      "wishMatched", "merchantSale", "haggleRolled"],
     settings: ["lootTable", "partyFund", "distribution", "coverSafe", "coverSecrets"]
   });
   registerTransport(handleRequest);
@@ -59,9 +62,16 @@ Hooks.once("init", () => {
   }
   Hooks.on("updateActor", () => scheduleRefresh());
 
+  // The wish list: loot which matches a wish, and the lists themselves
+  Hooks.on("createItem", onCreateItem);
+  Hooks.on("updateItem", onUpdateItem);
+  Hooks.on("updateUser", onUpdateUser);
+
   game.modules.get(MODULE_ID).api = {
     /** Open the window, optionally on a tab ("stash", "pool", "log", "balance"). */
     open: openLedger,
+    /** Open the merchant window which sells items of the party inventory (GM). */
+    sellToMerchant: openMerchant,
     /** Open the dialog which collects the belongings of defeated combatants (GM). */
     collect: openCollect,
     /** Open the dialog which takes the contents of Item Piles into the loot (GM), by default those on the scene. */
@@ -108,6 +118,7 @@ Hooks.once("ready", async () => {
   await languageReady;
   await ensureStorage();
   rememberLedgerItems();
+  rememberWishes();
   noticeNewVersions();
 });
 

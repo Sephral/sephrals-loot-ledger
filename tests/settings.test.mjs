@@ -88,6 +88,17 @@ test("settings of a switched off part hide in the settings dialog", () => {
   }
 });
 
+test("the wish list and the merchant have their defaults", () => {
+  const {settings} = register("dnd5e");
+  assert.equal(settings.get("wishList").default, true);
+  assert.equal(settings.get("merchantShare").default, 50);
+  assert.equal(settings.get("merchantHaggleLimit").default, 20);
+  for ( const key of ["wishList", "merchantShare", "merchantHaggleLimit"] ) {
+    assert.equal(settings.get(key).scope, "world", key);
+    assert.equal(settings.get(key).config, true, key);
+  }
+});
+
 test("the self test is a GM menu", () => {
   const {menus} = register("crucible");
   assert.equal(menus.get("selfTest").restricted, true);

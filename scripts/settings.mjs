@@ -55,6 +55,9 @@ export const SETTINGS = {
   coverSafe: {type: Boolean, default: false, native: true, onChange: redraw},
   coverSecrets: {type: String, default: "journal", choices: {
     journal: "SLL.SETTINGS.coverSecrets.journal", device: "SLL.SETTINGS.coverSecrets.device"}},
+  wishList: {type: Boolean, default: true, onChange: redraw},
+  merchantShare: {type: Number, default: 50, range: {min: 1, max: 200, step: 1}},
+  merchantHaggleLimit: {type: Number, default: 20, range: {min: 0, max: 50, step: 1}},
   genericCharacterType: {type: String, default: "character", generic: true, onChange: redraw},
   genericQuantity: {type: String, default: "system.quantity", generic: true, onChange: redraw},
   genericPrice: {type: String, default: "system.price", generic: true, onChange: redraw},

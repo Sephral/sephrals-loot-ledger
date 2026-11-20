@@ -56,11 +56,12 @@ test("every key used by scripts and templates exists", async () => {
     used.add(`SLL.SETTINGS.${key}.name`);
     used.add(`SLL.SETTINGS.${key}.hint`);
   }
-  for ( const tab of ["stash", "pool", "log", "balance"] ) used.add(`SLL.Tab.${tab}`);
+  for ( const tab of ["stash", "pool", "wishes", "log", "balance"] ) used.add(`SLL.Tab.${tab}`);
   for ( const claim of ["need", "want", "pass"] ) used.add(`SLL.Claim.${claim}`);
   for ( const rule of ["fair", "roll", "gm"] ) used.add(`SLL.Pool.distributeConfirm.${rule}`);
   for ( const reason of ["single", "fair", "fairRoll", "roll"] ) used.add(`SLL.Reason.${reason}`);
   for ( const place of ["pool", "stash", "fund", "outside"] ) used.add(`SLL.Place.${place}`);
+  for ( const result of ["empty", "known", "full"] ) used.add(`SLL.Wish.${result}`);
   // Built from parts in ledger.mjs: SLL.Log.<kind>[.<variant>]
   for ( const key of used ) if ( /\.$/.test(key) || key.endsWith(".SLL") ) used.delete(key);
   const missing = [...used].filter(key => !enKeys.has(key) && ![...enKeys].some(k => k.startsWith(`${key}.`)));
@@ -79,6 +80,7 @@ test("every log kind has a sentence", () => {
     assert.equal(typeof log.add.new[area], "string");
     assert.equal(typeof log.add.from[area], "string");
   }
+  for ( const kind of ["item", "fund", "actor"] ) assert.equal(typeof log.sale[kind], "string", kind);
   for ( const v of ["stash", "fund"] ) {
     assert.equal(typeof log.deposit[v], "string");
     assert.equal(typeof log.withdraw[v], "string");

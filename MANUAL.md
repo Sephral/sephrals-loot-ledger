@@ -2,10 +2,11 @@
 
 ## The window
 
-Open the Loot Ledger from the token controls on the left (scroll icon) or with the button above the actor directory. It has four tabs:
+Open the Loot Ledger from the token controls on the left (scroll icon) or with the button above the actor directory. It has five tabs:
 
 * **Party inventory:** everything the group owns together, the party fund and, below it, what your character carries. *Take* moves an item to your character, *Put in* moves it into the party inventory, the hand icon gives it to another character. You can also drag items from your character sheet onto the party inventory.
 * **Loot:** what waits to be handed out. Mark *Need*, *Want* or *Pass* for your character, everybody sees who marked what. The GM collects loot from a fight, adds items and coins, splits the coins and hands everything out.
+* **Wish list:** what you and your friends are looking for, see [Wish list](#wish-list).
 * **Log:** every change, newest first, with who asked for it. The line on top shows whether the log is unchanged.
 * **Balance:** what each character took from the loot, the party inventory and the party fund, minus what they put in, today and in total.
 
@@ -26,6 +27,26 @@ The loot table, the party fund and the balance can be switched off in the settin
 * **Undo:** most log entries can be reversed with the arrow button. Items and coins go back where they came from, and the log records the undo.
 * **Roll a table:** roll loot on a roll table, look at it first and add it in one step, see [Loot from roll tables](#loot-from-roll-tables).
 * **Item Piles:** take what an item pile holds into the loot, or leave unwanted loot as a new pile, see [Item Piles](#item-piles).
+
+## Wish list
+
+Every player keeps a wish list on the *Wish list* tab. A wish is a name, or part of a name, in any case: *heal* finds *Potion of Healing*, and *greater potion* finds it too, because every word is part of the name. You can also drag an item or a compendium link onto the tab to wish for exactly that item. A list holds 30 wishes.
+
+* **Stars:** loot which matches one of your wishes gets a star in the loot table. The GM sees the names of the players next to the loot, with what each wished for.
+* **Notice:** when matching loot comes into the loot table (put in by the GM, collected after a fight, rolled from a table, moved back from the party inventory), the player gets a short notice, once per wish and loot entry. More of the same item that joins a stack, or an item that goes away and comes back, does not tell again. Loot already there when a wish is added only gets the star.
+* **Visible to:** your list is kept in your user. You and the GM see it in the window, the other players do not. Foundry sends every user's data to every browser, so someone who opens the console can read the lists.
+* **Unidentified items** count with their cover name, never with their real name. Cover an item before it enters the loot: a player already told about a real name cannot be called back.
+* The GM can take wishes off a list. The setting *Wish list* switches the tab, the stars and the notices off.
+
+## Merchant
+
+The GM sells goods from the party inventory with the *Sell* button above the list. In the window pick the items and how many of each, name the merchant if you like and set the offer: a share of the value the game system gives the items, 50 % by default (setting *Merchant offer*, changeable for each sale between 1 and 200 %). Items without a value are not listed.
+
+* **Value:** D&D 5e uses the price in its coin, Crucible the price in copper, Pathfinder 2e the price per unit (a price for ten arrows counts a tenth per arrow). A container counts with its contents and is sold with them.
+* **Haggling** is optional. One character rolls one skill check, Persuasion in D&D 5e, Diplomacy in Pathfinder 2e and Crucible, and the roll goes to nobody but the GM's window, no chat message. Every point above the usual result (15 in D&D 5e and Crucible, the standard difficulty of the character's level in Pathfinder 2e) raises the offer by 2 %, every point below lowers it by 2 %, at most by the setting *Haggling limit* (20 % by default, 0 switches haggling off). The window shows the roll and what it does to the offer. Other systems cannot haggle.
+* **Proceeds:** into the party fund, or split among the characters you pick. With the party fund off they can only be split. The rest of a split goes into the fund, without a fund to the first character.
+* **Log:** one entry for each item sold and one for the coins, with the merchant, the share and the haggle. A sale cannot be undone. Players see it in the log like everything else.
+* Only the GM can sell, and the active GM's client does it, like every change.
 
 ## Unidentified items
 
@@ -101,6 +122,9 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 | Where the real values are kept | A journal only GMs can open, or the GM's browser only (GM) |
 | Self test | Checks the party inventory, the log, the system support and the player characters, and names what to fix (GM) |
 | Debug file | Saves a file for bug reports, see [Debug file](#debug-file) (GM) |
+| Wish list | Players note what they look for, matching loot gets a star and a notice |
+| Merchant offer | What a merchant pays, in percent of the value, 50 by default (GM) |
+| Haggling limit | The most a haggle moves the offer, 20 % by default, 0 switches it off (GM) |
 | Coin values | D&D 5e only: what each coin is worth in copper, for tables with their own exchange rates (GM) |
 
 Settings that belong to a switched off part are hidden in the settings dialog.
@@ -112,7 +136,7 @@ The module can take part in a small usage report shared by all of Sephral’s mo
 With the GM’s consent only the active GM’s browser counts, and it sends at most one report a day. The counts are kept in a hidden world setting, so all browsers and computers of the GM count together, and turning the statistics off deletes them. A copy of a world gets its own world ID. The question lists everything the report contains, from the Foundry version to a random world ID. For the Loot Ledger it holds:
 
 * on how many of the last 30 days the module was used
-* how often items are covered, revealed and identified, loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight, log entries are undone, loot is taken from item piles or left as an item pile, and loot rolled on a table is added
+* how often items are covered, revealed and identified, loot is claimed and handed out, coins are split, items move between a character and the party inventory, items are given to other characters, coins go into or out of the party fund, loot is collected after a fight, log entries are undone, loot is taken from item piles or left as an item pile, and loot rolled on a table is added, wishes are added, wishes match loot, goods are sold to a merchant, a haggle is rolled
 * the settings *Loot table*, *Party fund* and *How loot is handed out* (only the chosen option)
 * where errors occur in the module code: file, line, error type and whether the error arose in the module itself, in Foundry, in the game system or in another module, never the error message or the name of another module
 
@@ -144,7 +168,7 @@ Other modules can add support for more systems through the module's API.
 
 | Function | What it does |
 | --- | --- |
-| `open({tab})` | Opens the window, optionally on `"stash"`, `"pool"`, `"log"` or `"balance"` |
+| `open({tab})` | Opens the window, optionally on `"stash"`, `"pool"`, `"wishes"`, `"log"` or `"balance"` |
 | `collect()` | Opens the dialog which collects the loot of the last fight (GM) |
 | `coverItem(item, {name, img, description, dc})` | Covers an item as unidentified, every field optional (GM) |
 | `revealItem(item)` | Reveals a covered item (GM) |
@@ -156,6 +180,7 @@ Other modules can add support for more systems through the module's API.
 | `verify()` | Checks the log for later changes |
 | `ledgerActor()` | The actor which holds the loot and the party inventory |
 | `registerAdapter(systemId, adapter)` | Adds support for another system, see `BaseAdapter` |
+| `sellToMerchant()` | Opens the merchant window (GM) |
 | `runSelfTest()` | Runs the self test (GM) |
 | `saveDebugFile(messageId)` | Saves a debug file about one chat message, or without an id about the latest ones (GM) |
 

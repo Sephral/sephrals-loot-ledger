@@ -8,13 +8,14 @@
 import {MODULE_ID, flag, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {splitCoins} from "./coins.mjs";
-import {append, entries} from "./ledger.mjs";
+import {NOT_UNDOABLE, append, entries} from "./ledger.mjs";
 import {applyOperations, applyToActor, isBusy, mergeActorUpdates} from "./ops.mjs";
 import {balance, pickWinner} from "./rules.mjs";
 import {areaOf, isContained, isLedgerActor, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
 import {debugTrace} from "./trace.mjs";
 import {postApproval, postEntries, postOffer, postRolls, resolveCard} from "./chat.mjs";
 import {clampRequests} from "./pile-map.mjs";
+import {HAGGLE_LIMIT, clampShare, haggleAdjust, offerOf, splitProceeds} from "./merchant-logic.mjs";
 import {isLootablePile, pileContents, pilesApi} from "./piles.mjs";
 import {countFeature} from "./usage.mjs";
 import {carriedFlags, checkFormula, checkPasses, hasTried} from "./cover-logic.mjs";
@@ -44,7 +45,9 @@ const FEATURES = {
   addRolled: "tableLoot",
   cover: "itemCover",
   reveal: "itemReveal",
-  identify: "itemIdentify"
+  identify: "itemIdentify",
+  merchantSale: "merchantSale",
+  merchantHaggle: "haggleRolled"
 };
 
 /**
@@ -85,6 +88,17 @@ export function handleRequest(action, payload, user) {
     }
   });
   queue = run.catch(() => {});
+  return run;
+}
+
+/**
+ * Run a function once the requests which are running now are done, before the ones which come later.
+ * @param {Function} fn
+ * @returns {Promise<*>}
+ */
+export function afterRequests(fn) {
+  const run = queue.then(fn);
+  queue = run.catch(err => console.warn(`${MODULE_ID} | A follow-up task failed`, err));
   return run;
 }
 
@@ -846,7 +860,7 @@ const ACTIONS = {
     if ( !user.isGM ) return fail("SLL.Error.gmOnly");
     const all = entries();
     const entry = all.find(e => e.id === entryId);
-    if ( !entry || ["undo", "edit", "remove", "reveal"].includes(entry.kind) || (entry.to?.kind === "pile") ) {
+    if ( !entry || NOT_UNDOABLE.includes(entry.kind) || (entry.to?.kind === "pile") ) {
       return fail("SLL.Error.cannotUndo");
     }
     if ( all.some(e => (e.kind === "undo") && (e.undoes === entryId)) ) return fail("SLL.Error.alreadyUndone");
@@ -1132,6 +1146,111 @@ ACTIONS._edit = async ({entry}, user) => {
   await record([entry]);
   return ok();
 };
+
+/* -------------------------------------------- */
+/*  Merchant                                    */
+/* -------------------------------------------- */
+
+/**
+ * The most a haggle moves the offer, from the setting (0 switches haggling off).
+ * @returns {number}
+ */
+function haggleLimit() {
+  const value = Number(setting("merchantHaggleLimit"));
+  return Number.isFinite(value) ? Math.min(Math.max(Math.floor(value), 0), 100) : HAGGLE_LIMIT;
+}
+
+Object.assign(ACTIONS, {
+
+  /** GM: one character rolls the haggle (a skill check). Nothing is posted to the chat, the result goes back to the window. */
+  async merchantHaggle({actorId}, user) {
+    if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const a = adapter();
+    if ( !a.canHaggle || !haggleLimit() ) return fail("SLL.Error.noHaggle");
+    const actor = actorById(actorId);
+    if ( !isCharacter(actor) ) return fail("SLL.Error.noCharacter");
+    const result = await a.haggleRoll(actor);
+    if ( !result || !Number.isFinite(result.total) ) return fail("SLL.Error.noHaggle");
+    const limit = haggleLimit();
+    return ok({haggle: {actorId: actor.id, actor: actor.name, skill: result.skill, total: result.total,
+      baseline: result.baseline, limit, adjust: haggleAdjust(result.total, result.baseline, limit)}});
+  },
+
+  /**
+   * GM: sell items of the party inventory to a merchant. The items leave, the proceeds go into the party fund or are
+   * shared among characters, and the log records it. The offer is a share of the value the system gives the items,
+   * moved by the haggle if there was one.
+   */
+  async merchantSale({items, share, merchant, haggle, payout, actorIds}, user) {
+    if ( !user.isGM ) return fail("SLL.Error.gmOnly");
+    const a = adapter();
+    const name = String(merchant ?? "").trim().slice(0, 60) || t("SLL.Merchant.defaultName");
+    const lines = [];
+    const seen = new Set();
+    for ( const {itemId, quantity} of (items ?? []) ) {
+      if ( seen.has(itemId) ) continue;
+      seen.add(itemId);
+      const item = ledgerItem(itemId, "stash");
+      const amount = amountOf(item, quantity);
+      lines.push({item, amount, info: itemInfo(item, amount)});
+    }
+    const base = lines.reduce((sum, l) => sum + l.info.value, 0);
+    if ( !lines.length || !base ) return fail("SLL.Error.nothingToSell");
+
+    // The haggle counts as far as the world allows it; a number the window made up cannot raise the limit
+    const limit = haggleLimit();
+    const check = (haggle && a.canHaggle && limit && Number.isFinite(Number(haggle.total)) && Number.isFinite(Number(haggle.baseline)))
+      ? {actor: String(haggle.actor ?? ""), skill: String(haggle.skill ?? ""), adjust: haggleAdjust(haggle.total, haggle.baseline, limit)}
+      : null;
+    const percent = clampShare(share, clampShare(setting("merchantShare")));
+    const offer = offerOf(base, percent, check?.adjust ?? 0);
+    if ( !offer ) return fail("SLL.Error.nothingToSell");
+
+    // Where the proceeds go
+    const {fund} = parts();
+    const operations = [];
+    const coinLog = [];
+    const ref = {merchant: name};
+    const outside = {kind: "outside", name};
+    const note = [t("SLL.Merchant.noteShare", {share: percent, value: a.formatCoins(base)}),
+      check ? t("SLL.Merchant.noteHaggle", {skill: check.skill, adjust: `${(check.adjust > 0) ? "+" : ""}${check.adjust}`}) : ""]
+      .filter(Boolean).join(", ");
+    if ( payout === "split" ) {
+      const actors = (actorIds ?? []).map(actorById).filter(isCharacter);
+      if ( !actors.length ) return fail("SLL.Error.noCharacter");
+      const {shares, toFund} = splitProceeds(offer, actors.length, fund);
+      if ( !shares.some(Boolean) ) return fail("SLL.Error.tooFewCoins");
+      for ( const [i, actor] of actors.entries() ) {
+        if ( !shares[i] ) continue;
+        operations.push(...await a.receiveOps(actor, shares[i]));
+        coinLog.push({...by(user), kind: "sale", from: place("stash"), to: place(actor), coins: shares[i], ref, note});
+      }
+      if ( toFund ) {
+        operations.push({action: "update", documentName: "Actor", updates: [coinsUpdate({fund: storedCoins().fund + toFund})]});
+        coinLog.push({...by(user), kind: "sale", from: outside, to: place("fund"), coins: toFund, ref, note});
+      }
+    }
+    else {
+      if ( !fund ) return fail("SLL.Error.fundOff");
+      operations.push({action: "update", documentName: "Actor", updates: [coinsUpdate({fund: storedCoins().fund + offer})]});
+      coinLog.push({...by(user), kind: "sale", from: outside, to: place("fund"), coins: offer, ref, note});
+    }
+
+    // The items leave: whole stacks go, a part of a stack takes its quantity down
+    const itemOps = [];
+    for ( const {item, amount} of lines ) {
+      if ( amount >= Math.max(a.quantity(item), 1) ) {
+        itemOps.push({action: "delete", documentName: "Item", parent: ledgerActor(), ids: a.deleteIds(item)});
+      }
+      else itemOps.push({action: "update", documentName: "Item", parent: ledgerActor(),
+        updates: [{_id: item.id, [a.quantityPath]: a.quantity(item) - amount}]});
+    }
+    await applyOperations([...mergeActorUpdates(operations), ...itemOps]);
+    await record([...lines.map(({info, item}) => ({...by(user), kind: "sale", from: place("stash"), to: outside,
+      item: info, ref: {...ref, itemId: item.id}})), ...coinLog]);
+    return ok({notice: "SLL.Notice.sold", data: {count: lines.length, offer: a.formatCoins(offer)}});
+  }
+});
 
 /* -------------------------------------------- */
 /*  Unidentified items                          */

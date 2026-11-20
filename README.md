@@ -14,12 +14,13 @@
 
 * **Unidentified items in every system:** give an item a cover name, picture and description. Players see only the cover, in the loot, the log and on their character, until you reveal it or a character passes the check you set.
 * **A party inventory that just works:** players put things in and take them out with one click or by dragging. Coins go into a shared party fund.
-* **Fair loot:** after a fight the GM collects what the defeated leave behind. Everyone marks *Need*, *Want* or *Pass*, and the loot goes to the strongest claim, then to whoever received the least, or to the highest roll. Unclaimed loot lands in the party inventory.
+* **Fair loot:** after a fight the GM collects what the defeated leave behind. Everyone marks *Need*, *Want* or *Pass*, and the loot goes to the strongest claim, then to whoever received the least, or to the highest roll.
 * **Every copper counts:** coins are split in equal shares, and the rest goes into the party fund instead of vanishing.
 * **An open log:** every item and coin that changes hands is written into a journal all players can read. Only the GM's client writes it, and any later change shows up.
-* **Clean handovers:** equipped, attuned or invested items are taken off on the way, containers keep their contents, and stacks merge.
+* **Clean handovers:** equipped or attuned items are taken off on the way, containers keep their contents, and stacks merge.
 * **Gifts with consent:** a character gives something to a friend, who accepts or declines first.
-* **Loot from tables and piles:** roll a table with quantities like 2d4 or 3d6 gp and see the loot first, or empty an Item Piles pile into the loot from its token.
+* **Wish lists and a merchant:** players note what they look for and get a quiet notice when matching loot turns up. The GM sells goods from the party inventory, with an optional haggle roll.
+* **Loot from tables and piles:** roll a table with quantities like 2d4 or 3d6 gp, or empty an Item Piles pile into the loot.
 * **Your table, your rules:** free access or GM approval, a fund limit, chat messages for everyone or only the GM. Every part can be switched off.
 
 ## How it works

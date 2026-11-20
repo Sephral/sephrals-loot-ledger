@@ -642,3 +642,117 @@
   opacity: 0.75;
   white-space: nowrap;
 }
+
+/* Wish list */
+.sll-ledger .sll-wish-star {
+  color: #e2b54c;
+}
+
+.sll-ledger .sll-wishers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  margin-top: 2px;
+  font-size: var(--font-size-11, 11px);
+}
+
+.sll-ledger .sll-wisher i {
+  color: #e2b54c;
+}
+
+.sll-ledger .sll-wish-add {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.sll-ledger .sll-wish-add input {
+  flex: 1;
+}
+
+.sll-ledger .sll-wish > i:first-child {
+  flex: 0 0 32px;
+  text-align: center;
+}
+
+.sll-ledger .sll-wish-found {
+  color: #7fd67f;
+}
+
+/* Merchant */
+.sll-ledger .sll-merchant {
+  position: relative;
+}
+
+.sll-ledger .sll-merchant .sll-item input[type="checkbox"] {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.sll-ledger .sll-merchant .sll-qty {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 24px;
+}
+
+.sll-ledger .sll-merchant-form {
+  margin: 8px 0;
+}
+
+.sll-ledger .sll-merchant .sll-haggle-result {
+  margin: 2px 0 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.2);
+}
+
+.sll-ledger .sll-merchant .sll-haggle-result.good i {
+  color: #7fd67f;
+}
+
+.sll-ledger .sll-merchant .sll-haggle-result.bad i {
+  color: #ff9f6b;
+}
+
+.sll-ledger .sll-merchant .sll-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sll-ledger .sll-merchant .sll-check-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 6px;
+}
+
+.sll-ledger .sll-merchant .sll-check-list img {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sll-ledger .sll-merchant-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 6px 10px 10px;
+}
+
+.sll-ledger .sll-merchant .form-fields {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sll-ledger .sll-merchant .form-fields input[type="number"] {
+  flex: 0 0 90px;
+  width: 90px;
+}
+
+.sll-ledger .sll-merchant .form-fields select {
+  flex: 1;
+}

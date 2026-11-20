@@ -35,6 +35,9 @@ import {adapter} from "./adapters/index.mjs";
  * @property {string} hash
  */
 
+/** The kinds of entries an undo cannot reverse: they are no move of an item or of coins the module can take back. */
+export const NOT_UNDOABLE = ["undo", "edit", "remove", "reveal", "sale"];
+
 /* -------------------------------------------- */
 
 /**
@@ -156,7 +159,8 @@ export function whatText(entry) {
  * @returns {string}
  */
 export function describe(entry, byId) {
-  const data = {from: placeName(entry.from), to: placeName(entry.to), what: whatText(entry), note: entry.note ?? ""};
+  const data = {from: placeName(entry.from), to: placeName(entry.to), what: whatText(entry), note: entry.note ?? "",
+    merchant: entry.ref?.merchant ?? ""};
   if ( entry.kind === "undo" ) {
     const original = byId?.get(entry.undoes);
     return t("SLL.Log.undo", {entry: original ? describe(original) : "?"});
@@ -173,6 +177,7 @@ export function describe(entry, byId) {
   }
   if ( entry.kind === "add" ) keys.push(`SLL.Log.add.${entry.from?.kind === "outside" ? "new" : "from"}.${entry.to?.kind}`);
   if ( ["deposit", "remove"].includes(entry.kind) ) keys.push(`SLL.Log.${entry.kind}.${entry.to?.kind === "fund" ? "fund" : entry.from?.kind === "pool" ? "pool" : "stash"}`);
+  if ( entry.kind === "sale" ) keys.push(`SLL.Log.sale.${entry.item ? "item" : (entry.to?.kind === "actor" ? "actor" : "fund")}`);
   if ( entry.kind === "withdraw" ) keys.push(`SLL.Log.withdraw.${entry.from?.kind === "fund" ? "fund" : "stash"}`);
   keys.push(`SLL.Log.${entry.kind}`);
   const key = keys.find(k => game.i18n.has(k) && (typeof foundry.utils.getProperty(game.i18n.translations, k) === "string"));

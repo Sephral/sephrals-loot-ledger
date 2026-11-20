@@ -15,6 +15,7 @@
 
 import {COVER_FLAG, DEFAULT_COVER_IMG, nativeCover, stackIdentity} from "../cover-logic.mjs";
 import {MODULE_ID} from "../config.mjs";
+import {dcByLevel} from "../merchant-logic.mjs";
 import {BaseAdapter} from "./base.mjs";
 import {COINS, COIN_SOURCES, PAYOUT_KEYS, bulkOf, nativeCoverFields, planPay, planReceive, planStacks, priceOf,
   remapContainers, resetEquipped} from "./pf2e-logic.mjs";
@@ -38,6 +39,29 @@ export class Pf2eAdapter extends BaseAdapter {
   /** PF2e has system.identification with its own unidentified name, picture and description. */
   get nativeIdentification() {
     return true;
+  }
+
+  /** Haggling is a Diplomacy check against the standard difficulty of the character's level. */
+  get canHaggle() {
+    return true;
+  }
+
+  /** @override */
+  async haggleRoll(actor) {
+    const statistic = actor?.skills?.diplomacy;
+    const skill = statistic?.label ?? game.i18n.localize("PF2E.Skill.Diplomacy");
+    let total = null;
+    try {
+      const roll = await statistic.roll({skipDialog: true, createMessage: false});
+      total = roll?.total;
+    } catch(err) {
+      console.warn(`${MODULE_ID} | The system's Diplomacy roll failed, rolling the modifier by hand`, err);
+    }
+    if ( !Number.isFinite(total) ) {
+      const roll = await new Roll("1d20 + @bonus", {bonus: Number(statistic?.mod) || 0}).evaluate();
+      total = roll.total;
+    }
+    return {total, skill, baseline: dcByLevel(actor?.level)};
   }
 
   /** @override */

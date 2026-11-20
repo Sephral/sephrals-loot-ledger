@@ -81,6 +81,7 @@
       <header>
         <h3>{{localize "SLL.Stash.title"}}</h3>
         {{#if stashValue}}<small>{{localize "SLL.Stash.value" value=stashValue}}</small>{{/if}}
+        {{#if isGM}}{{#if coinsAvailable}}<button type="button" data-action="merchant" data-tooltip="{{localize "SLL.Merchant.openTooltip"}}"><i class="fa-solid fa-store" inert></i> {{localize "SLL.Merchant.open"}}</button>{{/if}}{{/if}}
         <input type="search" data-filter="stash" placeholder="{{localize "SLL.Search"}}">
       </header>
       <ol class="sll-items plain" data-list="stash">
@@ -184,10 +185,15 @@
         <li class="sll-item sll-loot" data-item-id="{{id}}" data-area="pool" data-name="{{name}}">
           <img src="{{img}}" alt="" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">
           <div class="sll-item-info">
-            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{#if covered}}<i class="fa-solid fa-mask sll-covered" data-tooltip="{{localize "SLL.Cover.covered"}}" inert></i> {{/if}}{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
+            <span class="sll-item-name" data-action="showItem" data-tooltip="{{localize "SLL.ShowItem"}}">{{#if covered}}<i class="fa-solid fa-mask sll-covered" data-tooltip="{{localize "SLL.Cover.covered"}}" inert></i> {{/if}}{{#if wished}}<i class="fa-solid fa-star sll-wish-star" data-tooltip="{{localize "SLL.Wish.star" text=wished}}" inert></i> {{/if}}{{name}}{{#if many}} <small>× {{quantity}}</small>{{/if}}</span>
             {{#if realName}}<small class="sll-real">{{localize "SLL.Cover.real" name=realName}}{{#if dc}} · {{localize "SLL.Cover.dcShort" dc=dc}}{{/if}}</small>{{/if}}
             <small>{{value}}</small>
             {{#if contents}}<small class="sll-contents">{{contents}}</small>{{/if}}
+            {{#if wishers.length}}
+            <div class="sll-wishers">
+              {{#each wishers}}<span class="sll-wisher" data-tooltip="{{localize "SLL.Wish.wisher" name=name text=text}}"><i class="fa-solid fa-star" inert></i> {{name}}: {{text}}</span>{{/each}}
+            </div>
+            {{/if}}
             {{#if claims.length}}
             <div class="sll-claims">
               {{#each claims}}<span class="sll-claim {{claim}}" data-tooltip="{{label}}"><img src="{{img}}" alt="">{{name}}</span>{{/each}}
@@ -218,6 +224,53 @@
       </ol>
       {{#if (and isGM lootOn)}}<p class="sll-drop-hint"><i class="fa-solid fa-hand-pointer" inert></i> {{localize "SLL.Pool.dropHint"}}</p>{{/if}}
     </section>
+    {{/if}}
+
+    {{!-- Wish list --}}
+    {{#if (eq tab "wishes")}}
+    <p class="sll-hint"><i class="fa-solid fa-circle-info" inert></i> {{localize "SLL.Wish.hint"}}</p>
+    <section class="sll-list sll-wish-list" data-drop="wish">
+      <header>
+        <h3>{{localize "SLL.Wish.mine"}}</h3>
+        <small>{{wishList.length}} / {{wishMax}}</small>
+      </header>
+      <div class="sll-wish-add">
+        <input type="text" name="wish" maxlength="60" placeholder="{{localize "SLL.Wish.placeholder"}}" {{#if wishFull}}disabled{{/if}}>
+        <button type="button" data-action="addWish" {{#if wishFull}}disabled{{/if}}><i class="fa-solid fa-star" inert></i> {{localize "SLL.Wish.add"}}</button>
+      </div>
+      <ol class="sll-items plain">
+        {{#each wishList}}
+        <li class="sll-item sll-wish" data-wish-id="{{id}}" data-user-id="{{userId}}">
+          {{#if img}}<img src="{{img}}" alt="">{{else}}<i class="fa-solid fa-star sll-wish-star" inert></i>{{/if}}
+          <div class="sll-item-info">
+            <span class="sll-item-name">{{#if link}}<i class="fa-solid fa-link" data-tooltip="{{localize "SLL.Wish.linked"}}" inert></i> {{/if}}{{text}}</span>
+            {{#if found}}<small class="sll-wish-found">{{localize "SLL.Wish.found" items=found}}</small>{{/if}}
+          </div>
+          <button type="button" class="sll-icon" data-action="removeWish" data-tooltip="{{localize "SLL.Wish.remove"}}"><i class="fa-solid fa-xmark" inert></i></button>
+        </li>
+        {{else}}
+        <li class="sll-empty">{{localize "SLL.Wish.none"}}</li>
+        {{/each}}
+      </ol>
+      <p class="sll-drop-hint"><i class="fa-solid fa-hand-pointer" inert></i> {{localize "SLL.Wish.dropHint"}}</p>
+    </section>
+    {{#each wishUsers}}
+    <section class="sll-list">
+      <header><h3 style="color: {{color}}">{{name}}</h3><small>{{localize "SLL.Wish.theirs"}}</small></header>
+      <ol class="sll-items plain">
+        {{#each wishes}}
+        <li class="sll-item sll-wish" data-wish-id="{{id}}" data-user-id="{{userId}}">
+          {{#if img}}<img src="{{img}}" alt="">{{else}}<i class="fa-solid fa-star sll-wish-star" inert></i>{{/if}}
+          <div class="sll-item-info">
+            <span class="sll-item-name">{{#if link}}<i class="fa-solid fa-link" data-tooltip="{{localize "SLL.Wish.linked"}}" inert></i> {{/if}}{{text}}</span>
+            {{#if found}}<small class="sll-wish-found">{{localize "SLL.Wish.found" items=found}}</small>{{/if}}
+          </div>
+          <button type="button" class="sll-icon" data-action="removeWish" data-tooltip="{{localize "SLL.Wish.remove"}}"><i class="fa-solid fa-xmark" inert></i></button>
+        </li>
+        {{/each}}
+      </ol>
+    </section>
+    {{/each}}
     {{/if}}
 
     {{!-- Log --}}

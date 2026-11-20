@@ -17,7 +17,8 @@
       "stash": "Gruppeninventar",
       "pool": "Beute",
       "log": "Protokoll",
-      "balance": "Bilanz"
+      "balance": "Bilanz",
+      "wishes": "Wunschliste"
     },
     "Storage": {
       "actorName": "Gruppeninventar",
@@ -154,7 +155,12 @@
       "undoTitle": "Rückgängig",
       "undoConfirm": "Diesen Eintrag rückgängig machen? Gegenstände und Münzen gehen dorthin zurück, wo sie herkamen, und das Protokoll vermerkt es.",
       "empty": "Noch nichts aufgezeichnet.",
-      "reveal": "{note} wurde bestimmt: {what}"
+      "reveal": "{note} wurde bestimmt: {what}",
+      "sale": {
+        "item": "{what} an {merchant} verkauft",
+        "fund": "{what} aus dem Verkauf an {merchant} kommt in die Gruppenkasse",
+        "actor": "{to} erhält {what} aus dem Verkauf an {merchant}"
+      }
     },
     "Reason": {
       "single": "stärkster Anspruch",
@@ -181,7 +187,8 @@
       "splitTitle": "Münzen teilen",
       "splitHint": "Die Münzen gehen zu gleichen Teilen an die gewählten Charaktere. Was sich nicht teilen lässt, kommt in die Gruppenkasse.",
       "split": "Teilen",
-      "splitHintPool": "Die Münzen gehen zu gleichen Teilen an die gewählten Charaktere. Was sich nicht teilen lässt, bleibt in der Beute."
+      "splitHintPool": "Die Münzen gehen zu gleichen Teilen an die gewählten Charaktere. Was sich nicht teilen lässt, bleibt in der Beute.",
+      "cancel": "Abbrechen"
     },
     "CoinValues": {
       "intro": "Wert einer Münze in {coin}, der kleinsten Münze. Münzen, die schon in der Beute und in der Gruppenkasse liegen, behalten ihren Wert in {coin}.",
@@ -212,7 +219,8 @@
       "covered": "{name} ist verhüllt.",
       "revealed": "{name} ist enthüllt.",
       "identified": "Bestimmt: {name}.",
-      "notIdentified": "Du kannst {name} nicht bestimmen."
+      "notIdentified": "Du kannst {name} nicht bestimmen.",
+      "sold": "{count} Gegenstände für {offer} verkauft."
     },
     "Error": {
       "noGM": "Keine Spielleitung online.",
@@ -248,7 +256,9 @@
       "noCheck": "Für diesen Gegenstand gibt es keine Probe. Frag die Spielleitung.",
       "alreadyTried": "Deine Figur hat schon versucht, diesen Gegenstand zu bestimmen.",
       "secretMissing": "Die echten Werte dieses Gegenstands fehlen. Sie lagen im Journal der Geheimnisse.",
-      "deviceStore": "Dieser Browser kann die echten Werte nicht speichern. Stelle \"Wo die echten Werte liegen\" auf das Journal um."
+      "deviceStore": "Dieser Browser kann die echten Werte nicht speichern. Stelle \"Wo die echten Werte liegen\" auf das Journal um.",
+      "noHaggle": "Hier lässt sich nicht feilschen.",
+      "nothingToSell": "Es gibt nichts zu verkaufen, oder nichts davon hat einen Wert."
     },
     "Block": {
       "cursed": "Verflucht und investiert: Nur die Spielleitung kann es abnehmen.",
@@ -353,6 +363,18 @@
         "hint": "Für verhüllte Gegenstände außerhalb der eigenen Bestimmung des Systems. Das Journal kann nur die Spielleitung öffnen und jede Spielleitung kann enthüllen, aber Foundry schickt jedes Weltdokument an alle Browser, wer als Spieler die Browserkonsole nutzt, kann es also lesen. Der Browser der Spielleitung hält sie von allen anderen Clients fern: Sie werden nirgends hingeschickt, aber nur dieser Browser kann den Gegenstand enthüllen oder seine Probe auswerten, und Kopien der Welt enthalten sie nicht.",
         "journal": "Ein Journal, das nur die Spielleitung öffnen kann",
         "device": "Nur der Browser der Spielleitung"
+      },
+      "wishList": {
+        "name": "Wunschliste",
+        "hint": "Spieler halten fest, was sie suchen. Passende Beute bekommt im Beutetisch einen Stern, und der Spieler bekommt eine kurze Meldung."
+      },
+      "merchantShare": {
+        "name": "Händlerangebot",
+        "hint": "Was ein Händler für verkaufte Gegenstände zahlt, in Prozent ihres Werts. Die Spielleitung kann es bei jedem Verkauf ändern."
+      },
+      "merchantHaggleLimit": {
+        "name": "Feilschgrenze",
+        "hint": "Um wie viel Prozent das Feilschen das Angebot höchstens nach oben oder unten verschiebt. 0 schaltet das Feilschen aus."
       }
     },
     "SELFTEST": {
@@ -454,6 +476,50 @@
     "Identify": {
       "success": "{actor} bestimmt {item}",
       "failure": "{actor} kann {item} nicht bestimmen"
+    },
+    "Wish": {
+      "hint": "Halte fest, was du suchst: einen Namen, einen Namensteil, oder zieh einen Gegenstand hierher. Taucht passende Beute im Beutetisch auf, bekommt sie einen Stern und du eine kurze Meldung. Die Spielleitung sieht die Wunschlisten.",
+      "mine": "Deine Wünsche",
+      "theirs": "Wünsche",
+      "placeholder": "Name oder Namensteil, zum Beispiel Heiltrank",
+      "add": "Merken",
+      "remove": "Von der Liste streichen",
+      "none": "Auf deiner Liste steht noch nichts.",
+      "dropHint": "Zieh einen Gegenstand oder einen Kompendium-Link hierher, um genau diesen Gegenstand zu wünschen.",
+      "dropItem": "Wünschen kann man sich nur Gegenstände.",
+      "linked": "Wunsch nach genau diesem Gegenstand",
+      "found": "In der Beute: {items}",
+      "star": "Auf deiner Wunschliste: {text}",
+      "wisher": "{name} wünscht sich: {text}",
+      "matched": "Auf deiner Wunschliste: {item}",
+      "empty": "Ein Wunsch braucht mindestens zwei Buchstaben.",
+      "known": "Das steht schon auf deiner Liste.",
+      "full": "Deine Liste ist voll ({max} Wünsche).",
+      "added": "Gemerkt."
+    },
+    "Merchant": {
+      "title": "An einen Händler verkaufen",
+      "open": "Verkaufen",
+      "openTooltip": "Gegenstände aus dem Gruppeninventar an einen Händler verkaufen",
+      "hint": "Wähle, was der Händler kauft. Das Angebot ist ein Anteil vom Wert, den das Spielsystem den Gegenständen gibt. Feilschen ist freiwillig.",
+      "items": "Gegenstände",
+      "all": "Alle",
+      "nothing": "Im Gruppeninventar liegt nichts, wofür ein Händler zahlen würde.",
+      "name": "Händler",
+      "defaultName": "den Händler",
+      "share": "Der Händler zahlt",
+      "haggle": "Feilschen",
+      "roll": "Würfeln",
+      "haggleHint": "Ein Charakter würfelt eine Fertigkeitsprobe. Das Ergebnis verschiebt das Angebot um höchstens {limit} % nach oben oder unten.",
+      "haggled": "{actor} würfelt {skill}: {total} gegen {baseline}. Das Angebot ändert sich um {adjust} % (höchstens {limit} %).",
+      "payout": "Erlös",
+      "toFund": "In die Gruppenkasse",
+      "toSplit": "Auf Charaktere verteilen",
+      "value": "Wert",
+      "offer": "Angebot",
+      "sell": "Verkaufen",
+      "noteShare": "{share} % von {value}",
+      "noteHaggle": "gefeilscht mit {skill} {adjust} %"
     }
   }
 }

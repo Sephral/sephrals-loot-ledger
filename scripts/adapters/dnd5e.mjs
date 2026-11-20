@@ -64,6 +64,28 @@ export class Dnd5eAdapter extends BaseAdapter {
     return Math.max(Number(skills.arc?.total) || 0, Number(skills.inv?.total) || 0);
   }
 
+  /** Haggling is a Persuasion check against an average difficulty of 15. */
+  get canHaggle() {
+    return true;
+  }
+
+  /** @override */
+  async haggleRoll(actor) {
+    const skill = game.i18n.localize(CONFIG.DND5E?.skills?.per?.label ?? "Persuasion");
+    let total = null;
+    try {
+      const rolls = await actor.rollSkill({skill: "per"}, {configure: false}, {create: false});
+      total = rolls?.[0]?.total;
+    } catch(err) {
+      console.warn(`${MODULE_ID} | The system's Persuasion roll failed, rolling the bonus by hand`, err);
+    }
+    if ( !Number.isFinite(total) ) {
+      const roll = await new Roll("1d20 + @bonus", {bonus: Number(actor.system?.skills?.per?.total) || 0}).evaluate();
+      total = roll.total;
+    }
+    return {total, skill, baseline: 15};
+  }
+
   /** @override */
   systemParty() {
     const party = game.actors.party;

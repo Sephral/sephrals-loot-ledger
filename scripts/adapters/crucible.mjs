@@ -7,6 +7,7 @@
  */
 
 import {formatCoins} from "../coins.mjs";
+import {MODULE_ID} from "../config.mjs";
 import {BaseAdapter, sameData, stackCompare} from "./base.mjs";
 
 export class CrucibleAdapter extends BaseAdapter {
@@ -29,6 +30,26 @@ export class CrucibleAdapter extends BaseAdapter {
   /** Physical items keep the description players see in description.public. */
   descriptionPath() {
     return "system.description.public";
+  }
+
+  /** Haggling is a Diplomacy check (3d8 plus bonuses) against Crucible's standard difficulty of 15. */
+  get canHaggle() {
+    return true;
+  }
+
+  /** @override */
+  async haggleRoll(actor) {
+    const config = globalThis.crucible?.CONFIG?.SKILLS?.diplomacy;
+    const skill = game.i18n.localize(config?.label ?? "Diplomacy");
+    let total = null;
+    try {
+      const check = await actor.rollSkill("diplomacy", {chatMessage: false, dc: 15});
+      total = check?.total;
+    } catch(err) {
+      console.warn(`${MODULE_ID} | The system's Diplomacy roll failed`, err);
+    }
+    if ( !Number.isFinite(total) ) return null;
+    return {total, skill, baseline: 15};
   }
 
   /** @override */

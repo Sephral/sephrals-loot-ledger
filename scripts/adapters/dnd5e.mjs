@@ -49,6 +49,11 @@ export class Dnd5eAdapter extends BaseAdapter {
   }
 
   /** @override */
+  containerOf(item) {
+    return item?.system?.container || null;
+  }
+
+  /** @override */
   descriptionPath() {
     return "system.description.value";
   }

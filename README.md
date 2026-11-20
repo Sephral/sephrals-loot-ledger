@@ -36,7 +36,7 @@ A GM has to be online for anything to change hands. Players can still look at ev
 
 Search for **Loot Ledger** in Foundry's module browser or open the [package page](https://foundryvtt.com/packages/sephrals-loot-ledger).
 
-Foundry VTT 13 and 14 · built in support for Crucible and D&D 5e, other systems through a few settings · English and German
+Foundry VTT 13 and 14 · built in support for Crucible, D&D 5e and Pathfinder 2e, other systems through a few settings · English and German
 
 ## Learn more
 

@@ -9,7 +9,7 @@ import {MODULE_ID, flag, parts, setting, t} from "./config.mjs";
 import {adapter} from "./adapters/index.mjs";
 import {splitCoins} from "./coins.mjs";
 import {append, entries} from "./ledger.mjs";
-import {applyOperations, isBusy} from "./ops.mjs";
+import {applyOperations, applyToActor, isBusy, mergeActorUpdates} from "./ops.mjs";
 import {balance, pickWinner} from "./rules.mjs";
 import {areaOf, isContained, isLedgerActor, ledgerActor, pendingRequests, storedCoins} from "./storage.mjs";
 import {debugTrace} from "./trace.mjs";
@@ -399,9 +399,11 @@ const ACTIONS = {
     if ( !share ) return fail("SLL.Error.tooFewCoins");
     const a = adapter();
     const toFund = ((setting("remainder") === "fund") && parts().fund) ? remainder : 0;
-    const updates = actors.map(actor => ({_id: actor.id, ...a.receiveUpdate(actor, share)}));
-    updates.push(coinsUpdate({pool: coins.pool - (share * actors.length) - toFund, fund: coins.fund + toFund}));
-    await applyOperations([{action: "update", documentName: "Actor", updates}]);
+    const operations = [];
+    for ( const actor of actors ) operations.push(...await a.receiveOps(actor, share));
+    operations.push({action: "update", documentName: "Actor",
+      updates: [coinsUpdate({pool: coins.pool - (share * actors.length) - toFund, fund: coins.fund + toFund})]});
+    await applyOperations(mergeActorUpdates(operations));
     const log = actors.map(actor => ({...by(user), kind: "split", from: place("pool"), to: place(actor), coins: share}));
     if ( toFund ) log.push({...by(user), kind: "move", from: place("pool"), to: place("fund"), coins: toFund,
       note: t("SLL.Reason.remainder")});
@@ -526,8 +528,8 @@ const ACTIONS = {
     if ( !base ) return fail("SLL.Error.noAmount");
     if ( !a.canPay(actor, coins) ) return fail("SLL.Error.notEnoughCoins");
     const stored = storedCoins();
-    await applyOperations([{action: "update", documentName: "Actor",
-      updates: [{_id: actor.id, ...a.payUpdate(actor, coins)}, coinsUpdate({fund: stored.fund + base})]}]);
+    await applyOperations(mergeActorUpdates([...await a.payOps(actor, coins),
+      {action: "update", documentName: "Actor", updates: [coinsUpdate({fund: stored.fund + base})]}]));
     await record([{...by(user), kind: "deposit", from: place(actor), to: place("fund"), coins: base}]);
     return ok();
   },
@@ -655,7 +657,7 @@ const ACTIONS = {
       // Coins: all of them, coin by coin where the system keeps them separately
       const base = (source.coins && coinArea) ? a.coinsBase(actor) : 0;
       if ( base ) {
-        await actor.update(a.payUpdate(actor, a.separateCoins ? a.purse(actor) : base));
+        await applyToActor(actor, await a.payOps(actor, a.separateCoins ? a.purse(actor) : base));
         coinsIn += base;
         log.push({...by(user), kind: "add", from: place(actor), to: place(coinArea), coins: base});
       }
@@ -996,8 +998,8 @@ async function executeWithdraw(actor, item, quantity, user, note="") {
 async function executeWithdrawCoins(actor, base, note, user, extra="") {
   const coins = storedCoins();
   if ( base > coins.fund ) return fail("SLL.Error.notEnoughCoins");
-  await applyOperations([{action: "update", documentName: "Actor",
-    updates: [{_id: actor.id, ...adapter().receiveUpdate(actor, base)}, coinsUpdate({fund: coins.fund - base})]}]);
+  await applyOperations(mergeActorUpdates([...await adapter().receiveOps(actor, base),
+    {action: "update", documentName: "Actor", updates: [coinsUpdate({fund: coins.fund - base})]}]));
   await record([{...by(user), kind: "withdraw", from: place("fund"), to: place(actor), coins: base,
     note: [note, extra].filter(Boolean).join(", ")}]);
   return ok();
@@ -1050,14 +1052,14 @@ async function reverse(entry) {
   }
   if ( entry.coins ) {
     const coins = storedCoins();
-    const updates = [];
+    const operations = [];
     const next = {...coins};
     const take = entry.to?.kind;
     const give = entry.from?.kind;
     if ( take === "actor" ) {
       const actor = actorOf(entry.to);
       if ( !actor || !a.canPay(actor, entry.coins) ) throw new Error("SLL.Error.cannotUndo");
-      updates.push({_id: actor.id, ...a.payUpdate(actor, entry.coins)});
+      operations.push(...await a.payOps(actor, entry.coins));
     }
     else if ( ["pool", "fund"].includes(take) ) {
       if ( next[take] < entry.coins ) throw new Error("SLL.Error.cannotUndo");
@@ -1070,16 +1072,16 @@ async function reverse(entry) {
       pile = doc?.actor ?? doc;
       if ( !(pile instanceof Actor) ) throw new Error("SLL.Error.cannotUndo");
     }
-    const pileUpdate = pile ? a.receiveUpdate(pile, entry.coins) : null;
+    const pileOps = pile ? await a.receiveOps(pile, entry.coins) : null;
     if ( give === "actor" ) {
       const actor = actorOf(entry.from);
       if ( !actor ) throw new Error("SLL.Error.cannotUndo");
-      updates.push({_id: actor.id, ...a.receiveUpdate(actor, entry.coins)});
+      operations.push(...await a.receiveOps(actor, entry.coins));
     }
     else if ( ["pool", "fund"].includes(give) ) next[give] += entry.coins;
-    updates.push(coinsUpdate(next));
-    await applyOperations([{action: "update", documentName: "Actor", updates}]);
-    if ( pileUpdate ) await pile.update(pileUpdate);
+    operations.push({action: "update", documentName: "Actor", updates: [coinsUpdate(next)]});
+    await applyOperations(mergeActorUpdates(operations));
+    if ( pileOps ) await applyToActor(pile, pileOps);
   }
 }
 

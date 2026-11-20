@@ -39,9 +39,9 @@ The GM marks an item as unidentified and gives it a cover: a name, a picture and
 
 How the cover is kept depends on the system:
 
-* **With its own identification (D&D 5e):** the module switches `system.identified` off and fills the system's unidentified name and description. The sheets show the cover by themselves, and the GM can also reveal with the checkbox of the sheet. The cover picture is used in the Loot Ledger, not on the sheet.
+* **With its own identification (D&D 5e and Pathfinder 2e):** the module switches `system.identified` off and fills the system's unidentified name and description. The sheets show the cover by themselves, and the GM can also reveal with the checkbox of the sheet. The cover picture is used in the Loot Ledger, not on the sheet.
 * **All other systems (Crucible and the generic adapter):** the item itself carries the cover (name, picture and, where the item has one, the description). The real values wait in a secret store until the item is revealed. Crucible's description is the public one.
-* **The setting *Keep real names out of the players' data* (D&D 5e)** uses this second way in D&D 5e too.
+* **The setting *Keep real names out of the players' data* (D&D 5e)** uses this second way in D&D 5e and Pathfinder 2e too.
 * **The setting *Where the real values are kept*** picks the secret store. *A journal only GMs can open* works for every GM. *The GM's browser only* keeps the values in the browser of the GM who covers the item, so only that browser can reveal the item or run its check, and a copy of the world does not carry them.
 
 What can leak, honestly:
@@ -88,7 +88,7 @@ All options are in *Game Settings → Configure Settings → Sephral’s Loot Le
 | Loot table | Claims and handing out of loot. Off: no Loot tab, nothing is collected after a fight, the GM collects by hand into the party inventory |
 | Party fund | Shared coins of the group. Off: coins stay with the characters |
 | Balance tab | Shows the Balance tab |
-| Who shares the loot | The system's party (Crucible and D&D 5e), otherwise all player characters, or always all player characters |
+| Who shares the loot | The system's party (Crucible, D&D 5e and Pathfinder 2e), otherwise all player characters, or always all player characters |
 | Taking from the party inventory | Free, or with the GM's approval. Putting things in is always free |
 | Party fund limit | Up to this amount players take coins without asking, more needs approval. 0 means always ask (only with the party fund) |
 | Gifts must be accepted | The receiving player accepts or declines a gift first |
@@ -133,6 +133,7 @@ The log lives in the journal *Loot log*, one page per day, readable even without
 
 * **Crucible:** coins are the hero's coins. Equipped and invested gear is taken off when it changes hands. Equipped gear cannot be handed over during a fight (unequipping costs action points there), and cursed invested items only by the GM. Natural weapons and armor stay with their creature, and adversary gear stops scaling with the owner's level once a hero owns it.
 * **D&D 5e:** coins stay separate (pp, gp, ep, sp, cp). Shares of a split are paid in gold, silver and copper. The module exchanges coins at the rates of the system. Tables with their own rates, for example 100 copper to a silver and 100 silver to a gold, set them under *Coin values*. Only the values that differ from the system are stored, and coins already in the loot or the party fund keep their worth in copper. Equipped and attuned items are taken off, also inside containers, and containers move with their contents. The window lists what a container holds, and its value includes the contents. Unidentified items use dnd5e's own identification, see [Unidentified items](#unidentified-items).
+* **Pathfinder 2e:** the party inventory is a loot actor (PF2e's own party actor is not used, PF2e would take it for the active party). The loot is shared among the members of the active party. Coins are PF2e's coin items (pp, gp, sp, cp): payouts are made in gold, silver and copper, paying a sum breaks a coin when needed, and deposits into the party fund are made coin by coin. Held, worn and invested items are taken off, and a backpack moves with everything inside it. Prices count per unit ("1 sp for 10 arrows"), the bulk limit shown is where a character becomes encumbered. Temporary items and the coin stacks themselves are not handed over as items. Unidentified items use PF2e's own identification (`system.identification`), see [Unidentified items](#unidentified-items). The identify check uses the best of Arcana, Nature, Occultism, Religion, Crafting and Society. Verified with PF2e 7.12.2 (Foundry 13) and 8.6.1 (Foundry 14).
 * **Other systems:** the module works with any system whose items have a quantity. In the module settings the GM names the actor type of player characters, where items keep their quantity and price and where characters keep their coins (one number). Without a coin path the coin features stay off. The self test tells whether the paths fit.
 
 Other modules can add support for more systems through the module's API.

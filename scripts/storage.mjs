@@ -57,6 +57,8 @@ export async function ensureStorage() {
       ownership: {default: observer},
       flags: {[MODULE_ID]: {ledger: true, coins: {pool: 0, fund: 0}}}
     });
+    // Some systems (PF2e) set their own default rights on new actors of a type
+    if ( actor && ((actor.ownership?.default ?? 0) < observer) ) await actor.update({"ownership.default": observer});
   }
   if ( actor && (setting("ledgerActor") !== actor.id) ) await game.settings.set(MODULE_ID, "ledgerActor", actor.id);
   let journal = ledgerJournal();
@@ -102,7 +104,7 @@ export function areaItems(area) {
  * @returns {boolean}
  */
 export function isContained(item) {
-  const container = item?.system?.container;
+  const container = adapter().containerOf(item);
   return !!(container && item.parent?.items.get(container));
 }
 

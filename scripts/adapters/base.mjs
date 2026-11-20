@@ -137,7 +137,16 @@ export class BaseAdapter {
    */
   contents(item) {
     if ( !item?.id || !item.parent?.items ) return [];
-    return item.parent.items.filter(i => i.system?.container === item.id);
+    return item.parent.items.filter(i => this.containerOf(i) === item.id);
+  }
+
+  /**
+   * The id of the container an item sits in, or null.
+   * @param {Item|object} item
+   * @returns {string|null}
+   */
+  containerOf(item) {
+    return item?.system?.container || null;
   }
 
   /**
@@ -256,6 +265,24 @@ export class BaseAdapter {
    */
   identifyBonus(actor) {
     return 0;
+  }
+
+  /**
+   * The fields which cover an item with the system's own identification (system mode), or null for the default of
+   * D&D 5e (cover-logic.mjs).
+   * @param {{name: string, img: string, description: string}} cover
+   * @returns {object|null}
+   */
+  nativeCoverUpdate(cover) {
+    return null;
+  }
+
+  /**
+   * The fields which reveal an item with the system's own identification, or null for the default of D&D 5e.
+   * @returns {object|null}
+   */
+  nativeRevealUpdate() {
+    return null;
   }
 
   /**
@@ -383,6 +410,27 @@ export class BaseAdapter {
    */
   receiveUpdate(actor, base) {
     throw new Error("This system has no coins the module can change");
+  }
+
+  /**
+   * The document operations which take coins from an actor. Systems with coins as numbers on the actor use the
+   * default (an actor update); systems whose coins are items return item operations.
+   * @param {Actor} actor
+   * @param {Record<string, number>|number} coins
+   * @returns {Promise<import("../ops.mjs").Operation[]>}
+   */
+  async payOps(actor, coins) {
+    return [{action: "update", documentName: "Actor", updates: [{_id: actor.id, ...this.payUpdate(actor, coins)}]}];
+  }
+
+  /**
+   * The document operations which give an actor coins worth a number of base units.
+   * @param {Actor} actor
+   * @param {number} base
+   * @returns {Promise<import("../ops.mjs").Operation[]>}
+   */
+  async receiveOps(actor, base) {
+    return [{action: "update", documentName: "Actor", updates: [{_id: actor.id, ...this.receiveUpdate(actor, base)}]}];
   }
 
   /**

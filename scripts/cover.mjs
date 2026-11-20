@@ -174,7 +174,8 @@ export async function coverItem(item, input) {
   const real = {name: source.name, img: source.img,
     description: descriptionPath ? foundry.utils.getProperty(source, descriptionPath) : null};
   const store = secretStore();
-  const plan = planCover({mode, scope: MODULE_ID, real, cover, descriptionPath, store});
+  const plan = planCover({mode, scope: MODULE_ID, real, cover, descriptionPath, store,
+    nativeUpdate: (mode === "system") ? a.nativeCoverUpdate(cover) : null});
   // The secret only exists when there is something to keep
   if ( (mode === "swap") || (cover.dc !== null) ) {
     plan.flag.secret = await saveSecret({...plan.secret}, store);
@@ -195,7 +196,8 @@ export async function revealItem(item) {
   if ( !cover ) throw new Error("SLL.Error.notCovered");
   const secret = readSecret(cover.secret, cover.store);
   const realName = (cover.mode === "system") ? (item._source?.name ?? item.name) : secret?.name;
-  const update = planReveal({mode: cover.mode, scope: MODULE_ID, secret, descriptionPath: a.descriptionPath(item)});
+  const update = planReveal({mode: cover.mode, scope: MODULE_ID, secret, descriptionPath: a.descriptionPath(item),
+    nativeUpdate: (cover.mode === "system") ? a.nativeRevealUpdate() : null});
   await item.update(update);
   await dropSecret(cover, item);
   return {coverName: cover.name, realName: realName ?? item.name};

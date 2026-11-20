@@ -30,7 +30,7 @@ function defeatedOf(combat) {
  */
 function belongings(actor) {
   const a = adapter();
-  const items = actor.items.filter(i => a.isTransferable(i) && !i.system?.container);
+  const items = actor.items.filter(i => a.isTransferable(i) && !a.containerOf(i));
   return {items, coins: a.coinsBase(actor)};
 }
 

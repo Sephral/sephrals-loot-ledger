@@ -6,12 +6,14 @@
 import {CrucibleAdapter} from "./crucible.mjs";
 import {Dnd5eAdapter} from "./dnd5e.mjs";
 import {GenericAdapter} from "./generic.mjs";
+import {Pf2eAdapter} from "./pf2e.mjs";
 
 export {BaseAdapter} from "./base.mjs";
 
 const adapters = new Map([
   ["crucible", new CrucibleAdapter()],
-  ["dnd5e", new Dnd5eAdapter()]
+  ["dnd5e", new Dnd5eAdapter()],
+  ["pf2e", new Pf2eAdapter()]
 ]);
 
 const generic = new GenericAdapter();

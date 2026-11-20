@@ -68,9 +68,11 @@ const flagPath = (scope, key) => `flags.${scope}.${key}`;
  * @param {string|null} args.descriptionPath   Where the item keeps its description (swap), or null
  * @param {string|null} args.secretId   The id of the secret in its store
  * @param {"journal"|"device"} [args.store]   Where the secret is kept
+ * @param {object|null} [args.nativeUpdate]   The system's own cover fields (system mode), by default the ones of D&D 5e
  * @returns {{update: object, flag: object, secret: object}}
  */
-export function planCover({ mode, scope, real, cover, descriptionPath = null, secretId = null, store = "journal" }) {
+export function planCover({ mode, scope, real, cover, descriptionPath = null, secretId = null, store = "journal",
+  nativeUpdate = null }) {
   const flag = {
     v: COVER_VERSION, mode, name: cover.name, img: cover.img, description: cover.description,
     secret: secretId, store: SECRET_STORES.includes(store) ? store : "journal", check: cover.dc !== null, tries: {}
@@ -78,9 +80,11 @@ export function planCover({ mode, scope, real, cover, descriptionPath = null, se
   const update = { [flagPath(scope, COVER_FLAG)]: flag };
   const secret = { dc: cover.dc };
   if (mode === "system") {
-    update["system.identified"] = false;
-    update["system.unidentified.name"] = cover.name;
-    update["system.unidentified.description"] = cover.description;
+    Object.assign(update, nativeUpdate ?? {
+      "system.identified": false,
+      "system.unidentified.name": cover.name,
+      "system.unidentified.description": cover.description
+    });
   } else {
     update.name = cover.name;
     update.img = cover.img;
@@ -99,12 +103,13 @@ export function planCover({ mode, scope, real, cover, descriptionPath = null, se
  * @param {string} args.scope
  * @param {{name?: string, img?: string, description?: string|null}|null} args.secret   What the secret page holds
  * @param {string|null} args.descriptionPath
+ * @param {object|null} [args.nativeUpdate]   The system's own fields which reveal (system mode), by default D&D 5e's
  * @returns {object}   The update
  */
-export function planReveal({ mode, scope, secret, descriptionPath = null }) {
+export function planReveal({ mode, scope, secret, descriptionPath = null, nativeUpdate = null }) {
   const update = { [`flags.${scope}.-=${COVER_FLAG}`]: null };
   if (mode === "system") {
-    update["system.identified"] = true;
+    Object.assign(update, nativeUpdate ?? {"system.identified": true});
     return update;
   }
   if (!secret?.name) throw new Error("SLL.Error.secretMissing");

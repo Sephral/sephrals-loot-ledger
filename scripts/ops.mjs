@@ -104,3 +104,40 @@ async function sequential(operations) {
     throw err;
   }
 }
+
+/**
+ * Merge the plain actor updates of a list of operations into one operation (at the place of the first), so adapters
+ * with coins on the actor keep one actor update, and leave every other operation as it is.
+ * @param {Operation[]} operations
+ * @returns {Operation[]}
+ */
+export function mergeActorUpdates(operations) {
+  const out = [];
+  let merged = null;
+  for ( const o of operations ) {
+    if ( (o.action === "update") && (o.documentName === "Actor") && !o.parent && !o.options ) {
+      if ( merged ) merged.updates.push(...o.updates);
+      else {
+        merged = {...o, updates: [...o.updates]};
+        out.push(merged);
+      }
+    }
+    else out.push(o);
+  }
+  return out;
+}
+
+/**
+ * Apply coin operations to one actor outside a batch (an Item Pile's actor, which may be a token's own actor).
+ * @param {Actor} actor
+ * @param {Operation[]} operations
+ * @returns {Promise<void>}
+ */
+export async function applyToActor(actor, operations) {
+  for ( const o of operations ) {
+    if ( (o.action === "update") && (o.documentName === "Actor") && !o.parent ) {
+      for ( const {_id, ...update} of o.updates ) await actor.update(update);
+    }
+    else await applyOperations([o]);
+  }
+}

@@ -19,7 +19,7 @@
 * **An open log:** every item and coin that changes hands is written into a journal all players can read. Only the GM's client writes it, and any later change shows up.
 * **Clean handovers:** equipped or attuned items are taken off on the way, containers keep their contents, and stacks merge.
 * **Gifts with consent:** a character gives something to a friend, who accepts or declines first.
-* **Wish lists and a merchant:** players note what they look for and get a quiet notice when matching loot turns up. The GM sells goods from the party inventory, with an optional haggle roll.
+* **Wish lists and a merchant:** players note what they look for, and matching loot gets a star and a quiet notice. The GM sells goods from the party inventory, with an optional haggle roll. Pathfinder 2e works out of the box.
 * **Loot from tables and piles:** roll a table with quantities like 2d4 or 3d6 gp, or empty an Item Piles pile into the loot.
 * **Your table, your rules:** free access or GM approval, a fund limit, chat messages for everyone or only the GM. Every part can be switched off.
 

@@ -18,6 +18,7 @@ import {onGetHeaderControls, onGetRollTableContextOptions, onRenderRollTableShee
 import {registerTransport, report, request} from "./transport.mjs";
 import {addDirectoryEntries} from "./cover.mjs";
 import {registerUsage} from "./usage.mjs";
+import {sampleWindows} from "./sample-windows.mjs";
 import {openMerchant} from "./merchant.mjs";
 import {onCreateItem, onUpdateItem, onUpdateUser, rememberWishes} from "./wish.mjs";
 
@@ -103,6 +104,8 @@ Hooks.once("init", () => {
     /** Check the storage, the log and the system adapter (GM). */
     runSelfTest,
     /** Save the debug file of Sephral's modules (GM): about one chat message, or without an id the latest picture. */
+    /** Sample windows, questions and chat cards with made-up party loot, nothing saved (translators, testing). */
+    samples: () => sampleWindows(),
     saveDebugFile: messageId => saveDebugFile(messageId ?? null, {moduleId: MODULE_ID})
   };
 });

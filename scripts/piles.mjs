@@ -62,6 +62,35 @@ export function scenePiles() {
 /* -------------------------------------------- */
 
 /**
+ * One pile's section of the dialog.
+ * @param {string} name
+ * @param {number} index
+ * @param {{id: string, name: string, img: string, quantity: number}[]} items
+ * @param {number} base       Coins in base units
+ * @param {string[]} kept     Coins the loot cannot take
+ * @returns {string}
+ */
+export function pileSection(name, index, items, base, kept) {
+  const a = adapter();
+  const rows = items.map(item => `<label class="sll-check"><input type="checkbox" name="pick.p${index}.${esc(item.id)}" checked>`
+    + `<img src="${esc(item.img)}" alt=""> ${esc(item.name)}${item.quantity > 1 ? ` <small>× ${item.quantity}</small>` : ""}</label>`).join("");
+  const coinRow = base ? `<label class="sll-check"><input type="checkbox" name="coins.p${index}" checked>`
+    + `<i class="fa-solid fa-coins" inert></i> ${esc(a.formatCoins(base))}</label>` : "";
+  const note = kept?.length ? `<p class="hint">${esc(t("SLL.Piles.kept", {list: kept.join(", ")}))}</p>` : "";
+  return `<fieldset class="sll-collect"><legend>${esc(name)}</legend>${rows}${coinRow}${note}</fieldset>`;
+}
+
+/**
+ * The text of the piles dialog around its sections.
+ * @param {string[]} sections
+ * @param {boolean} loot
+ * @returns {string}
+ */
+export function pilesContent(sections, loot) {
+  return `<p>${esc(t(loot ? "SLL.Piles.hint" : "SLL.Piles.hintStash"))}</p><div class="sll-collect-list">${sections.join("")}</div>`;
+}
+
+/**
  * GM: pick what to take from piles, by default every pile on the current scene.
  * @param {string[]} [uuids]   Token or actor UUIDs of piles
  * @returns {Promise<void>}
@@ -78,15 +107,8 @@ export async function openPiles(uuids) {
     const base = withCoins ? coins.base : 0;
     if ( !items.length && !base ) return "";
     sources.push({index, uuid: pile.uuid});
-    const rows = items.map(item => {
-      const qty = a.quantity(item);
-      return `<label class="sll-check"><input type="checkbox" name="pick.p${index}.${esc(item.id)}" checked>`
-        + `<img src="${esc(item.img)}" alt=""> ${esc(a.displayName(item))}${qty > 1 ? ` <small>× ${qty}</small>` : ""}</label>`;
-    }).join("");
-    const coinRow = base ? `<label class="sll-check"><input type="checkbox" name="coins.p${index}" checked>`
-      + `<i class="fa-solid fa-coins" inert></i> ${esc(a.formatCoins(base))}</label>` : "";
-    const kept = coins.kept.length ? `<p class="hint">${esc(t("SLL.Piles.kept", {list: coins.kept.join(", ")}))}</p>` : "";
-    return `<fieldset class="sll-collect"><legend>${esc(pile.name)}</legend>${rows}${coinRow}${kept}</fieldset>`;
+    return pileSection(pile.name, index, items.map(item => ({id: item.id, name: a.displayName(item), img: item.img,
+      quantity: a.quantity(item)})), base, coins.kept);
   }).filter(Boolean);
   if ( !sections.length ) {
     ui.notifications.info(t(piles.length ? "SLL.Notice.pilesEmpty" : "SLL.Notice.noPiles"));
@@ -95,7 +117,7 @@ export async function openPiles(uuids) {
   const result = await foundry.applications.api.DialogV2.prompt({
     window: {title: t("SLL.Piles.title"), icon: "fa-solid fa-box-open"},
     position: {width: 480},
-    content: `<p>${esc(t(loot ? "SLL.Piles.hint" : "SLL.Piles.hintStash"))}</p><div class="sll-collect-list">${sections.join("")}</div>`,
+    content: pilesContent(sections, loot),
     rejectClose: false,
     ok: {label: t(loot ? "SLL.Collect.take" : "SLL.Collect.takeStash"), callback: (event, button) => {
       const FDE = foundry.applications.ux?.FormDataExtended ?? globalThis.FormDataExtended;

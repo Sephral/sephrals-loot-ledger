@@ -20,6 +20,16 @@ function formData(button) {
 }
 
 /**
+ * The form of the quantity question.
+ * @param {number} max
+ * @returns {string}
+ */
+export function quantityContent(max) {
+  return `<div class="form-group"><label>${esc(t("SLL.Dialog.quantity"))}</label>`
+    + `<input type="number" name="quantity" value="${max}" min="1" max="${max}" step="1" autofocus></div>`;
+}
+
+/**
  * Ask how many units.
  * @param {string} title
  * @param {number} max
@@ -27,14 +37,28 @@ function formData(button) {
  */
 export async function askQuantity(title, max) {
   if ( max <= 1 ) return 1;
-  const content = `<div class="form-group"><label>${esc(t("SLL.Dialog.quantity"))}</label>`
-    + `<input type="number" name="quantity" value="${max}" min="1" max="${max}" step="1" autofocus></div>`;
+  const content = quantityContent(max);
   const result = await DialogV2.prompt({
     window: {title}, content, rejectClose: false,
     ok: {label: t("SLL.Dialog.ok"), callback: (event, button) => Number(formData(button).quantity)}
   });
   if ( !Number.isFinite(result) || (result < 1) ) return null;
   return Math.min(Math.floor(result), max);
+}
+
+/**
+ * The form of the recipient question.
+ * @param {{id: string, name: string}[]} actors
+ * @param {number} max
+ * @returns {string}
+ */
+export function recipientContent(actors, max) {
+  const options = actors.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join("");
+  let content = `<div class="form-group"><label>${esc(t("SLL.Dialog.recipient"))}</label>`
+    + `<select name="actorId">${options}</select></div>`;
+  if ( max > 1 ) content += `<div class="form-group"><label>${esc(t("SLL.Dialog.quantity"))}</label>`
+    + `<input type="number" name="quantity" value="${max}" min="1" max="${max}" step="1"></div>`;
+  return content;
 }
 
 /**
@@ -49,11 +73,7 @@ export async function askRecipient(title, actors, max) {
     ui.notifications.warn(t("SLL.Error.noCharacter"));
     return null;
   }
-  const options = actors.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join("");
-  let content = `<div class="form-group"><label>${esc(t("SLL.Dialog.recipient"))}</label>`
-    + `<select name="actorId">${options}</select></div>`;
-  if ( max > 1 ) content += `<div class="form-group"><label>${esc(t("SLL.Dialog.quantity"))}</label>`
-    + `<input type="number" name="quantity" value="${max}" min="1" max="${max}" step="1"></div>`;
+  const content = recipientContent(actors, max);
   const result = await DialogV2.prompt({
     window: {title}, content, rejectClose: false,
     ok: {label: t("SLL.Dialog.ok"), callback: (event, button) => formData(button)}
@@ -73,19 +93,7 @@ export async function askRecipient(title, actors, max) {
 export async function askCoins(title, {byCoin=false, note=false}={}) {
   const a = adapter();
   const denoms = [...a.denominations()].sort((x, y) => y.value - x.value);
-  let content;
-  if ( byCoin ) {
-    content = `<div class="sll-coin-fields">${denoms.map(d => `<label><span>${esc(d.abbr)}</span>`
-      + `<input type="number" name="coin.${esc(d.key)}" value="0" min="0" step="1"></label>`).join("")}</div>`;
-  }
-  else {
-    const main = denoms.find(d => d.key === a.mainCoin());
-    content = `<div class="form-group"><label>${esc(t("SLL.Dialog.amount"))}</label>`
-      + `<input type="text" name="amount" placeholder="${esc(t("SLL.Dialog.amountHint", {coin: main?.abbr ?? ""}))}" autofocus>`
-      + `</div>`;
-  }
-  if ( note ) content += `<div class="form-group"><label>${esc(t("SLL.Dialog.note"))}</label>`
-    + `<input type="text" name="note" maxlength="120"></div>`;
+  const content = coinsContent({byCoin, note});
   const result = await DialogV2.prompt({
     window: {title}, content, rejectClose: false,
     ok: {label: t("SLL.Dialog.ok"), callback: (event, button) => formData(button)}
@@ -109,6 +117,46 @@ export async function askCoins(title, {byCoin=false, note=false}={}) {
 }
 
 /**
+ * The form of the coins question.
+ * @param {object} [options]
+ * @param {boolean} [options.byCoin]
+ * @param {boolean} [options.note]
+ * @returns {string}
+ */
+export function coinsContent({byCoin=false, note=false}={}) {
+  const a = adapter();
+  const denoms = [...a.denominations()].sort((x, y) => y.value - x.value);
+  let content;
+  if ( byCoin ) {
+    content = `<div class="sll-coin-fields">${denoms.map(d => `<label><span>${esc(d.abbr)}</span>`
+      + `<input type="number" name="coin.${esc(d.key)}" value="0" min="0" step="1"></label>`).join("")}</div>`;
+  }
+  else {
+    const main = denoms.find(d => d.key === a.mainCoin());
+    content = `<div class="form-group"><label>${esc(t("SLL.Dialog.amount"))}</label>`
+      + `<input type="text" name="amount" placeholder="${esc(t("SLL.Dialog.amountHint", {coin: main?.abbr ?? ""}))}" autofocus>`
+      + `</div>`;
+  }
+  if ( note ) content += `<div class="form-group"><label>${esc(t("SLL.Dialog.note"))}</label>`
+    + `<input type="text" name="note" maxlength="120"></div>`;
+  return content;
+}
+
+/**
+ * The form of the coin values question.
+ * @param {{key: string, abbr: string, value: number}[]} system   The coins, sorted from the largest
+ * @param {Map<string, number>} current
+ * @returns {string}
+ */
+export function coinValuesContent(system, current) {
+  const smallest = system.at(-1);
+  const rows = system.map(d => `<div class="form-group"><label>1 ${esc(d.abbr)} =</label><div class="form-fields">`
+    + `<input type="number" name="coin.${esc(d.key)}" value="${current.get(d.key) ?? d.value}" min="1" step="1"`
+    + `${d.key === smallest.key ? " disabled" : ""}><span>${esc(smallest.abbr)}</span></div></div>`).join("");
+  return `<p>${esc(t("SLL.CoinValues.intro", {coin: smallest.abbr}))}</p>${rows}`;
+}
+
+/**
  * GM: set the worth of each coin, for tables with their own exchange rates. Only the values that differ from the system
  * are stored, so the other coins keep following the system.
  * @returns {Promise<Record<string, number>|null>}   The stored values, or null when nothing changed
@@ -119,12 +167,9 @@ export async function editCoinValues() {
   const current = new Map(a.denominations().map(d => [d.key, d.value]));
   const smallest = system.at(-1);
   if ( !smallest ) return null;
-  const rows = system.map(d => `<div class="form-group"><label>1 ${esc(d.abbr)} =</label><div class="form-fields">`
-    + `<input type="number" name="coin.${esc(d.key)}" value="${current.get(d.key) ?? d.value}" min="1" step="1"`
-    + `${d.key === smallest.key ? " disabled" : ""}><span>${esc(smallest.abbr)}</span></div></div>`).join("");
   const result = await DialogV2.wait({
     window: {title: t("SLL.SETTINGS.coinValues.name")},
-    content: `<p>${esc(t("SLL.CoinValues.intro", {coin: smallest.abbr}))}</p>${rows}`,
+    content: coinValuesContent(system, current),
     rejectClose: false,
     buttons: [
       {action: "save", label: t("SLL.Dialog.ok"), default: true, callback: (event, button) => formData(button).coin ?? {}},
@@ -142,16 +187,26 @@ export async function editCoinValues() {
 }
 
 /**
+ * The form of the split question.
+ * @param {{id: string, name: string, img: string}[]} actors
+ * @param {boolean} toFund   The rest goes to the party fund
+ * @returns {string}
+ */
+export function splitContent(actors, toFund) {
+  const rows = actors.map(a => `<label class="sll-check"><input type="checkbox" name="ids.${esc(a.id)}" checked>`
+    + `<img src="${esc(a.img)}" alt=""> ${esc(a.name)}</label>`).join("");
+  return `<p>${esc(t(toFund ? "SLL.Dialog.splitHint" : "SLL.Dialog.splitHintPool"))}</p><div class="sll-check-list">${rows}</div>`;
+}
+
+/**
  * Ask which characters share the coins of the loot.
  * @param {Actor[]} actors
  * @returns {Promise<string[]|null>}
  */
 export async function askSplit(actors) {
-  const rows = actors.map(a => `<label class="sll-check"><input type="checkbox" name="ids.${esc(a.id)}" checked>`
-    + `<img src="${esc(a.img)}" alt=""> ${esc(a.name)}</label>`).join("");
   const result = await DialogV2.prompt({
     window: {title: t("SLL.Dialog.splitTitle")},
-    content: `<p>${esc(t(((setting("remainder") === "fund") && parts().fund) ? "SLL.Dialog.splitHint" : "SLL.Dialog.splitHintPool"))}</p><div class="sll-check-list">${rows}</div>`,
+    content: splitContent(actors, (setting("remainder") === "fund") && parts().fund),
     rejectClose: false,
     ok: {label: t("SLL.Dialog.split"), callback: (event, button) => formData(button)}
   });

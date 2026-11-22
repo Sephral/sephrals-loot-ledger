@@ -183,6 +183,7 @@ Other modules can add support for more systems through the module's API.
 | `sellToMerchant()` | Opens the merchant window (GM) |
 | `runSelfTest()` | Runs the self test (GM) |
 | `saveDebugFile(messageId)` | Saves a debug file about one chat message, or without an id about the latest ones (GM) |
+| `samples()` | Lists sample windows, questions and chat cards filled with made-up party loot (for translators and testing). Nothing is saved |
 
 ## Debug file
 

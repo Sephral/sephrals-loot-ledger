@@ -28,7 +28,7 @@ function gmIds() {
  */
 async function postCard(body, {whisper=null, flags={}}={}) {
   if ( !game.user.isGM ) return null;
-  const content = `<div class="sll-card">${body}</div>`;
+  const content = cardHtml(body);
   const data = {content, speaker: {alias: t("SLL.Card.speaker")}, flags: {[MODULE_ID]: {card: true, ...flags}}};
   if ( whisper ) data.whisper = whisper;
   return ChatMessage.implementation.create(data);
@@ -41,14 +41,23 @@ async function postCard(body, {whisper=null, flags={}}={}) {
 export async function postEntries(list) {
   const mode = setting("chatCards");
   if ( (mode === "off") || !list.length ) return;
-  const byId = new Map(entries().map(e => [e.id, e]));
+  await postCard(entriesBody(list, new Map(entries().map(e => [e.id, e]))), {whisper: (mode === "gm") ? gmIds() : null});
+}
+
+/**
+ * The body of the card for log entries.
+ * @param {object[]} list
+ * @param {Map<string, object>} byId
+ * @returns {string}
+ */
+export function entriesBody(list, byId) {
   const a = adapter();
   const items = list.map(e => {
     const value = (e.item?.value ?? 0) + (e.coins ?? 0);
     const img = e.item?.img ? `<img src="${esc(e.item.img)}" alt="">` : `<i class="fa-solid fa-coins" inert></i>`;
     return `<li>${img}<span>${esc(describe(e, byId))}</span>${value ? `<small>${esc(a.formatCoins(value))}</small>` : ""}</li>`;
   }).join("");
-  await postCard(`<ul class="sll-card-entries">${items}</ul>`, {whisper: (mode === "gm") ? gmIds() : null});
+  return `<ul class="sll-card-entries">${items}</ul>`;
 }
 
 /**
@@ -58,12 +67,20 @@ export async function postEntries(list) {
 export async function postRolls(lines) {
   const mode = setting("chatCards");
   if ( (mode === "off") || !lines.length || !lines.some(l => l.rolls.length) ) return;
+  await postCard(rollsBody(lines), {whisper: (mode === "gm") ? gmIds() : null});
+}
+
+/**
+ * The body of the card for the rolls of a distribution.
+ * @param {{item: string, winner: string, reason: string, rolls: {name: string, value: number}[]}[]} lines
+ * @returns {string}
+ */
+export function rollsBody(lines) {
   const rows = lines.filter(l => l.rolls.length).map(l => {
-    const rolls = l.rolls.sort((x, y) => y.value - x.value).map(r => `${esc(r.name)} ${r.value}`).join(" · ");
+    const rolls = [...l.rolls].sort((x, y) => y.value - x.value).map(r => `${esc(r.name)} ${r.value}`).join(" · ");
     return `<li><strong>${esc(l.item)}</strong> → ${esc(l.winner)}<br><small>${esc(t("SLL.Card.rolls"))}: ${rolls}</small></li>`;
   }).join("");
-  await postCard(`<p>${esc(t("SLL.Card.distribution"))}</p><ul class="sll-card-rolls">${rows}</ul>`,
-    {whisper: (mode === "gm") ? gmIds() : null});
+  return `<p>${esc(t("SLL.Card.distribution"))}</p><ul class="sll-card-rolls">${rows}</ul>`;
 }
 
 /**
@@ -72,8 +89,18 @@ export async function postRolls(lines) {
  */
 export async function postApproval(pending) {
   const asker = game.users.get(pending.user)?.name ?? "?";
-  await postCard(`<p>${esc(t("SLL.Card.approval", {user: asker}))}</p><p><strong>${esc(pending.label)}</strong></p>`
-    + buttons(pending.id, "approval"), {whisper: gmIds(), flags: {pending: pending.id, kind: "approval"}});
+  await postCard(approvalBody(pending, asker), {whisper: gmIds(), flags: {pending: pending.id, kind: "approval"}});
+}
+
+/**
+ * The body of an approval card.
+ * @param {{id: string, label: string}} pending
+ * @param {string} asker   Name of the user who asked
+ * @returns {string}
+ */
+export function approvalBody(pending, asker) {
+  return `<p>${esc(t("SLL.Card.approval", {user: asker}))}</p><p><strong>${esc(pending.label)}</strong></p>`
+    + buttons(pending.id, "approval");
 }
 
 /**
@@ -84,8 +111,25 @@ export async function postApproval(pending) {
 export async function postOffer(pending, to) {
   const owners = game.users.filter(u => !u.isGM && to.testUserPermission(u, "OWNER")).map(u => u.id);
   const whisper = [...new Set([...owners, pending.user, ...gmIds()])];
-  await postCard(`<p><strong>${esc(pending.label)}</strong></p>${buttons(pending.id, "offer")}`,
-    {whisper, flags: {pending: pending.id, kind: "offer", to: to.id}});
+  await postCard(offerBody(pending), {whisper, flags: {pending: pending.id, kind: "offer", to: to.id}});
+}
+
+/**
+ * The body of an offer card.
+ * @param {{id: string, label: string}} pending
+ * @returns {string}
+ */
+export function offerBody(pending) {
+  return `<p><strong>${esc(pending.label)}</strong></p>${buttons(pending.id, "offer")}`;
+}
+
+/**
+ * A card as the chat shows it: the body in the module's frame.
+ * @param {string} body
+ * @returns {string}
+ */
+export function cardHtml(body) {
+  return `<div class="sll-card">${body}</div>`;
 }
 
 /**

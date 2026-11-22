@@ -53,6 +53,39 @@ export function onDeleteCombat(combat) {
 }
 
 /**
+ * One defeated combatant's section of the collect dialog.
+ * @param {string} name
+ * @param {number} index
+ * @param {{id: string, name: string, img: string, quantity: number, covered: boolean}[]} items
+ * @param {number} coins   Base units
+ * @returns {string}   Empty when there is nothing to take
+ */
+export function collectSection(name, index, items, coins) {
+  if ( !items.length && !coins ) return "";
+  const a = adapter();
+  const rows = items.map(item => {
+    // Covered before it is logged: the mask hides the item from the log and the chat card
+    const mask = item.covered ? "" : `<label class="sll-cover-toggle" data-tooltip="${esc(t("SLL.Cover.collectToggle"))}">`
+      + `<input type="checkbox" name="cover.a${index}.${esc(item.id)}"><i class="fa-solid fa-mask" inert></i></label>`;
+    return `<div class="sll-check-row"><label class="sll-check"><input type="checkbox" name="pick.a${index}.${esc(item.id)}" checked>`
+      + `<img src="${esc(item.img)}" alt=""> ${esc(item.name)}${item.quantity > 1 ? ` <small>× ${item.quantity}</small>` : ""}</label>${mask}</div>`;
+  }).join("");
+  const coinRow = coins ? `<label class="sll-check"><input type="checkbox" name="coins.a${index}" checked>`
+    + `<i class="fa-solid fa-coins" inert></i> ${esc(a.formatCoins(coins))}</label>` : "";
+  return `<fieldset class="sll-collect"><legend>${esc(name)}</legend>${rows}${coinRow}</fieldset>`;
+}
+
+/**
+ * The text of the collect dialog around its sections.
+ * @param {string[]} sections
+ * @param {boolean} loot   The loot table is on
+ * @returns {string}
+ */
+export function collectContent(sections, loot) {
+  return `<p>${esc(t(loot ? "SLL.Collect.hint" : "SLL.Collect.hintStash"))}</p><div class="sll-collect-list">${sections.join("")}</div>`;
+}
+
+/**
  * Open the collect dialog for a list of actors, by default the defeated of the running or the last combat.
  * @param {string[]} [uuids]
  * @returns {Promise<void>}
@@ -67,19 +100,8 @@ export async function openCollect(uuids) {
   const actors = uuids.map(uuid => fromUuidSync(uuid)).filter(actor => actor instanceof Actor);
   const sections = actors.map((actor, index) => {
     const {items, coins: purse} = belongings(actor);
-    const coins = withCoins ? purse : 0;
-    if ( !items.length && !coins ) return "";
-    const rows = items.map(item => {
-      const qty = a.quantity(item);
-      // Covered before it is logged: the mask hides the item from the log and the chat card
-      const mask = a.isCovered(item) ? "" : `<label class="sll-cover-toggle" data-tooltip="${esc(t("SLL.Cover.collectToggle"))}">`
-        + `<input type="checkbox" name="cover.a${index}.${esc(item.id)}"><i class="fa-solid fa-mask" inert></i></label>`;
-      return `<div class="sll-check-row"><label class="sll-check"><input type="checkbox" name="pick.a${index}.${esc(item.id)}" checked>`
-        + `<img src="${esc(a.displayImg(item))}" alt=""> ${esc(a.displayName(item))}${qty > 1 ? ` <small>× ${qty}</small>` : ""}</label>${mask}</div>`;
-    }).join("");
-    const coinRow = coins ? `<label class="sll-check"><input type="checkbox" name="coins.a${index}" checked>`
-      + `<i class="fa-solid fa-coins" inert></i> ${esc(a.formatCoins(coins))}</label>` : "";
-    return `<fieldset class="sll-collect"><legend>${esc(actor.name)}</legend>${rows}${coinRow}</fieldset>`;
+    return collectSection(actor.name, index, items.map(item => ({id: item.id, name: a.displayName(item),
+      img: a.displayImg(item), quantity: a.quantity(item), covered: a.isCovered(item)})), withCoins ? purse : 0);
   }).filter(Boolean);
   if ( !sections.length ) {
     ui.notifications.info(t("SLL.Notice.nothingToCollect"));
@@ -88,7 +110,7 @@ export async function openCollect(uuids) {
   const result = await foundry.applications.api.DialogV2.prompt({
     window: {title: t("SLL.Collect.title"), icon: "fa-solid fa-sack"},
     position: {width: 480},
-    content: `<p>${esc(t(loot ? "SLL.Collect.hint" : "SLL.Collect.hintStash"))}</p><div class="sll-collect-list">${sections.join("")}</div>`,
+    content: collectContent(sections, loot),
     rejectClose: false,
     ok: {label: t(loot ? "SLL.Collect.take" : "SLL.Collect.takeStash"), callback: (event, button) => {
       const FDE = foundry.applications.ux?.FormDataExtended ?? globalThis.FormDataExtended;

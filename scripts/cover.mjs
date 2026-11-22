@@ -218,6 +218,27 @@ export async function markTried(item, actorId) {
 /* -------------------------------------------- */
 
 /**
+ * The form of the cover question.
+ * @param {string} name       The item's name
+ * @param {{name: string, img: string, description: string, dc: number|null}} d
+ * @param {string} hint       Key of the hint about where the secret is kept
+ * @returns {string}
+ */
+export function coverContent(name, d, hint) {
+  return `<p>${esc(t("SLL.Cover.hint", {name}))}</p>
+      <div class="form-group"><label>${esc(t("SLL.Cover.name"))}</label>
+        <div class="form-fields"><input type="text" name="name" value="${esc(d.name)}"></div></div>
+      <div class="form-group"><label>${esc(t("SLL.Cover.img"))}</label>
+        <div class="form-fields"><file-picker name="img" type="image" value="${esc(d.img)}"></file-picker></div></div>
+      <div class="form-group stacked"><label>${esc(t("SLL.Cover.description"))}</label>
+        <textarea name="description" rows="4">${esc(d.description)}</textarea></div>
+      <div class="form-group"><label>${esc(t("SLL.Cover.dc"))}</label>
+        <div class="form-fields"><input type="number" name="dc" min="1" max="99" step="1" value="${d.dc ?? ""}"></div>
+        <p class="hint">${esc(t("SLL.Cover.dcHint"))}</p></div>
+      <p class="hint">${esc(t(hint))}</p>`;
+}
+
+/**
  * Ask the GM for the cover of an item.
  * @param {Item} item
  * @returns {Promise<{name: string, img: string, description: string, dc: number|null}|null>}
@@ -230,17 +251,7 @@ export async function askCover(item) {
   const result = await foundry.applications.api.DialogV2.prompt({
     window: {title: t("SLL.Cover.title"), icon: "fa-solid fa-mask"},
     position: {width: 460},
-    content: `<p>${esc(t("SLL.Cover.hint", {name: item.name}))}</p>
-      <div class="form-group"><label>${esc(t("SLL.Cover.name"))}</label>
-        <div class="form-fields"><input type="text" name="name" value="${esc(d.name)}"></div></div>
-      <div class="form-group"><label>${esc(t("SLL.Cover.img"))}</label>
-        <div class="form-fields"><file-picker name="img" type="image" value="${esc(d.img)}"></file-picker></div></div>
-      <div class="form-group stacked"><label>${esc(t("SLL.Cover.description"))}</label>
-        <textarea name="description" rows="4">${esc(d.description)}</textarea></div>
-      <div class="form-group"><label>${esc(t("SLL.Cover.dc"))}</label>
-        <div class="form-fields"><input type="number" name="dc" min="1" max="99" step="1" value="${d.dc ?? ""}"></div>
-        <p class="hint">${esc(t("SLL.Cover.dcHint"))}</p></div>
-      <p class="hint">${esc(t(hint))}</p>`,
+    content: coverContent(item.name, d, hint),
     rejectClose: false,
     ok: {label: t("SLL.Cover.confirm"), callback: (event, button) => foundry.utils.expandObject(new FDE(button.form).object)}
   });
